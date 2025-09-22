@@ -1,4 +1,6 @@
 using System;
+using Gozba_na_klik.Models;
+using Gozba_na_klik.Repository;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,8 +21,12 @@ builder.Services.AddCors(options =>
         });
 });
 
+// Register User repository
+builder.Services.AddScoped<UsersDbRepository>();
+
+
 // Configure PostgreSQL database connection
-builder.Services.AddDbContext<DbContext>(options =>
+builder.Services.AddDbContext<GozbaNaKlikDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
