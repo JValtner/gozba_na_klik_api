@@ -1,6 +1,8 @@
 ﻿using System;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.Repositories;
 using Gozba_na_klik.Repository;
+using Gozba_na_klik.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +29,9 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 });
+
+builder.Services.AddScoped<IUsersRepository, UsersDbRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
