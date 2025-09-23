@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Gozba_na_klik.Models;
-using Gozba_na_klik.Repository;
+using Gozba_na_klik.Services;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -11,25 +11,26 @@ namespace Gozba_na_klik.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly UsersDbRepository _usersRepository;
+        //private readonly UsersDbRepository _usersRepository;
+        private readonly IUserService _userService;
 
-        public UsersController(UsersDbRepository usersRepository)
+        public UsersController(IUserService userService)
         {
-            _usersRepository = usersRepository;
+            _userService = userService;
         }
 
         // GET: api/users
         [HttpGet]
         public async Task<IActionResult> GetAllAsync()
         {
-            return Ok(await _usersRepository.GetAllAsync());
+            return Ok(await _userService.GetAllUsersAsync());
         }
 
         // GET api/users/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOneAsync(int id)
         {
-            User user = await _usersRepository.GetByIdAsync(id);
+            var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
             {
                 return NotFound();
@@ -41,7 +42,7 @@ namespace Gozba_na_klik.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync(User user)
         {
-            User new_user = await _usersRepository.AddAsync(user);
+            User new_user = await _userService.CreateUserAsync(user);
             return Ok(new_user);
         }
 
@@ -54,12 +55,12 @@ namespace Gozba_na_klik.Controllers
                 return BadRequest();
             }
 
-            if (!await _usersRepository.ExistsAsync(id))
+            if (!await _userService.UserExistsAsync(id))
             {
                 return NotFound();
             }
 
-            User updated_user = await _usersRepository.UpdateAsync(user);
+            User updated_user = await _userService.UpdateUserAsync(user);
             return Ok(updated_user);
         }
 
@@ -67,12 +68,12 @@ namespace Gozba_na_klik.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            User existingUser = await _usersRepository.GetByIdAsync(id);
+            var existingUser = await _userService.GetUserByIdAsync(id);
             if (existingUser == null)
             {
                 return NotFound();
             }
-            await _usersRepository.DeleteAsync(id);
+            await _userService.DeleteUserAsync(id);
             return NoContent();
         }
     }

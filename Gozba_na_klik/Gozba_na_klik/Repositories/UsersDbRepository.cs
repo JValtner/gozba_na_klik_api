@@ -1,10 +1,11 @@
 ﻿using System;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gozba_na_klik.Repository
 {
-    public class UsersDbRepository
+    public class UsersDbRepository: IUsersRepository
     {
         private GozbaNaKlikDbContext _context;
 
@@ -12,7 +13,7 @@ namespace Gozba_na_klik.Repository
         {
             _context = context;
         }
-        public async Task<List<User>> GetAllAsync()
+        public async Task<IEnumerable<User>> GetAllAsync()
         {
             return await _context.Users.ToListAsync();
         }
