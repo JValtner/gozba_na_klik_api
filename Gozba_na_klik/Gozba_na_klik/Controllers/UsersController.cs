@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Gozba_na_klik.DTOs;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Repository;
 using Microsoft.AspNetCore.Mvc;
@@ -74,6 +75,46 @@ namespace Gozba_na_klik.Controllers
             }
             await _usersRepository.DeleteAsync(id);
             return NoContent();
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
+        {
+            // Validacija input parametara
+            if (string.IsNullOrWhiteSpace(loginRequest?.Username) || string.IsNullOrWhiteSpace(loginRequest?.Password))
+            {
+                return BadRequest(new { message = "Korisničko ime i lozinka su obavezni" });
+            }
+
+            try
+            {
+                // Dobij sve korisnike iz baze
+                var allUsers = await _usersRepository.GetAllAsync();
+
+                // Pronadji korisnika po username-u
+                var user = allUsers.FirstOrDefault(u => u.Username.ToLower() == loginRequest.Username.ToLower());
+
+                // Proveri da li korisnik postoji i da li se lozinka poklapa
+                if (user == null || user.Password != loginRequest.Password)
+                {
+                    return Unauthorized(new { message = "Neispravno korisničko ime ili lozinka" });
+                }
+
+                // Kreiraj response objekat (bez lozinke)
+                var loginResponse = new LoginResponse
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                    Email = user.Email,
+                    Role = user.Role
+                };
+
+                return Ok(loginResponse);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Greška na serveru", details = ex.Message });
+            }
         }
     }
 }
