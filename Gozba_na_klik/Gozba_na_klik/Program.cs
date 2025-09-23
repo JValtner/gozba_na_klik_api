@@ -1,34 +1,32 @@
-using System;
+﻿using System;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Repository;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// AddAsync services to the container.
-
+// Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(
-        builder =>
-        {
-            builder.WithOrigins("*").AllowAnyHeader().AllowAnyMethod();
-        });
-});
-
 // Register User repository
 builder.Services.AddScoped<UsersDbRepository>();
-
 
 // Configure PostgreSQL database connection
 builder.Services.AddDbContext<GozbaNaKlikDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -39,7 +37,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors();
+// Aktiviraj CORS sa definisanom politikom
+app.UseCors("FrontendPolicy");
 
 app.UseAuthorization();
 
