@@ -90,7 +90,7 @@ namespace Gozba_na_klik.Controllers
             try
             {
                 // Dobij sve korisnike iz baze
-                var allUsers = await _usersRepository.GetAllAsync();
+                var allUsers = await _userService.GetAllUsersAsync();
 
                 // Pronadji korisnika po username-u
                 var user = allUsers.FirstOrDefault(u => u.Username.ToLower() == loginRequest.Username.ToLower());
