@@ -4,6 +4,7 @@ using Gozba_na_klik.Repositories;
 using Gozba_na_klik.Repository;
 using Gozba_na_klik.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,12 @@ builder.Services.AddScoped<IUsersRepository, UsersDbRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
+// Serve static files from the "assets" directory
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "assets")),
+    RequestPath = "/assets"
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -50,3 +57,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+

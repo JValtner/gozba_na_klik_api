@@ -7,5 +7,7 @@
         public string Password { get; set; }
         public string Email { get; set; }
         public string Role { get; set; } // e.g., "Client", "Admin", "RestaurantOwner", "RestaurantEmployee", "DeliveryPerson"
+        public string? UserImage { get; set; }
+
     }
 }

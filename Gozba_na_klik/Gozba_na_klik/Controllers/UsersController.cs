@@ -49,21 +49,36 @@ namespace Gozba_na_klik.Controllers
 
         // PUT api/users/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAsync(int id, User user)
+        public async Task<IActionResult> PutAsync(int id, [FromForm] UpdateUserDto dto, IFormFile? userimage)
         {
-            if (id != user.Id)
+            var user = await _userService.GetUserByIdAsync(id);
+            if (user == null) return NotFound();
+
+            // update fields
+            user.Username = dto.Username;
+            user.Email = dto.Email;
+            if (!string.IsNullOrEmpty(dto.Password))
+                user.Password = dto.Password;
+
+            // handle file upload
+            if (userimage != null && userimage.Length > 0)
             {
-                return BadRequest();
+                var folderPath = Path.Combine("assets", "profileImg");
+                Directory.CreateDirectory(folderPath);
+
+                var fileName = $"{Guid.NewGuid()}_{userimage.FileName}";
+                var filePath = Path.Combine(folderPath, fileName);
+
+                using var stream = new FileStream(filePath, FileMode.Create);
+                await userimage.CopyToAsync(stream);
+
+                user.UserImage = "/" + filePath.Replace("\\", "/");
             }
 
-            if (!await _userService.UserExistsAsync(id))
-            {
-                return NotFound();
-            }
-
-            User updated_user = await _userService.UpdateUserAsync(user);
-            return Ok(updated_user);
+            var updatedUser = await _userService.UpdateUserAsync(user);
+            return Ok(updatedUser);
         }
+
 
         // DELETE api/users/5
         [HttpDelete("{id}")]
