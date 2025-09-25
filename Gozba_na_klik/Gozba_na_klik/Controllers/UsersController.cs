@@ -49,14 +49,18 @@ namespace Gozba_na_klik.Controllers
 
         // PUT api/users/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAsync(int id, [FromForm] User user, IFormFile? userimage)
+        public async Task<IActionResult> PutAsync(int id, [FromForm] UpdateUserDto dto, IFormFile? userimage)
         {
-            if (id != user.Id)
-                return BadRequest();
+            var user = await _userService.GetUserByIdAsync(id);
+            if (user == null) return NotFound();
 
-            if (!await _userService.UserExistsAsync(id))
-                return NotFound();
+            // update fields
+            user.Username = dto.Username;
+            user.Email = dto.Email;
+            if (!string.IsNullOrEmpty(dto.Password))
+                user.Password = dto.Password;
 
+            // handle file upload
             if (userimage != null && userimage.Length > 0)
             {
                 var folderPath = Path.Combine("assets", "profileImg");
@@ -65,17 +69,16 @@ namespace Gozba_na_klik.Controllers
                 var fileName = $"{Guid.NewGuid()}_{userimage.FileName}";
                 var filePath = Path.Combine(folderPath, fileName);
 
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await userimage.CopyToAsync(stream);
-                }
+                using var stream = new FileStream(filePath, FileMode.Create);
+                await userimage.CopyToAsync(stream);
 
-                user.UserImage = "/" + filePath.Replace("\\", "/"); // for frontend use
+                user.UserImage = "/" + filePath.Replace("\\", "/");
             }
 
             var updatedUser = await _userService.UpdateUserAsync(user);
             return Ok(updatedUser);
         }
+
 
         // DELETE api/users/5
         [HttpDelete("{id}")]
