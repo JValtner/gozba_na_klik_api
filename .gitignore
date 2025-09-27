@@ -400,3 +400,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+# Profile image files
+Gozba_na_klik/Gozba_na_klik/assets/profileImg/
+Gozba_na_klik/Gozba_na_klik/wwwroot/assets/profileImg/
