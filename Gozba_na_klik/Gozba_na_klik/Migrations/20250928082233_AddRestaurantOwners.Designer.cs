@@ -3,6 +3,7 @@ using System;
 using Gozba_na_klik.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Gozba_na_klik.Migrations
 {
     [DbContext(typeof(GozbaNaKlikDbContext))]
-    partial class GozbaNaKlikDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250928082233_AddRestaurantOwners")]
+    partial class AddRestaurantOwners
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,26 +44,6 @@ namespace Gozba_na_klik.Migrations
                     b.HasIndex("RestaurantId");
 
                     b.ToTable("ClosedDates");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Date = new DateTime(2025, 12, 25, 0, 0, 0, 0, DateTimeKind.Utc),
-                            RestaurantId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Date = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            RestaurantId = 2
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Date = new DateTime(2025, 7, 4, 0, 0, 0, 0, DateTimeKind.Utc),
-                            RestaurantId = 3
-                        });
                 });
 
             modelBuilder.Entity("Gozba_na_klik.Models.Restaurants.Restaurant", b =>
@@ -93,32 +76,6 @@ namespace Gozba_na_klik.Migrations
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Restaurants");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedAt = new DateTime(2025, 9, 28, 8, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Bella Italia",
-                            OwnerId = 7,
-                            PhotoUrl = "..."
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedAt = new DateTime(2025, 9, 28, 8, 30, 0, 0, DateTimeKind.Utc),
-                            Name = "Sushi Master",
-                            OwnerId = 8,
-                            PhotoUrl = "..."
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedAt = new DateTime(2025, 9, 28, 9, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Grill House",
-                            OwnerId = 9,
-                            PhotoUrl = "..."
-                        });
                 });
 
             modelBuilder.Entity("Gozba_na_klik.Models.Restaurants.WorkSchedule", b =>
@@ -146,56 +103,6 @@ namespace Gozba_na_klik.Migrations
                     b.HasIndex("RestaurantId");
 
                     b.ToTable("WorkSchedules");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CloseTime = new TimeSpan(0, 21, 0, 0, 0),
-                            DayOfWeek = 1,
-                            OpenTime = new TimeSpan(0, 9, 0, 0, 0),
-                            RestaurantId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CloseTime = new TimeSpan(0, 21, 0, 0, 0),
-                            DayOfWeek = 2,
-                            OpenTime = new TimeSpan(0, 9, 0, 0, 0),
-                            RestaurantId = 1
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CloseTime = new TimeSpan(0, 22, 0, 0, 0),
-                            DayOfWeek = 1,
-                            OpenTime = new TimeSpan(0, 11, 0, 0, 0),
-                            RestaurantId = 2
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CloseTime = new TimeSpan(0, 22, 0, 0, 0),
-                            DayOfWeek = 2,
-                            OpenTime = new TimeSpan(0, 11, 0, 0, 0),
-                            RestaurantId = 2
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CloseTime = new TimeSpan(0, 20, 0, 0, 0),
-                            DayOfWeek = 1,
-                            OpenTime = new TimeSpan(0, 10, 0, 0, 0),
-                            RestaurantId = 3
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CloseTime = new TimeSpan(0, 20, 0, 0, 0),
-                            DayOfWeek = 2,
-                            OpenTime = new TimeSpan(0, 10, 0, 0, 0),
-                            RestaurantId = 3
-                        });
                 });
 
             modelBuilder.Entity("Gozba_na_klik.Models.User", b =>
