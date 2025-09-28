@@ -1,8 +1,9 @@
 ﻿using System;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Repositories;
-using Gozba_na_klik.Repository;
+using Gozba_na_klik.Repositories.RestaurantRepositories;
 using Gozba_na_klik.Services;
+using Gozba_na_klik.Services.RestaurantServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
@@ -31,8 +32,18 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
+
+
 builder.Services.AddScoped<IUsersRepository, UsersDbRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRestaurantRepository, RestaurantDbRepository>();
+builder.Services.AddScoped<IRestaurantService, RestaurantService>();
 
 var app = builder.Build();
 // Serve static files from the "assets" directory

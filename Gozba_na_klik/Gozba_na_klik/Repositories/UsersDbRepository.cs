@@ -3,7 +3,7 @@ using Gozba_na_klik.Models;
 using Gozba_na_klik.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace Gozba_na_klik.Repository
+namespace Gozba_na_klik.Repositories
 {
     public class UsersDbRepository: IUsersRepository
     {

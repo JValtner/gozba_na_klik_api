@@ -1,4 +1,6 @@
-﻿namespace Gozba_na_klik.Models.Restaurants;
+﻿using Gozba_na_klik.Models.Restaurants;
+
+namespace Gozba_na_klik.Models.RestaurantModels;
 
 public class WorkSchedule
 {
