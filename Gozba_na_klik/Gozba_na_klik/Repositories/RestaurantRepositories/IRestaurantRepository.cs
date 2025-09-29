@@ -11,4 +11,5 @@ public interface IRestaurantRepository
     Task<Restaurant> UpdateAsync(Restaurant restaurant);
     Task<bool> DeleteAsync(int id);
     Task<bool> ExistsAsync(int id);
+    Task<IEnumerable<Restaurant>> GetByOwnerAsync(int ownerId);
 }

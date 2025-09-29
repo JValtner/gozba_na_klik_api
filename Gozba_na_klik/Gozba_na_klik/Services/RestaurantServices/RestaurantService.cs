@@ -24,11 +24,6 @@ namespace Gozba_na_klik.Services.RestaurantServices
             return await _restaurantRepository.GetByIdAsync(id);
         }
 
-        public async Task<Restaurant> CreateUserAsync(Restaurant restaurant)
-        {
-            return await _restaurantRepository.AddAsync(restaurant);
-        }
-
         public async Task<Restaurant> UpdateRestaurantAsync(Restaurant restaurant)
         {
             return await _restaurantRepository.UpdateAsync(restaurant);
@@ -44,9 +39,14 @@ namespace Gozba_na_klik.Services.RestaurantServices
             return await _restaurantRepository.ExistsAsync(id);
         }
 
-        public Task<Restaurant> CreateRestaurantAsync(Restaurant restaurant)
+        public async Task<IEnumerable<Restaurant>> GetRestaurantsByOwnerAsync(int ownerId)
         {
-            throw new NotImplementedException();
+            return await _restaurantRepository.GetByOwnerAsync(ownerId);
+        }
+
+        public async Task<Restaurant> CreateRestaurantAsync(Restaurant restaurant)
+        {
+            return await _restaurantRepository.AddAsync(restaurant);
         }
     }
 }
