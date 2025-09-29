@@ -57,18 +57,16 @@ namespace Gozba_na_klik.Controllers.RestaurantControllers
         // GET: api/restaurants/my
         // Prikaz samo restorana koji pripadaju prijavljenom vlasniku (AC #1)
         [HttpGet("my")]
-        public async Task<IActionResult> GetMyRestaurantsAsync()
+        public async Task<IActionResult> GetMyRestaurantsAsync(
+            [FromHeader(Name = "X-User-Id")] int? userId)
         {
-            // Privremeni način do autentikacije: čitamo X-User-Id header (kasnije zameniti JWT-om)
-            string userIdHeader = Request.Headers["X-User-Id"].ToString();
-            int userIdParsed;
-            bool ok = int.TryParse(userIdHeader, out userIdParsed);
-            if (!ok)
+            // Provera hedera
+            if (userId == null || userId <= 0)
             {
                 return Unauthorized(new { message = "Nedostaje ili je neispravan X-User-Id header." });
             }
 
-            User? user = await _userService.GetUserByIdAsync(userIdParsed);
+            User? user = await _userService.GetUserByIdAsync(userId.Value);
             if (user == null)
             {
                 return Unauthorized();
@@ -94,20 +92,22 @@ namespace Gozba_na_klik.Controllers.RestaurantControllers
             return Ok(list);
         }
 
+
         // PUT: api/restaurants/{id}
         // Izmena osnovnih podataka restorana uz proveru vlasništva (AC #2)
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateAsync(int id, [FromBody] RestaurantUpdateDto dto)
+        public async Task<IActionResult> UpdateAsync(
+            int id,
+            [FromBody] RestaurantUpdateDto dto,
+            [FromHeader(Name = "X-User-Id")] int? userId)
         {
-            string userIdHeader = Request.Headers["X-User-Id"].ToString();
-            int userIdParsed;
-            bool ok = int.TryParse(userIdHeader, out userIdParsed);
-            if (!ok)
+            // Provera hedera 
+            if (userId == null || userId <= 0)
             {
                 return Unauthorized(new { message = "Nedostaje ili je neispravan X-User-Id header." });
             }
 
-            User? user = await _userService.GetUserByIdAsync(userIdParsed);
+            User? user = await _userService.GetUserByIdAsync(userId.Value);
             if (user == null)
             {
                 return Unauthorized();
@@ -158,5 +158,6 @@ namespace Gozba_na_klik.Controllers.RestaurantControllers
 
             return Ok(summary);
         }
+
     }
 }

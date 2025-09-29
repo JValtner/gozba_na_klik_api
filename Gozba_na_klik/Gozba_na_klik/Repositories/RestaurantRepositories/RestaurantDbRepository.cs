@@ -1,7 +1,7 @@
 ﻿using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Restaurants;
 using Microsoft.EntityFrameworkCore;
-using System.Linq
+using System.Linq;
 
 namespace Gozba_na_klik.Repositories.RestaurantRepositories;
 
