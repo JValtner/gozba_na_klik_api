@@ -43,7 +43,11 @@ builder.Services.AddControllers()
 builder.Services.AddScoped<IUsersRepository, UsersDbRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRestaurantRepository, RestaurantDbRepository>();
-builder.Services.AddScoped<IRestaurantService, RestaurantService>();
+builder.Services.AddScoped<IRestaurantService>(provider =>
+    new RestaurantService(
+        provider.GetRequiredService<IRestaurantRepository>(),
+        provider.GetRequiredService<GozbaNaKlikDbContext>()
+    ));
 
 var app = builder.Build();
 // Serve static files from the "assets" directory
