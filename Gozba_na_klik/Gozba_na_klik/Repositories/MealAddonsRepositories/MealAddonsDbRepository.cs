@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Gozba_na_klik.Repositories.MealAddonsRepositories
 {
-    public class MealAddonsDbRepositories
+    public class MealAddonsDbRepository
     {
         private GozbaNaKlikDbContext _context;
 
-        public MealAddonsDbRepositories(GozbaNaKlikDbContext context)
+        public MealAddonsDbRepository(GozbaNaKlikDbContext context)
         {
             _context = context;
         }

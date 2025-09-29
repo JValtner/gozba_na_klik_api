@@ -1,5 +1,5 @@
 ﻿using Gozba_na_klik.Models.MealModels;
-using static Gozba_na_klik.Repositories.MealAddonsRepositories.IMealAddonsRepositories;
+using static Gozba_na_klik.Repositories.MealAddonsRepositories.IMealAddonsRepository;
 
 namespace Gozba_na_klik.Services.MealAddonServices
 {

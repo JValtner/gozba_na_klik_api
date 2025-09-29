@@ -2,7 +2,7 @@
 
 namespace Gozba_na_klik.Repositories.MealAddonsRepositories
 {
-    public class IMealAddonsRepositories
+    public class IMealAddonsRepository
     {
         public interface IMealAddonsRepository
         {
