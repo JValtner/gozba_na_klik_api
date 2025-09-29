@@ -1,6 +1,7 @@
 ﻿using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Restaurants;
 using Microsoft.EntityFrameworkCore;
+using System.Linq
 
 namespace Gozba_na_klik.Repositories.RestaurantRepositories;
 
@@ -54,5 +55,14 @@ public class RestaurantDbRepository : IRestaurantRepository
         _context.Restaurants.Remove(restaurant);
         await _context.SaveChangesAsync();
         return true;
+    }
+    public async Task<IEnumerable<Restaurant>> GetByOwnerAsync(int ownerId)
+    {
+        return await _context.Restaurants
+            .Include(r => r.WorkSchedules)
+            .Include(r => r.ClosedDates)
+            .Where(r => r.OwnerId == ownerId)
+            .OrderBy(r => r.Name)
+            .ToListAsync();
     }
 }
