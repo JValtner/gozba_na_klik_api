@@ -1,9 +1,9 @@
 ﻿using System;
 using Gozba_na_klik.Models;
-using Gozba_na_klik.Repositories;
 using Gozba_na_klik.Repositories.RestaurantRepositories;
-using Gozba_na_klik.Services;
+using Gozba_na_klik.Repositories.UserRepositories;
 using Gozba_na_klik.Services.RestaurantServices;
+using Gozba_na_klik.Services.UserServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
@@ -40,7 +40,7 @@ builder.Services.AddControllers()
     });
 
 
-builder.Services.AddScoped<IUsersRepository, UsersDbRepository>();
+builder.Services.AddScoped<IUsersRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRestaurantRepository, RestaurantDbRepository>();
 builder.Services.AddScoped<IRestaurantService, RestaurantService>();

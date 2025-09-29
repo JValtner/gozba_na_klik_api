@@ -1,4 +1,4 @@
-﻿namespace Gozba_na_klik.Models
+﻿namespace Gozba_na_klik.DTOs
 {
     public class UpdateUserDto
     {

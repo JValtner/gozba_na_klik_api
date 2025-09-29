@@ -1,4 +1,6 @@
-﻿namespace Gozba_na_klik.Models
+﻿using Gozba_na_klik.Models.Restaurants;
+
+namespace Gozba_na_klik.Models.MealModels
 {
     public class Meal
     {
@@ -8,8 +10,7 @@
         public decimal Price { get; set; }
         public string ImageUrl { get; set; }
         public int RestaurantId { get; set; }
-
-        //public Restaurant Restaurant { get; set; }
+        public Restaurant Restaurant { get; set; }
         public List<MealAddon> Addons { get; set; } = new List<MealAddon>();
         public List<Alergen> Alergens { get; set; } = new List<Alergen>();
     }

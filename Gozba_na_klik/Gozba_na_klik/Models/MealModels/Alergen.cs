@@ -1,4 +1,4 @@
-﻿namespace Gozba_na_klik.Models
+﻿namespace Gozba_na_klik.Models.MealModels
 {
     public class Alergen
     {

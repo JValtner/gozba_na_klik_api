@@ -1,4 +1,5 @@
-﻿using Gozba_na_klik.Models.RestaurantModels;
+﻿using Gozba_na_klik.Models.MealModels;
+using Gozba_na_klik.Models.RestaurantModels;
 using Gozba_na_klik.Models.Restaurants;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +10,9 @@ namespace Gozba_na_klik.Models
         public GozbaNaKlikDbContext(DbContextOptions<GozbaNaKlikDbContext> options) : base(options) {}
         public DbSet<User> Users { get; set; }
         public DbSet<Restaurant> Restaurants { get; set; }
+        public  DbSet<Meal> Meals { get; set; }
+        public DbSet<MealAddon> MealAddons { get; set; }
+        public DbSet<Alergen> Alergens { get; set; }
         public DbSet<ClosedDate> ClosedDates { get; set; }
         public DbSet<WorkSchedule> WorkSchedules { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)

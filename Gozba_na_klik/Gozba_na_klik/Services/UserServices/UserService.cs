@@ -1,7 +1,7 @@
 ﻿using Gozba_na_klik.Models;
-using Gozba_na_klik.Repositories;
+using Gozba_na_klik.Repositories.UserRepositories;
 
-namespace Gozba_na_klik.Services
+namespace Gozba_na_klik.Services.UserServices
 {
     public class UserService: IUserService
     {

@@ -1,23 +1,25 @@
 ﻿using System.Threading.Tasks;
 using Gozba_na_klik.DTOs;
 using Gozba_na_klik.Models;
-using Gozba_na_klik.Services;
+using Gozba_na_klik.Services.FileServices;
+using Gozba_na_klik.Services.UserServices;
 using Microsoft.AspNetCore.Mvc;
 
 
 
-namespace Gozba_na_klik.Controllers
+namespace Gozba_na_klik.Controllers.UserControllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
-        //private readonly UsersDbRepository _usersRepository;
         private readonly IUserService _userService;
+        private readonly IFileService _fileService;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IFileService fileService)
         {
             _userService = userService;
+            _fileService = fileService;
         }
 
         // GET: api/users
@@ -63,16 +65,7 @@ namespace Gozba_na_klik.Controllers
             // handle file upload
             if (userimage != null && userimage.Length > 0)
             {
-                var folderPath = Path.Combine("assets", "profileImg");
-                Directory.CreateDirectory(folderPath);
-
-                var fileName = $"{Guid.NewGuid()}_{userimage.FileName}";
-                var filePath = Path.Combine(folderPath, fileName);
-
-                using var stream = new FileStream(filePath, FileMode.Create);
-                await userimage.CopyToAsync(stream);
-
-                user.UserImage = "/" + filePath.Replace("\\", "/");
+                user.UserImage = await _fileService.SaveUserImageAsync(userimage);
             }
 
             var updatedUser = await _userService.UpdateUserAsync(user);

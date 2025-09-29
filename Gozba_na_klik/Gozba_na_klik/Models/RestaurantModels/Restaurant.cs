@@ -1,5 +1,6 @@
 ﻿namespace Gozba_na_klik.Models.Restaurants;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.Models.MealModels;
 using Gozba_na_klik.Models.RestaurantModels;
 
 public class Restaurant
@@ -8,11 +9,9 @@ public class Restaurant
     public string Name { get; set; }
     public string PhotoUrl { get; set; }
     public int OwnerId { get; set; }                 
-    public User Owner { get; set; }                 
-
-    // Meni
-    // Skini Komentare kad dodas klasu Meal :)
-    //public List<Meal> Menu { get; set; } = new();
+    public User Owner { get; set; } 
+    public string Description { get; set; }
+    public List<Meal> Menu { get; set; } = new();
 
     // Standardno radno vreme po danima
     public List<WorkSchedule> WorkSchedules { get; set; } = new();

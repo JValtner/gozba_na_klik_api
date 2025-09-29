@@ -1,4 +1,4 @@
-﻿namespace Gozba_na_klik.Models
+﻿namespace Gozba_na_klik.Models.MealModels
 {
     public class MealAddon
     {
@@ -7,6 +7,6 @@
         public decimal Price { get; set; }
         public string Type { get; set; }
         public int MealId { get; set; } 
-        public Meal Meal { get; set;
+        public Meal Meal { get; set; } 
     }
 }
