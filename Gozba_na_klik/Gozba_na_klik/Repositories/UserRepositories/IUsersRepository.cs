@@ -1,6 +1,6 @@
 ﻿using Gozba_na_klik.Models;
 
-namespace Gozba_na_klik.Repositories
+namespace Gozba_na_klik.Repositories.UserRepositories
 {
     public interface IUsersRepository
     {
@@ -9,7 +9,6 @@ namespace Gozba_na_klik.Repositories
         Task<User> AddAsync(User user);
         Task<User> UpdateAsync(User user);
         Task<bool> DeleteAsync(int userId);
-        
         Task<bool> ExistsAsync(int userId);
     }
 }

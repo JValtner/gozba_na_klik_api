@@ -1,6 +1,6 @@
 ﻿using Gozba_na_klik.Models;
 
-namespace Gozba_na_klik.Services
+namespace Gozba_na_klik.Services.UserServices
 {
     public interface IUserService
     {

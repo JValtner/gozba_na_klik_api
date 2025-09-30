@@ -400,3 +400,10 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+# Profile image upload folders — keep the folders, ignore image files
+#Gozba_na_klik/Gozba_na_klik/assets/profileImg/*
+#Gozba_na_klik/Gozba_na_klik/wwwroot/assets/profileImg/*
+
+# But keep the placeholder file so the folders stay in Git
+#!Gozba_na_klik/Gozba_na_klik/assets/profileImg/.gitkeep
+#!Gozba_na_klik/Gozba_na_klik/wwwroot/assets/profileImg/.gitkeep

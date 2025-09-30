@@ -1,9 +1,8 @@
 ﻿using System;
 using Gozba_na_klik.Models;
-using Gozba_na_klik.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace Gozba_na_klik.Repositories
+namespace Gozba_na_klik.Repositories.UserRepositories
 {
     public class UsersDbRepository: IUsersRepository
     {
