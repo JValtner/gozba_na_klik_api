@@ -26,6 +26,11 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<IRestaurantRepository, RestaurantDbRepository>();
 builder.Services.AddScoped<IRestaurantService, RestaurantService>();
+builder.Services.AddScoped<IRestaurantService>(provider =>
+    new RestaurantService(
+        provider.GetRequiredService<IRestaurantRepository>(),
+        provider.GetRequiredService<GozbaNaKlikDbContext>()
+    ));
 
 builder.Services.AddScoped<IMealAddonsRepository, MealAddonsDbRepository>();
 builder.Services.AddScoped<IMealAddonService, MealAddonService>();
@@ -60,9 +65,6 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.WriteIndented = true;
     });
-
-
-
 
 
 var app = builder.Build();
