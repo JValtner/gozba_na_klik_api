@@ -4,11 +4,14 @@ using Gozba_na_klik.Models.RestaurantModels;
 
 public class Restaurant
 {
-    public int Id { get; set; }                     
+    public int Id { get; set; }
     public string Name { get; set; }
-    public string PhotoUrl { get; set; }
-    public int OwnerId { get; set; }                 
-    public User Owner { get; set; }                 
+    public string? PhotoUrl { get; set; }
+    public string? Address { get; set; }
+    public string? Description { get; set; }
+    public string? Phone { get; set; }
+    public int OwnerId { get; set; }
+    public User Owner { get; set; }
 
     // Meni
     // Skini Komentare kad dodas klasu Meal :)
@@ -18,7 +21,7 @@ public class Restaurant
     public List<WorkSchedule> WorkSchedules { get; set; } = new();
 
     // Neradni datumi
-    public List<ClosedDate> ClosedDates { get; set; } = new();       
+    public List<ClosedDate> ClosedDates { get; set; } = new();
 
     // Mozda cemo morati da menjamo sa User na Employee zbog nekih suspenzija...
     public List<User> Employees { get; set; } = new();

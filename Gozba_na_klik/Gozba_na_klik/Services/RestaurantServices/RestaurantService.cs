@@ -48,9 +48,14 @@ namespace Gozba_na_klik.Services.RestaurantServices
             return await _restaurantRepository.ExistsAsync(id);
         }
 
+        public async Task<IEnumerable<Restaurant>> GetRestaurantsByOwnerAsync(int ownerId)
+        {
+            return await _restaurantRepository.GetByOwnerAsync(ownerId);
+        }
+
         public async Task UpdateWorkSchedulesAsync(int restaurantId, List<WorkSchedule> schedules)
         {
-            var restaurant = await _context.Restaurants
+            Restaurant? restaurant = await _context.Restaurants
                 .Include(r => r.WorkSchedules)
                 .FirstOrDefaultAsync(r => r.Id == restaurantId);
 
@@ -58,7 +63,7 @@ namespace Gozba_na_klik.Services.RestaurantServices
 
             _context.WorkSchedules.RemoveRange(restaurant.WorkSchedules);
 
-            foreach (var schedule in schedules)
+            foreach (WorkSchedule schedule in schedules)
             {
                 schedule.RestaurantId = restaurantId;
                 _context.WorkSchedules.Add(schedule);
@@ -76,7 +81,7 @@ namespace Gozba_na_klik.Services.RestaurantServices
 
         public async Task RemoveClosedDateAsync(int restaurantId, int dateId)
         {
-            var closedDate = await _context.ClosedDates
+            ClosedDate? closedDate = await _context.ClosedDates
                 .FirstOrDefaultAsync(cd => cd.Id == dateId && cd.RestaurantId == restaurantId);
 
             if (closedDate != null)
