@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Gozba_na_klik.Repositories.AlergenRepositories
 {
-    public class AlergensDbRepository
+    public class AlergensDbRepository:IAlergensRepository
     {
         private GozbaNaKlikDbContext _context;
 

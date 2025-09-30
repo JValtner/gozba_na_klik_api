@@ -30,9 +30,9 @@ namespace Gozba_na_klik.Models
             );
 
             modelBuilder.Entity<Restaurant>().HasData(
-                new Restaurant { Id = 1, Name = "Bella Italia", PhotoUrl = "...", OwnerId = 7, CreatedAt = new DateTime(2025, 9, 28, 8, 0, 0, DateTimeKind.Utc) },
-                new Restaurant { Id = 2, Name = "Sushi Master", PhotoUrl = "...", OwnerId = 8, CreatedAt = new DateTime(2025, 9, 28, 8, 30, 0, DateTimeKind.Utc) },
-                new Restaurant { Id = 3, Name = "Grill House", PhotoUrl = "...", OwnerId = 9, CreatedAt = new DateTime(2025, 9, 28, 9, 0, 0, DateTimeKind.Utc) }
+                new Restaurant { Id = 1, Name = "Bella Italia", PhotoUrl = "...", OwnerId = 7, Description = "Authentic Italian dishes made with fresh ingredients.", CreatedAt = new DateTime(2025, 9, 28, 8, 0, 0, DateTimeKind.Utc) },
+                new Restaurant { Id = 2, Name = "Sushi Master", PhotoUrl = "...", OwnerId = 8, Description = "Authentic Japanese dishes made with fresh ingredients.", CreatedAt = new DateTime(2025, 9, 28, 8, 30, 0, DateTimeKind.Utc) },
+                new Restaurant { Id = 3, Name = "Grill House", PhotoUrl = "...", OwnerId = 9, Description = "Authentic Ausie dishes made with fresh ingredients.", CreatedAt = new DateTime(2025, 9, 28, 9, 0, 0, DateTimeKind.Utc) }
             );
 
 

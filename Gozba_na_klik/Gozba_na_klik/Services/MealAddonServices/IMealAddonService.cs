@@ -9,6 +9,6 @@ namespace Gozba_na_klik.Services.MealAddonServices
         Task<bool> MealAddonExistsAsync(int mealAddonId);
         Task<MealAddon> CreateMealAddonAsync(MealAddon mealAddon);
         Task<MealAddon> UpdateMealAddonAsync(MealAddon mealAddon);
-        Task DeleteMealAddonAsync(int id);
+        Task DeleteMealAddonAsync(int mealAddonId);
     }
 }

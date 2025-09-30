@@ -1,9 +1,12 @@
-﻿using Gozba_na_klik.Models.MealModels;
-using static Gozba_na_klik.Repositories.MealAddonsRepositories.IMealAddonsRepository;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Gozba_na_klik.Models.MealModels;
+using Gozba_na_klik.Repositories.MealAddonsRepositories;
+
 
 namespace Gozba_na_klik.Services.MealAddonServices
 {
-    public class MealAddonService
+    public class MealAddonService: IMealAddonService
     {
         private readonly IMealAddonsRepository _mealAddonsRepository;
 

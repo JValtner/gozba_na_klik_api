@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Gozba_na_klik.Repositories.MealAddonsRepositories
 {
-    public class MealAddonsDbRepository
+    public class MealAddonsDbRepository : IMealAddonsRepository
+
     {
         private GozbaNaKlikDbContext _context;
 

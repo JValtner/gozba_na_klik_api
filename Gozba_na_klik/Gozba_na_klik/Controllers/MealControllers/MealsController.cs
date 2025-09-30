@@ -1,5 +1,5 @@
 ﻿using Gozba_na_klik.DTOs;
-using Gozba_na_klik.Models;
+using Gozba_na_klik.Models.MealModels;
 using Gozba_na_klik.Services.FileServices;
 using Gozba_na_klik.Services.MealServices;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +30,7 @@ namespace Gozba_na_klik.Controllers.MealControllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOneAsync(int id)
         {
-            var meal = await _mealService.GetMealByIdAsync(id);
+            Meal meal = await _mealService.GetMealByIdAsync(id);
             if (meal == null)
             {
                 return NotFound();

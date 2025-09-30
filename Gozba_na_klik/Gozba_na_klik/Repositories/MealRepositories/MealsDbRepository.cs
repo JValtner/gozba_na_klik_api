@@ -15,11 +15,21 @@ namespace Gozba_na_klik.Repositories.MealRepositories
         }
         public async Task<IEnumerable<Meal>> GetAllAsync()
         {
-            return await _context.Meals.ToListAsync();
+            return await _context.Meals
+                .Include(m => m.Addons)
+                .Include(m => m.Alergens)
+                .Include(m => m.Restaurant)
+                .AsNoTracking()
+                .ToListAsync();
         }
         public async Task<Meal?> GetByIdAsync(int id)
         {
-            return await _context.Meals.FindAsync(id);
+            return await _context.Meals
+                .Include(m => m.Addons)
+                .Include(m => m.Alergens)
+                .Include(m => m.Restaurant)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Id == id);
         }
         public async Task<bool> ExistsAsync(int id)
         {
