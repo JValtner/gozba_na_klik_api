@@ -16,17 +16,26 @@ public class RestaurantDbRepository : IRestaurantRepository
     public async Task<IEnumerable<Restaurant>> GetAllAsync()
     {
         return await _context.Restaurants
-            .Include(r => r.WorkSchedules)
-            .Include(r => r.ClosedDates)
-            .ToListAsync();
+                .Include(r => r.Owner)
+                .Include(r => r.Menu)
+                    .ThenInclude(m => m.Addons)
+                .Include(r => r.Menu)
+                    .ThenInclude(m => m.Alergens)
+                .Include(r => r.WorkSchedules)
+                .Include(r => r.ClosedDates)
+                .ToListAsync();
     }
     public async Task<Restaurant?> GetByIdAsync(int id)
     {
         return await _context.Restaurants
-            .Include(r => r.WorkSchedules)
-            .Include(r => r.ClosedDates)
-            // Ovde kad se napravi Meal treba dodati include r.Meals
-            .FirstOrDefaultAsync(r => r.Id == id);
+                .Include(r => r.Owner)
+                .Include(r => r.Menu)
+                    .ThenInclude(m => m.Addons)
+                .Include(r => r.Menu)
+                    .ThenInclude(m => m.Alergens)
+                .Include(r => r.WorkSchedules)
+                .Include(r => r.ClosedDates)
+                .FirstOrDefaultAsync(r => r.Id == id);
     }
     public async Task<bool> ExistsAsync(int id)
     {
@@ -59,10 +68,15 @@ public class RestaurantDbRepository : IRestaurantRepository
     public async Task<IEnumerable<Restaurant>> GetByOwnerAsync(int ownerId)
     {
         return await _context.Restaurants
-            .Include(r => r.WorkSchedules)
-            .Include(r => r.ClosedDates)
-            .Where(r => r.OwnerId == ownerId)
-            .OrderBy(r => r.Name)
-            .ToListAsync();
+                .Include(r => r.Owner)
+                .Include(r => r.Menu)
+                    .ThenInclude(m => m.Addons)
+                .Include(r => r.Menu)
+                    .ThenInclude(m => m.Alergens)
+                .Include(r => r.WorkSchedules)
+                .Include(r => r.ClosedDates)
+                .Where(r => r.OwnerId == ownerId)
+                .OrderBy(r => r.Name)
+                .ToListAsync();
     }
 }

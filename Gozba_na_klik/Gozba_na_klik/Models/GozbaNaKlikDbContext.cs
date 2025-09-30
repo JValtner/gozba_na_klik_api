@@ -1,4 +1,5 @@
-﻿using Gozba_na_klik.Models.RestaurantModels;
+﻿using Gozba_na_klik.Models.MealModels;
+using Gozba_na_klik.Models.RestaurantModels;
 using Gozba_na_klik.Models.Restaurants;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +10,9 @@ namespace Gozba_na_klik.Models
         public GozbaNaKlikDbContext(DbContextOptions<GozbaNaKlikDbContext> options) : base(options) {}
         public DbSet<User> Users { get; set; }
         public DbSet<Restaurant> Restaurants { get; set; }
+        public  DbSet<Meal> Meals { get; set; }
+        public DbSet<MealAddon> MealAddons { get; set; }
+        public DbSet<Alergen> Alergens { get; set; }
         public DbSet<ClosedDate> ClosedDates { get; set; }
         public DbSet<WorkSchedule> WorkSchedules { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -26,9 +30,9 @@ namespace Gozba_na_klik.Models
             );
 
             modelBuilder.Entity<Restaurant>().HasData(
-                new Restaurant { Id = 1, Name = "Bella Italia", PhotoUrl = "...", OwnerId = 7, CreatedAt = new DateTime(2025, 9, 28, 8, 0, 0, DateTimeKind.Utc) },
-                new Restaurant { Id = 2, Name = "Sushi Master", PhotoUrl = "...", OwnerId = 8, CreatedAt = new DateTime(2025, 9, 28, 8, 30, 0, DateTimeKind.Utc) },
-                new Restaurant { Id = 3, Name = "Grill House", PhotoUrl = "...", OwnerId = 9, CreatedAt = new DateTime(2025, 9, 28, 9, 0, 0, DateTimeKind.Utc) }
+                new Restaurant { Id = 1, Name = "Bella Italia", PhotoUrl = "...", OwnerId = 7, Description = "Authentic Italian dishes made with fresh ingredients.", CreatedAt = new DateTime(2025, 9, 28, 8, 0, 0, DateTimeKind.Utc) },
+                new Restaurant { Id = 2, Name = "Sushi Master", PhotoUrl = "...", OwnerId = 8, Description = "Authentic Japanese dishes made with fresh ingredients.", CreatedAt = new DateTime(2025, 9, 28, 8, 30, 0, DateTimeKind.Utc) },
+                new Restaurant { Id = 3, Name = "Grill House", PhotoUrl = "...", OwnerId = 9, Description = "Authentic Ausie dishes made with fresh ingredients.", CreatedAt = new DateTime(2025, 9, 28, 9, 0, 0, DateTimeKind.Utc) }
             );
 
 
