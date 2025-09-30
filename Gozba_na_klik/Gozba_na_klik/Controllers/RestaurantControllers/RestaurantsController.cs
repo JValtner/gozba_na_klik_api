@@ -1,7 +1,7 @@
 ﻿using Gozba_na_klik.DTOs;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Restaurants;
-using Gozba_na_klik.Services;
+using Gozba_na_klik.Services.UserServices;
 using Gozba_na_klik.Services.RestaurantServices;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;

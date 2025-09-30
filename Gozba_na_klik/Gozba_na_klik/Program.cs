@@ -1,9 +1,16 @@
 ﻿using System;
 using Gozba_na_klik.Models;
-using Gozba_na_klik.Repositories;
+using Gozba_na_klik.Repositories.AlergenRepositories;
+using Gozba_na_klik.Repositories.MealAddonsRepositories;
+using Gozba_na_klik.Repositories.MealRepositories;
 using Gozba_na_klik.Repositories.RestaurantRepositories;
-using Gozba_na_klik.Services;
+using Gozba_na_klik.Repositories.UserRepositories;
+using Gozba_na_klik.Services.AlergenServices;
+using Gozba_na_klik.Services.FileServices;
+using Gozba_na_klik.Services.MealAddonServices;
+using Gozba_na_klik.Services.MealServices;
 using Gozba_na_klik.Services.RestaurantServices;
+using Gozba_na_klik.Services.UserServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Gozba_na_klik.Repositories.AddressRepositories;
@@ -12,7 +19,6 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Controllers + JSON
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -20,14 +26,13 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.WriteIndented = true;
     });
 
-// Swagger + X-User-Id auth a Swagger UI-ban
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Gozba_na_klik", Version = "v1" });
     c.AddSecurityDefinition("XUserId", new OpenApiSecurityScheme
     {
-        Description = "Temporary auth via X-User-Id header (pl. 1)",
+        Description = "Temporary auth via X-User-Id header (e.g. 1)",
         Name = "X-User-Id",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey
@@ -44,9 +49,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// (opcionális) konkrét típus regisztráció törölhető
-builder.Services.AddScoped<UsersDbRepository>();
-
 // PostgreSQL
 builder.Services.AddDbContext<GozbaNaKlikDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -62,24 +64,35 @@ builder.Services.AddCors(options =>
     });
 });
 
-// DI – Users
+// DI
 builder.Services.AddScoped<IUsersRepository, UsersDbRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-// DI – Restaurants
 builder.Services.AddScoped<IRestaurantRepository, RestaurantDbRepository>();
 builder.Services.AddScoped<IRestaurantService, RestaurantService>();
 
-// DI – Addresses (KP7)
+builder.Services.AddScoped<IMealAddonsRepository, MealAddonsDbRepository>();
+builder.Services.AddScoped<IMealAddonService, MealAddonService>();
+
+builder.Services.AddScoped<IMealsRepository, MealsDbRepository>();
+builder.Services.AddScoped<IMealService, MealService>();
+
+builder.Services.AddScoped<IAlergensRepository, AlergensDbRepository>();
+builder.Services.AddScoped<IAlergenService, AlergenService>();
+
+builder.Services.AddScoped<IFileService, FileService>();
+
 builder.Services.AddScoped<IAddressRepository, AddressDbRepository>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 
 var app = builder.Build();
 
 // Static files: /assets
+var assetsPath = Path.Combine(builder.Environment.ContentRootPath, "assets");
+if (!Directory.Exists(assetsPath)) Directory.CreateDirectory(assetsPath);
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "assets")),
+    FileProvider = new PhysicalFileProvider(assetsPath),
     RequestPath = "/assets"
 });
 
@@ -89,10 +102,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// (ajánlott)
 app.UseHttpsRedirection();
 
-// CORS
 app.UseCors("FrontendPolicy");
 
 app.UseAuthorization();
