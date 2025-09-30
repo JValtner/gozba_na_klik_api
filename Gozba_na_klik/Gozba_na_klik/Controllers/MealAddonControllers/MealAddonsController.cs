@@ -26,7 +26,7 @@ namespace Gozba_na_klik.Controllers.MealAddonControllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOneAsync(int id)
         {
-            var mealAddon = await _mealAddonService.GetMealAddonByIdAsync(id);
+            MealAddon mealAddon = await _mealAddonService.GetMealAddonByIdAsync(id);
             if (mealAddon == null)
             {
                 return NotFound();
@@ -46,7 +46,7 @@ namespace Gozba_na_klik.Controllers.MealAddonControllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAsync(int id, [FromBody] MealAddon mealAddon)
         {
-            if (await _mealAddonService.MealAddonExistsAsync(id)) 
+            if (!await _mealAddonService.MealAddonExistsAsync(id)) 
                 return NotFound();
 
             var updatedMealAddon = await _mealAddonService.UpdateMealAddonAsync(mealAddon);

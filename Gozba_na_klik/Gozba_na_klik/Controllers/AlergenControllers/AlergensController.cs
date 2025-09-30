@@ -46,10 +46,10 @@ namespace Gozba_na_klik.Controllers.AlergenControllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAsync(int id, [FromBody] Alergen alergen)
         {
-            if (await _alergenService.AlergenExistsAsync(id))
+            if (!await _alergenService.AlergenExistsAsync(id))
                 return NotFound();
 
-            var updatedAlergen = await _alergenService.UpdateAlergenAsync(alergen);
+            Alergen updatedAlergen = await _alergenService.UpdateAlergenAsync(alergen);
             return Ok(updatedAlergen);
         }
 
