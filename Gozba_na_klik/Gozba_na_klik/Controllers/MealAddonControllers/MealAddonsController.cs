@@ -49,7 +49,7 @@ namespace Gozba_na_klik.Controllers.MealAddonControllers
             if (!await _mealAddonService.MealAddonExistsAsync(id)) 
                 return NotFound();
 
-            var updatedMealAddon = await _mealAddonService.UpdateMealAddonAsync(mealAddon);
+            MealAddon updatedMealAddon = await _mealAddonService.UpdateMealAddonAsync(mealAddon);
             return Ok(mealAddon);
         }
 
