@@ -17,12 +17,6 @@ namespace Gozba_na_klik.Migrations
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
-                name: "Description",
-                table: "Restaurants",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
                 name: "Phone",
                 table: "Restaurants",
                 type: "text",
@@ -34,6 +28,7 @@ namespace Gozba_na_klik.Migrations
                 type: "text",
                 nullable: true);
 
+            // Reason mezőt nyugodtan NULL-ra állíthatjuk, mert nullable
             migrationBuilder.UpdateData(
                 table: "ClosedDates",
                 keyColumn: "Id",
@@ -55,26 +50,27 @@ namespace Gozba_na_klik.Migrations
                 column: "Reason",
                 value: null);
 
+            // FONTOS: NEM állítunk Description-t NULL-ra
             migrationBuilder.UpdateData(
                 table: "Restaurants",
                 keyColumn: "Id",
                 keyValue: 1,
-                columns: new[] { "Address", "Description", "Phone" },
-                values: new object[] { null, null, null });
+                columns: new[] { "Address", "Phone" },
+                values: new object[] { null, null });
 
             migrationBuilder.UpdateData(
                 table: "Restaurants",
                 keyColumn: "Id",
                 keyValue: 2,
-                columns: new[] { "Address", "Description", "Phone" },
-                values: new object[] { null, null, null });
+                columns: new[] { "Address", "Phone" },
+                values: new object[] { null, null });
 
             migrationBuilder.UpdateData(
                 table: "Restaurants",
                 keyColumn: "Id",
                 keyValue: 3,
-                columns: new[] { "Address", "Description", "Phone" },
-                values: new object[] { null, null, null });
+                columns: new[] { "Address", "Phone" },
+                values: new object[] { null, null });
         }
 
         /// <inheritdoc />
@@ -82,10 +78,6 @@ namespace Gozba_na_klik.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "Address",
-                table: "Restaurants");
-
-            migrationBuilder.DropColumn(
-                name: "Description",
                 table: "Restaurants");
 
             migrationBuilder.DropColumn(

@@ -2,6 +2,7 @@
 using Gozba_na_klik.Models.RestaurantModels;
 using Gozba_na_klik.Models.Restaurants;
 using Microsoft.EntityFrameworkCore;
+using Gozba_na_klik.Models.Customers;
 
 namespace Gozba_na_klik.Models
 {
@@ -15,6 +16,7 @@ namespace Gozba_na_klik.Models
         public DbSet<Alergen> Alergens { get; set; }
         public DbSet<ClosedDate> ClosedDates { get; set; }
         public DbSet<WorkSchedule> WorkSchedules { get; set; }
+        public DbSet<Address> Addresses { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // --- Predefined Admin accounts ---
