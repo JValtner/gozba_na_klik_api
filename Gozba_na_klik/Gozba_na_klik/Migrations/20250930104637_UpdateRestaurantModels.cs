@@ -17,6 +17,7 @@ namespace Gozba_na_klik.Migrations
                         ALTER TABLE ""Restaurants"" ADD ""Address"" text;
                     END IF;
 
+<<<<<<< HEAD
                     IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                                    WHERE table_name='Restaurants' AND column_name='Description') THEN
                         ALTER TABLE ""Restaurants"" ADD ""Description"" text;
@@ -34,10 +35,68 @@ namespace Gozba_na_klik.Migrations
                 END
                 $$;
             ");
+=======
+            migrationBuilder.AddColumn<string>(
+                name: "Phone",
+                table: "Restaurants",
+                type: "text",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "Reason",
+                table: "ClosedDates",
+                type: "text",
+                nullable: true);
+
+            // Reason mezőt nyugodtan NULL-ra állíthatjuk, mert nullable
+            migrationBuilder.UpdateData(
+                table: "ClosedDates",
+                keyColumn: "Id",
+                keyValue: 1,
+                column: "Reason",
+                value: null);
+
+            migrationBuilder.UpdateData(
+                table: "ClosedDates",
+                keyColumn: "Id",
+                keyValue: 2,
+                column: "Reason",
+                value: null);
+
+            migrationBuilder.UpdateData(
+                table: "ClosedDates",
+                keyColumn: "Id",
+                keyValue: 3,
+                column: "Reason",
+                value: null);
+
+            // FONTOS: NEM állítunk Description-t NULL-ra
+            migrationBuilder.UpdateData(
+                table: "Restaurants",
+                keyColumn: "Id",
+                keyValue: 1,
+                columns: new[] { "Address", "Phone" },
+                values: new object[] { null, null });
+
+            migrationBuilder.UpdateData(
+                table: "Restaurants",
+                keyColumn: "Id",
+                keyValue: 2,
+                columns: new[] { "Address", "Phone" },
+                values: new object[] { null, null });
+
+            migrationBuilder.UpdateData(
+                table: "Restaurants",
+                keyColumn: "Id",
+                keyValue: 3,
+                columns: new[] { "Address", "Phone" },
+                values: new object[] { null, null });
+>>>>>>> 850cb0caae022186be27e6b4ee810e57b3ab5b0c
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+<<<<<<< HEAD
             // Drop columns safely (PostgreSQL ignores if column doesn't exist)
             migrationBuilder.Sql(@"
                 ALTER TABLE ""Restaurants"" DROP COLUMN IF EXISTS ""Address"";
@@ -45,6 +104,19 @@ namespace Gozba_na_klik.Migrations
                 ALTER TABLE ""Restaurants"" DROP COLUMN IF EXISTS ""Phone"";
                 ALTER TABLE ""ClosedDates"" DROP COLUMN IF EXISTS ""Reason"";
             ");
+=======
+            migrationBuilder.DropColumn(
+                name: "Address",
+                table: "Restaurants");
+
+            migrationBuilder.DropColumn(
+                name: "Phone",
+                table: "Restaurants");
+
+            migrationBuilder.DropColumn(
+                name: "Reason",
+                table: "ClosedDates");
+>>>>>>> 850cb0caae022186be27e6b4ee810e57b3ab5b0c
         }
     }
 }

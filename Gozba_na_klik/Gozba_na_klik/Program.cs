@@ -7,30 +7,69 @@ using Gozba_na_klik.Repositories.RestaurantRepositories;
 using Gozba_na_klik.Repositories.UserRepositories;
 using Gozba_na_klik.Services.AlergenServices;
 using Gozba_na_klik.Services.FileServices;
-using Gozba_na_klik.Services.MealAddonServices;
+using Gozba_na_klik.Services.MealAddonServices; 
 using Gozba_na_klik.Services.MealServices;
 using Gozba_na_klik.Services.RestaurantServices;
 using Gozba_na_klik.Services.UserServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Gozba_na_klik.Repositories.AddressRepositories;
+using Gozba_na_klik.Services.AddressServices;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
 
-// Register User repositories and services
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Gozba_na_klik", Version = "v1" });
+    c.AddSecurityDefinition("XUserId", new OpenApiSecurityScheme
+    {
+        Description = "Temporary auth via X-User-Id header (e.g. 1)",
+        Name = "X-User-Id",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "XUserId" }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+// PostgreSQL
+builder.Services.AddDbContext<GozbaNaKlikDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+// DI
 builder.Services.AddScoped<IUsersRepository, UsersDbRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<IRestaurantRepository, RestaurantDbRepository>();
 builder.Services.AddScoped<IRestaurantService, RestaurantService>();
-builder.Services.AddScoped<IRestaurantService>(provider =>
-    new RestaurantService(
-        provider.GetRequiredService<IRestaurantRepository>(),
-        provider.GetRequiredService<GozbaNaKlikDbContext>()
-    ));
 
 builder.Services.AddScoped<IMealAddonsRepository, MealAddonsDbRepository>();
 builder.Services.AddScoped<IMealAddonService, MealAddonService>();
@@ -43,46 +82,28 @@ builder.Services.AddScoped<IAlergenService, AlergenService>();
 
 builder.Services.AddScoped<IFileService, FileService>();
 
-
-// Configure PostgreSQL database connection
-builder.Services.AddDbContext<GozbaNaKlikDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("FrontendPolicy", policy =>
-    {
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
-
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
-        options.JsonSerializerOptions.WriteIndented = true;
-    });
-
+builder.Services.AddScoped<IAddressRepository, AddressDbRepository>();
+builder.Services.AddScoped<IAddressService, AddressService>();
 
 var app = builder.Build();
-// Serve static files from the "assets" directory
+
+// Static files: /assets
+var assetsPath = Path.Combine(builder.Environment.ContentRootPath, "assets");
+if (!Directory.Exists(assetsPath)) Directory.CreateDirectory(assetsPath);
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "assets")),
+    FileProvider = new PhysicalFileProvider(assetsPath),
     RequestPath = "/assets"
 });
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Aktiviraj CORS sa definisanom politikom
+app.UseHttpsRedirection();
+
 app.UseCors("FrontendPolicy");
 
 app.UseAuthorization();
@@ -90,5 +111,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-
