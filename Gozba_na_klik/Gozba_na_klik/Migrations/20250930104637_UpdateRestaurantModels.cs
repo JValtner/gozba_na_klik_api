@@ -9,33 +9,7 @@ namespace Gozba_na_klik.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // Use SQL to conditionally add columns only if they do not exist
-            migrationBuilder.Sql(@"
-                DO $$
-                BEGIN
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                                   WHERE table_name='Restaurants' AND column_name='Address') THEN
-                        ALTER TABLE ""Restaurants"" ADD ""Address"" text;
-                    END IF;
 
-<<<<<<< HEAD
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                                   WHERE table_name='Restaurants' AND column_name='Description') THEN
-                        ALTER TABLE ""Restaurants"" ADD ""Description"" text;
-                    END IF;
-
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                                   WHERE table_name='Restaurants' AND column_name='Phone') THEN
-                        ALTER TABLE ""Restaurants"" ADD ""Phone"" text;
-                    END IF;
-
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                                   WHERE table_name='ClosedDates' AND column_name='Reason') THEN
-                        ALTER TABLE ""ClosedDates"" ADD ""Reason"" text;
-                    END IF;
-                END
-                $$;
-            ");
-=======
             migrationBuilder.AddColumn<string>(
                 name: "Phone",
                 table: "Restaurants",
@@ -91,20 +65,10 @@ namespace Gozba_na_klik.Migrations
                 keyValue: 3,
                 columns: new[] { "Address", "Phone" },
                 values: new object[] { null, null });
->>>>>>> 850cb0caae022186be27e6b4ee810e57b3ab5b0c
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-<<<<<<< HEAD
-            // Drop columns safely (PostgreSQL ignores if column doesn't exist)
-            migrationBuilder.Sql(@"
-                ALTER TABLE ""Restaurants"" DROP COLUMN IF EXISTS ""Address"";
-                ALTER TABLE ""Restaurants"" DROP COLUMN IF EXISTS ""Description"";
-                ALTER TABLE ""Restaurants"" DROP COLUMN IF EXISTS ""Phone"";
-                ALTER TABLE ""ClosedDates"" DROP COLUMN IF EXISTS ""Reason"";
-            ");
-=======
             migrationBuilder.DropColumn(
                 name: "Address",
                 table: "Restaurants");
@@ -116,7 +80,6 @@ namespace Gozba_na_klik.Migrations
             migrationBuilder.DropColumn(
                 name: "Reason",
                 table: "ClosedDates");
->>>>>>> 850cb0caae022186be27e6b4ee810e57b3ab5b0c
         }
     }
 }
