@@ -4,97 +4,47 @@
 
 namespace Gozba_na_klik.Migrations
 {
-    /// <inheritdoc />
     public partial class UpdateRestaurantModels : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Address",
-                table: "Restaurants",
-                type: "text",
-                nullable: true);
+            // Use SQL to conditionally add columns only if they do not exist
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                   WHERE table_name='Restaurants' AND column_name='Address') THEN
+                        ALTER TABLE ""Restaurants"" ADD ""Address"" text;
+                    END IF;
 
-            migrationBuilder.AddColumn<string>(
-                name: "Description",
-                table: "Restaurants",
-                type: "text",
-                nullable: true);
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                   WHERE table_name='Restaurants' AND column_name='Description') THEN
+                        ALTER TABLE ""Restaurants"" ADD ""Description"" text;
+                    END IF;
 
-            migrationBuilder.AddColumn<string>(
-                name: "Phone",
-                table: "Restaurants",
-                type: "text",
-                nullable: true);
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                   WHERE table_name='Restaurants' AND column_name='Phone') THEN
+                        ALTER TABLE ""Restaurants"" ADD ""Phone"" text;
+                    END IF;
 
-            migrationBuilder.AddColumn<string>(
-                name: "Reason",
-                table: "ClosedDates",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.UpdateData(
-                table: "ClosedDates",
-                keyColumn: "Id",
-                keyValue: 1,
-                column: "Reason",
-                value: null);
-
-            migrationBuilder.UpdateData(
-                table: "ClosedDates",
-                keyColumn: "Id",
-                keyValue: 2,
-                column: "Reason",
-                value: null);
-
-            migrationBuilder.UpdateData(
-                table: "ClosedDates",
-                keyColumn: "Id",
-                keyValue: 3,
-                column: "Reason",
-                value: null);
-
-            migrationBuilder.UpdateData(
-                table: "Restaurants",
-                keyColumn: "Id",
-                keyValue: 1,
-                columns: new[] { "Address", "Description", "Phone" },
-                values: new object[] { null, null, null });
-
-            migrationBuilder.UpdateData(
-                table: "Restaurants",
-                keyColumn: "Id",
-                keyValue: 2,
-                columns: new[] { "Address", "Description", "Phone" },
-                values: new object[] { null, null, null });
-
-            migrationBuilder.UpdateData(
-                table: "Restaurants",
-                keyColumn: "Id",
-                keyValue: 3,
-                columns: new[] { "Address", "Description", "Phone" },
-                values: new object[] { null, null, null });
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                   WHERE table_name='ClosedDates' AND column_name='Reason') THEN
+                        ALTER TABLE ""ClosedDates"" ADD ""Reason"" text;
+                    END IF;
+                END
+                $$;
+            ");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Address",
-                table: "Restaurants");
-
-            migrationBuilder.DropColumn(
-                name: "Description",
-                table: "Restaurants");
-
-            migrationBuilder.DropColumn(
-                name: "Phone",
-                table: "Restaurants");
-
-            migrationBuilder.DropColumn(
-                name: "Reason",
-                table: "ClosedDates");
+            // Drop columns safely (PostgreSQL ignores if column doesn't exist)
+            migrationBuilder.Sql(@"
+                ALTER TABLE ""Restaurants"" DROP COLUMN IF EXISTS ""Address"";
+                ALTER TABLE ""Restaurants"" DROP COLUMN IF EXISTS ""Description"";
+                ALTER TABLE ""Restaurants"" DROP COLUMN IF EXISTS ""Phone"";
+                ALTER TABLE ""ClosedDates"" DROP COLUMN IF EXISTS ""Reason"";
+            ");
         }
     }
 }

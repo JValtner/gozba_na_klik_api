@@ -3,6 +3,7 @@ using System;
 using Gozba_na_klik.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Gozba_na_klik.Migrations
 {
     [DbContext(typeof(GozbaNaKlikDbContext))]
-    partial class GozbaNaKlikDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250930193812_SyncSchemaAfterMerge")]
+    partial class SyncSchemaAfterMerge
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,21 +137,18 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 1,
                             Date = new DateTime(2025, 12, 25, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Reason = "Christmas",
                             RestaurantId = 1
                         },
                         new
                         {
                             Id = 2,
                             Date = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Reason = "New Year",
                             RestaurantId = 2
                         },
                         new
                         {
                             Id = 3,
                             Date = new DateTime(2025, 7, 4, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Reason = "Independence Day",
                             RestaurantId = 3
                         });
                 });
@@ -273,34 +273,28 @@ namespace Gozba_na_klik.Migrations
                         new
                         {
                             Id = 1,
-                            Address = "Some address 1",
                             CreatedAt = new DateTime(2025, 9, 28, 8, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Authentic Italian dishes made with fresh ingredients.",
                             Name = "Bella Italia",
                             OwnerId = 7,
-                            Phone = "123456",
                             PhotoUrl = "..."
                         },
                         new
                         {
                             Id = 2,
-                            Address = "Some address 2",
                             CreatedAt = new DateTime(2025, 9, 28, 8, 30, 0, 0, DateTimeKind.Utc),
                             Description = "Authentic Japanese dishes made with fresh ingredients.",
                             Name = "Sushi Master",
                             OwnerId = 8,
-                            Phone = "234567",
                             PhotoUrl = "..."
                         },
                         new
                         {
                             Id = 3,
-                            Address = "Some address 3",
                             CreatedAt = new DateTime(2025, 9, 28, 9, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Authentic Ausie dishes made with fresh ingredients.",
                             Name = "Grill House",
                             OwnerId = 9,
-                            Phone = "345678",
                             PhotoUrl = "..."
                         });
                 });
