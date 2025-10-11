@@ -1,7 +1,4 @@
-﻿using Gozba_na_klik.Models.MealModels;
-using Gozba_na_klik.Models.RestaurantModels;
-using Gozba_na_klik.Models.Restaurants;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Gozba_na_klik.Models
 {
@@ -34,7 +31,23 @@ namespace Gozba_na_klik.Models
                 new Restaurant { Id = 2, Name = "Sushi Master", PhotoUrl = "...", OwnerId = 8, Description = "Authentic Japanese dishes made with fresh ingredients.", CreatedAt = new DateTime(2025, 9, 28, 8, 30, 0, DateTimeKind.Utc) },
                 new Restaurant { Id = 3, Name = "Grill House", PhotoUrl = "...", OwnerId = 9, Description = "Authentic Ausie dishes made with fresh ingredients.", CreatedAt = new DateTime(2025, 9, 28, 9, 0, 0, DateTimeKind.Utc) }
             );
+            modelBuilder.Entity<Meal>().HasData(
+                // --- Bella Italia (RestaurantId = 1) ---
+                new Meal { Id = 1, Name = "Spaghetti Carbonara", Description = "Classic Italian pasta with pancetta, egg, and pecorino cheese.", Price = 950, ImagePath = "...", RestaurantId = 1 },
+                new Meal { Id = 2, Name = "Margherita Pizza", Description = "Fresh mozzarella, tomato sauce, and basil on a wood-fired crust.", Price = 890, ImagePath = "...", RestaurantId = 1 },
+                new Meal { Id = 3, Name = "Lasagna al Forno", Description = "Layered pasta with beef ragù, bechamel sauce, and parmesan.", Price = 1100, ImagePath = "...", RestaurantId = 1 },
 
+                // --- Sushi Master (RestaurantId = 2) ---
+                new Meal { Id = 4, Name = "Salmon Nigiri", Description = "Fresh salmon on seasoned rice, served with wasabi.", Price = 620, ImagePath = "...", RestaurantId = 2 },
+                new Meal { Id = 5, Name = "California Roll", Description = "Crab, avocado, and cucumber rolled in sesame rice.", Price = 750, ImagePath = "...", RestaurantId = 2 },
+                new Meal { Id = 6, Name = "Tuna Sashimi", Description = "Thinly sliced tuna served with soy sauce and wasabi.", Price = 980, ImagePath = "...", RestaurantId = 2 },
+                new Meal { Id = 7, Name = "Ramen Bowl", Description = "Rich miso broth with noodles, egg, and pork slices.", Price = 1100, ImagePath = "...", RestaurantId = 2 },
+
+                // --- Grill House (RestaurantId = 3) ---
+                new Meal { Id = 8, Name = "BBQ Ribs", Description = "Slow-cooked ribs with tangy BBQ sauce.", Price = 1450, ImagePath = "...", RestaurantId = 3 },
+                new Meal { Id = 9, Name = "Grilled Chicken Breast", Description = "Juicy grilled chicken with seasonal vegetables.", Price = 980, ImagePath = "...", RestaurantId = 3 },
+                new Meal { Id = 10, Name = "Beef Burger", Description = "Classic beef burger with cheddar, lettuce, and tomato.", Price = 890, ImagePath = "...", RestaurantId = 3 }
+            );
 
             modelBuilder.Entity<WorkSchedule>().HasData(
                 new WorkSchedule { Id = 1, DayOfWeek = DayOfWeek.Monday, OpenTime = new TimeSpan(9, 0, 0), CloseTime = new TimeSpan(21, 0, 0), RestaurantId = 1 },

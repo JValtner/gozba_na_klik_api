@@ -1,26 +1,25 @@
 ﻿using System;
+using AutoMapper;
 using Gozba_na_klik.Models;
-using Gozba_na_klik.Repositories.AlergenRepositories;
-using Gozba_na_klik.Repositories.MealAddonsRepositories;
-using Gozba_na_klik.Repositories.MealRepositories;
-using Gozba_na_klik.Repositories.RestaurantRepositories;
-using Gozba_na_klik.Repositories.UserRepositories;
-using Gozba_na_klik.Services.AlergenServices;
-using Gozba_na_klik.Services.FileServices;
-using Gozba_na_klik.Services.MealAddonServices;
-using Gozba_na_klik.Services.MealServices;
-using Gozba_na_klik.Services.RestaurantServices;
-using Gozba_na_klik.Services.UserServices;
+using Gozba_na_klik.Repositories;
+using Gozba_na_klik.Services;
+using Gozba_na_klik.Settings;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services to the container
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Register User repositories and services
+// AutoMapper (scan all assemblies)
+builder.Services.AddAutoMapper(cfg => {cfg.AddProfile<MappingProfile>();
+});
+
+// Register repositories and services
 builder.Services.AddScoped<IUsersRepository, UsersDbRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
@@ -38,12 +37,11 @@ builder.Services.AddScoped<IAlergenService, AlergenService>();
 
 builder.Services.AddScoped<IFileService, FileService>();
 
-
 // Configure PostgreSQL database connection
 builder.Services.AddDbContext<GozbaNaKlikDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
+// Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>
@@ -54,6 +52,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Controllers with JSON options
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -61,26 +60,38 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.WriteIndented = true;
     });
 
+// Exception handling middleware
+builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
+// Serilog logger
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .CreateLogger();
 
-
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
 
 var app = builder.Build();
-// Serve static files from the "assets" directory
+
+// Middleware pipeline
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// Serve static files from "assets" directory
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "assets")),
     RequestPath = "/assets"
 });
 
-// Configure the HTTP request pipeline.
+// Swagger in development
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Aktiviraj CORS sa definisanom politikom
+// Enable CORS
 app.UseCors("FrontendPolicy");
 
 app.UseAuthorization();
@@ -88,5 +99,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-
