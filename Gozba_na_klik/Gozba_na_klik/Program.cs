@@ -4,17 +4,6 @@ using Gozba_na_klik.Models;
 using Gozba_na_klik.Repositories;
 using Gozba_na_klik.Services;
 using Gozba_na_klik.Settings;
-using Gozba_na_klik.Repositories.AlergenRepositories;
-using Gozba_na_klik.Repositories.MealAddonsRepositories;
-using Gozba_na_klik.Repositories.MealRepositories;
-using Gozba_na_klik.Repositories.RestaurantRepositories;
-using Gozba_na_klik.Repositories.UserRepositories;
-using Gozba_na_klik.Services.AlergenServices;
-using Gozba_na_klik.Services.FileServices;
-using Gozba_na_klik.Services.MealAddonServices; 
-using Gozba_na_klik.Services.MealServices;
-using Gozba_na_klik.Services.RestaurantServices;
-using Gozba_na_klik.Services.UserServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -132,8 +121,6 @@ var app = builder.Build();
 // Middleware pipeline
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-// Serve static files from "assets" directory
-var app = builder.Build();
 
 // Static files: /assets
 var assetsPath = Path.Combine(builder.Environment.ContentRootPath, "assets");

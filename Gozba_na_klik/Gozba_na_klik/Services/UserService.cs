@@ -1,15 +1,19 @@
 ﻿using Gozba_na_klik.DTOs;
 using Gozba_na_klik.Models;
-using Gozba_na_klik.Repositories;
-using Gozba_na_klik.Services; // Add this if IUserService is in the same namespace
 namespace Gozba_na_klik.Services
 {
     public class UserService : IUserService
     {
         private readonly IUsersRepository _userRepository;
         private readonly IFileService _fileService;
+        private IFileService? fileService;
 
+        
         public UserService(IUsersRepository userRepository, IFileService fileService)
+        {
+            _userRepository = userRepository;
+            _fileService = fileService;
+        }
         // Fallback image path (relative)
         private const string DefaultProfileImagePath = "/assets/profileImg/default_profile.png";
 

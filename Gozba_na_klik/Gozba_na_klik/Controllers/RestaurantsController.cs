@@ -4,6 +4,7 @@ using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Services;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.DTOs;
 
 namespace Gozba_na_klik.Controllers
 {

@@ -1,8 +1,4 @@
 ﻿using Gozba_na_klik.Models;
-using Gozba_na_klik.Models.RestaurantModels;
-using Gozba_na_klik.Models.Restaurants;
-using Gozba_na_klik.Repositories;
-using Gozba_na_klik.Repositories.RestaurantRepositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gozba_na_klik.Services
