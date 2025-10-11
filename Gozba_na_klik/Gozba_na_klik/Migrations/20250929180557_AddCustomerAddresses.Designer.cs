@@ -3,6 +3,7 @@ using System;
 using Gozba_na_klik.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Gozba_na_klik.Migrations
 {
     [DbContext(typeof(GozbaNaKlikDbContext))]
-    partial class GozbaNaKlikDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250929180557_AddCustomerAddresses")]
+    partial class AddCustomerAddresses
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,181 +84,6 @@ namespace Gozba_na_klik.Migrations
                     b.ToTable("Addresses");
                 });
 
-            modelBuilder.Entity("Gozba_na_klik.Models.MealModels.Alergen", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("MealId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MealId");
-
-                    b.ToTable("Alergens");
-                });
-
-            modelBuilder.Entity("Gozba_na_klik.Models.MealModels.Meal", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ImagePath")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric");
-
-                    b.Property<int>("RestaurantId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RestaurantId");
-
-                    b.ToTable("Meals");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Description = "Classic Italian pasta with pancetta, egg, and pecorino cheese.",
-                            ImagePath = "...",
-                            Name = "Spaghetti Carbonara",
-                            Price = 950m,
-                            RestaurantId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Description = "Fresh mozzarella, tomato sauce, and basil on a wood-fired crust.",
-                            ImagePath = "...",
-                            Name = "Margherita Pizza",
-                            Price = 890m,
-                            RestaurantId = 1
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "Layered pasta with beef ragù, bechamel sauce, and parmesan.",
-                            ImagePath = "...",
-                            Name = "Lasagna al Forno",
-                            Price = 1100m,
-                            RestaurantId = 1
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Description = "Fresh salmon on seasoned rice, served with wasabi.",
-                            ImagePath = "...",
-                            Name = "Salmon Nigiri",
-                            Price = 620m,
-                            RestaurantId = 2
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Description = "Crab, avocado, and cucumber rolled in sesame rice.",
-                            ImagePath = "...",
-                            Name = "California Roll",
-                            Price = 750m,
-                            RestaurantId = 2
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Description = "Thinly sliced tuna served with soy sauce and wasabi.",
-                            ImagePath = "...",
-                            Name = "Tuna Sashimi",
-                            Price = 980m,
-                            RestaurantId = 2
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Description = "Rich miso broth with noodles, egg, and pork slices.",
-                            ImagePath = "...",
-                            Name = "Ramen Bowl",
-                            Price = 1100m,
-                            RestaurantId = 2
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Description = "Slow-cooked ribs with tangy BBQ sauce.",
-                            ImagePath = "...",
-                            Name = "BBQ Ribs",
-                            Price = 1450m,
-                            RestaurantId = 3
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Description = "Juicy grilled chicken with seasonal vegetables.",
-                            ImagePath = "...",
-                            Name = "Grilled Chicken Breast",
-                            Price = 980m,
-                            RestaurantId = 3
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Description = "Classic beef burger with cheddar, lettuce, and tomato.",
-                            ImagePath = "...",
-                            Name = "Beef Burger",
-                            Price = 890m,
-                            RestaurantId = 3
-                        });
-                });
-
-            modelBuilder.Entity("Gozba_na_klik.Models.MealModels.MealAddon", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("MealId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MealId");
-
-                    b.ToTable("MealAddons");
-                });
-
             modelBuilder.Entity("Gozba_na_klik.Models.RestaurantModels.ClosedDate", b =>
                 {
                     b.Property<int>("Id")
@@ -266,9 +94,6 @@ namespace Gozba_na_klik.Migrations
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Reason")
-                        .HasColumnType("text");
 
                     b.Property<int>("RestaurantId")
                         .HasColumnType("integer");
@@ -284,21 +109,18 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 1,
                             Date = new DateTime(2025, 12, 25, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Reason = "Christmas",
                             RestaurantId = 1
                         },
                         new
                         {
                             Id = 2,
                             Date = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Reason = "New Year",
                             RestaurantId = 2
                         },
                         new
                         {
                             Id = 3,
                             Date = new DateTime(2025, 7, 4, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Reason = "Independence Day",
                             RestaurantId = 3
                         });
                 });
@@ -388,14 +210,8 @@ namespace Gozba_na_klik.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Address")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -404,10 +220,8 @@ namespace Gozba_na_klik.Migrations
                     b.Property<int>("OwnerId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Phone")
-                        .HasColumnType("text");
-
                     b.Property<string>("PhotoUrl")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -423,34 +237,25 @@ namespace Gozba_na_klik.Migrations
                         new
                         {
                             Id = 1,
-                            Address = "Some address 1",
                             CreatedAt = new DateTime(2025, 9, 28, 8, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Authentic Italian dishes made with fresh ingredients.",
                             Name = "Bella Italia",
                             OwnerId = 7,
-                            Phone = "123456",
                             PhotoUrl = "..."
                         },
                         new
                         {
                             Id = 2,
-                            Address = "Some address 2",
                             CreatedAt = new DateTime(2025, 9, 28, 8, 30, 0, 0, DateTimeKind.Utc),
-                            Description = "Authentic Japanese dishes made with fresh ingredients.",
                             Name = "Sushi Master",
                             OwnerId = 8,
-                            Phone = "234567",
                             PhotoUrl = "..."
                         },
                         new
                         {
                             Id = 3,
-                            Address = "Some address 3",
                             CreatedAt = new DateTime(2025, 9, 28, 9, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Authentic Ausie dishes made with fresh ingredients.",
                             Name = "Grill House",
                             OwnerId = 9,
-                            Phone = "345678",
                             PhotoUrl = "..."
                         });
                 });
@@ -558,39 +363,6 @@ namespace Gozba_na_klik.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Gozba_na_klik.Models.MealModels.Alergen", b =>
-                {
-                    b.HasOne("Gozba_na_klik.Models.MealModels.Meal", "Meal")
-                        .WithMany("Alergens")
-                        .HasForeignKey("MealId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Meal");
-                });
-
-            modelBuilder.Entity("Gozba_na_klik.Models.MealModels.Meal", b =>
-                {
-                    b.HasOne("Gozba_na_klik.Models.Restaurants.Restaurant", "Restaurant")
-                        .WithMany("Menu")
-                        .HasForeignKey("RestaurantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Restaurant");
-                });
-
-            modelBuilder.Entity("Gozba_na_klik.Models.MealModels.MealAddon", b =>
-                {
-                    b.HasOne("Gozba_na_klik.Models.MealModels.Meal", "Meal")
-                        .WithMany("Addons")
-                        .HasForeignKey("MealId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Meal");
-                });
-
             modelBuilder.Entity("Gozba_na_klik.Models.RestaurantModels.ClosedDate", b =>
                 {
                     b.HasOne("Gozba_na_klik.Models.Restaurants.Restaurant", "Restaurant")
@@ -631,20 +403,11 @@ namespace Gozba_na_klik.Migrations
                         .HasForeignKey("RestaurantId");
                 });
 
-            modelBuilder.Entity("Gozba_na_klik.Models.MealModels.Meal", b =>
-                {
-                    b.Navigation("Addons");
-
-                    b.Navigation("Alergens");
-                });
-
             modelBuilder.Entity("Gozba_na_klik.Models.Restaurants.Restaurant", b =>
                 {
                     b.Navigation("ClosedDates");
 
                     b.Navigation("Employees");
-
-                    b.Navigation("Menu");
 
                     b.Navigation("WorkSchedules");
                 });

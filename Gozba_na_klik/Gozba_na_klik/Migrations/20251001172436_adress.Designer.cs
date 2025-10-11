@@ -3,6 +3,7 @@ using System;
 using Gozba_na_klik.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Gozba_na_klik.Migrations
 {
     [DbContext(typeof(GozbaNaKlikDbContext))]
-    partial class GozbaNaKlikDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251001172436_adress")]
+    partial class adress
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -115,7 +118,8 @@ namespace Gozba_na_klik.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ImagePath")
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
@@ -133,98 +137,6 @@ namespace Gozba_na_klik.Migrations
                     b.HasIndex("RestaurantId");
 
                     b.ToTable("Meals");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Description = "Classic Italian pasta with pancetta, egg, and pecorino cheese.",
-                            ImagePath = "...",
-                            Name = "Spaghetti Carbonara",
-                            Price = 950m,
-                            RestaurantId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Description = "Fresh mozzarella, tomato sauce, and basil on a wood-fired crust.",
-                            ImagePath = "...",
-                            Name = "Margherita Pizza",
-                            Price = 890m,
-                            RestaurantId = 1
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "Layered pasta with beef ragù, bechamel sauce, and parmesan.",
-                            ImagePath = "...",
-                            Name = "Lasagna al Forno",
-                            Price = 1100m,
-                            RestaurantId = 1
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Description = "Fresh salmon on seasoned rice, served with wasabi.",
-                            ImagePath = "...",
-                            Name = "Salmon Nigiri",
-                            Price = 620m,
-                            RestaurantId = 2
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Description = "Crab, avocado, and cucumber rolled in sesame rice.",
-                            ImagePath = "...",
-                            Name = "California Roll",
-                            Price = 750m,
-                            RestaurantId = 2
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Description = "Thinly sliced tuna served with soy sauce and wasabi.",
-                            ImagePath = "...",
-                            Name = "Tuna Sashimi",
-                            Price = 980m,
-                            RestaurantId = 2
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Description = "Rich miso broth with noodles, egg, and pork slices.",
-                            ImagePath = "...",
-                            Name = "Ramen Bowl",
-                            Price = 1100m,
-                            RestaurantId = 2
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Description = "Slow-cooked ribs with tangy BBQ sauce.",
-                            ImagePath = "...",
-                            Name = "BBQ Ribs",
-                            Price = 1450m,
-                            RestaurantId = 3
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Description = "Juicy grilled chicken with seasonal vegetables.",
-                            ImagePath = "...",
-                            Name = "Grilled Chicken Breast",
-                            Price = 980m,
-                            RestaurantId = 3
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Description = "Classic beef burger with cheddar, lettuce, and tomato.",
-                            ImagePath = "...",
-                            Name = "Beef Burger",
-                            Price = 890m,
-                            RestaurantId = 3
-                        });
                 });
 
             modelBuilder.Entity("Gozba_na_klik.Models.MealModels.MealAddon", b =>

@@ -1,4 +1,5 @@
-﻿using Gozba_na_klik.Models;
+﻿using Gozba_na_klik.DTOs;
+using Gozba_na_klik.Models;
 using Gozba_na_klik.Repositories;
 using Gozba_na_klik.Services; // Add this if IUserService is in the same namespace
 namespace Gozba_na_klik.Services
@@ -6,13 +7,16 @@ namespace Gozba_na_klik.Services
     public class UserService : IUserService
     {
         private readonly IUsersRepository _userRepository;
+        private readonly IFileService _fileService;
 
+        public UserService(IUsersRepository userRepository, IFileService fileService)
         // Fallback image path (relative)
         private const string DefaultProfileImagePath = "/assets/profileImg/default_profile.png";
 
         public UserService(IUsersRepository userRepository)
         {
             _userRepository = userRepository;
+            _fileService = fileService;
         }
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()
@@ -47,9 +51,25 @@ namespace Gozba_na_klik.Services
             return await _userRepository.AddAsync(user);
         }
 
-        public async Task<User> UpdateUserAsync(User author)
+        public async Task<User> UpdateUserAsync(int id, UpdateUserDto dto, IFormFile? userimage)
         {
-            return await _userRepository.UpdateAsync(author);
+            var user = await GetUserByIdAsync(id);
+            if (user == null) return null;
+
+            // update fields
+            user.Username = dto.Username;
+            user.Email = dto.Email;
+            if (!string.IsNullOrEmpty(dto.Password))
+                user.Password = dto.Password;
+
+            // handle file upload
+            if (userimage != null && userimage.Length > 0)
+            {
+                user.UserImage = await _fileService.SaveUserImageAsync(userimage);
+            }
+
+            return await _userRepository.UpdateAsync(user);
+
         }
 
         public async Task DeleteUserAsync(int userId)

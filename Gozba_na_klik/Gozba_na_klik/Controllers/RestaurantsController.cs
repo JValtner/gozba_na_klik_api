@@ -77,7 +77,7 @@ namespace Gozba_na_klik.Controllers
 
             IEnumerable<Restaurant> restaurants = await _restaurantService.GetRestaurantsByOwnerAsync(user.Id);
 
-            // Mapiranje na DTO da bismo izbegli anonimne tipove (i time upotrebu 'var')
+
             IEnumerable<RestaurantListItemDto> list = restaurants.Select(r => new RestaurantListItemDto
             {
                 Id = r.Id,
@@ -91,16 +91,15 @@ namespace Gozba_na_klik.Controllers
             return Ok(list);
         }
 
-
         // PUT: api/restaurants/{id}
-        // Izmena osnovnih podataka restorana uz proveru vlasništva (AC #2)
+        // Izmena osnovnih podataka restorana uz proveru vlasništva (AC #2 i #3)
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateAsync(
-            int id,
-            [FromBody] RestaurantUpdateDto dto,
-            [FromHeader(Name = "X-User-Id")] int? userId)
+    int id,
+    [FromForm] RestaurantUpdateDto dto,
+    [FromHeader(Name = "X-User-Id")] int? userId)
         {
-            // Provera hedera 
+            // Provera hedera
             if (userId == null || userId <= 0)
             {
                 return Unauthorized(new { message = "Nedostaje ili je neispravan X-User-Id header." });
@@ -135,17 +134,32 @@ namespace Gozba_na_klik.Controllers
             }
 
             // Ažuriranje polja
-            entity.Name = dto.Name.Trim();
-            if (!string.IsNullOrWhiteSpace(dto.PhotoUrl))
+            entity.Name = dto.Name?.Trim();
+            entity.Address = dto.Address?.Trim();
+            entity.Description = dto.Description?.Trim();
+            entity.Phone = dto.Phone?.Trim();
+
+            // Ako je poslata nova fotografija
+            if (dto.Photo != null && dto.Photo.Length > 0)
             {
-                entity.PhotoUrl = dto.PhotoUrl.Trim();
+                string folderPath = Path.Combine("assets", "restaurantImg");
+                Directory.CreateDirectory(folderPath);
+
+                string fileName = $"{Guid.NewGuid()}_{dto.Photo.FileName}";
+                string filePath = Path.Combine(folderPath, fileName);
+
+                using FileStream stream = new FileStream(filePath, FileMode.Create);
+                await dto.Photo.CopyToAsync(stream);
+
+                entity.PhotoUrl = "/assets/restaurantImg/" + fileName;
             }
+
             entity.UpdatedAt = DateTime.UtcNow;
 
             Restaurant updated = await _restaurantService.UpdateRestaurantAsync(entity);
 
-            // Vraćamo sažetak (može i ceo entitet po potrebi)
-            RestaurantListItemDto summary = new RestaurantListItemDto
+            // Vrati summary DTO
+            return Ok(new RestaurantListItemDto
             {
                 Id = updated.Id,
                 Name = updated.Name,
@@ -153,10 +167,58 @@ namespace Gozba_na_klik.Controllers
                 OwnerId = updated.OwnerId,
                 CreatedAt = updated.CreatedAt,
                 UpdatedAt = updated.UpdatedAt
-            };
-
-            return Ok(summary);
+            });
         }
 
+
+        // DELETE: api/restaurants/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            Restaurant? restaurant = await _restaurantService.GetRestaurantByIdAsync(id);
+            if (restaurant == null) return NotFound();
+
+            await _restaurantService.DeleteRestaurantAsync(id);
+            return NoContent();
+        }
+
+        // POST: api/restaurants/{id}/workschedules
+        [HttpPost("{id}/workschedules")]
+        public async Task<IActionResult> UpdateWorkSchedulesAsync(int id, [FromBody] List<WorkScheduleDto> scheduleDtos)
+        {
+            try
+            {
+                List<WorkSchedule> schedules = scheduleDtos.Select(dto => new WorkSchedule
+                {
+                    DayOfWeek = (DayOfWeek)dto.DayOfWeek,
+                    OpenTime = TimeSpan.Parse(dto.OpenTime),
+                    CloseTime = TimeSpan.Parse(dto.CloseTime)
+                }).ToList();
+
+                await _restaurantService.UpdateWorkSchedulesAsync(id, schedules);
+                return Ok(new { message = "Radno vreme uspešno ažurirano." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Greška pri obradi radnog vremena", error = ex.Message });
+            }
+        }
+
+        // POST: api/restaurants/{id}/closeddates
+        [HttpPost("{id}/closeddates")]
+        public async Task<IActionResult> AddClosedDateAsync(int id, [FromBody] ClosedDate date)
+        {
+            date.RestaurantId = id;
+            await _restaurantService.AddClosedDateAsync(id, date);
+            return Ok(new { message = "Neradni datum uspešno dodat." });
+        }
+
+        // DELETE: api/restaurants/{id}/closeddates/{dateId}
+        [HttpDelete("{id}/closeddates/{dateId}")]
+        public async Task<IActionResult> RemoveClosedDateAsync(int id, int dateId)
+        {
+            await _restaurantService.RemoveClosedDateAsync(id, dateId);
+            return NoContent();
+        }
     }
 }

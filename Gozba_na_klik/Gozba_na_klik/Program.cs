@@ -4,16 +4,71 @@ using Gozba_na_klik.Models;
 using Gozba_na_klik.Repositories;
 using Gozba_na_klik.Services;
 using Gozba_na_klik.Settings;
+using Gozba_na_klik.Repositories.AlergenRepositories;
+using Gozba_na_klik.Repositories.MealAddonsRepositories;
+using Gozba_na_klik.Repositories.MealRepositories;
+using Gozba_na_klik.Repositories.RestaurantRepositories;
+using Gozba_na_klik.Repositories.UserRepositories;
+using Gozba_na_klik.Services.AlergenServices;
+using Gozba_na_klik.Services.FileServices;
+using Gozba_na_klik.Services.MealAddonServices; 
+using Gozba_na_klik.Services.MealServices;
+using Gozba_na_klik.Services.RestaurantServices;
+using Gozba_na_klik.Services.UserServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Gozba_na_klik.Repositories.AddressRepositories;
+using Gozba_na_klik.Services.AddressServices;
+using Microsoft.OpenApi.Models;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
+
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Gozba_na_klik", Version = "v1" });
+    c.AddSecurityDefinition("XUserId", new OpenApiSecurityScheme
+    {
+        Description = "Temporary auth via X-User-Id header (e.g. 1)",
+        Name = "X-User-Id",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "XUserId" }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+// PostgreSQL
+builder.Services.AddDbContext<GozbaNaKlikDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 // AutoMapper (scan all assemblies)
 builder.Services.AddAutoMapper(cfg => {cfg.AddProfile<MappingProfile>();
@@ -78,9 +133,14 @@ var app = builder.Build();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Serve static files from "assets" directory
+var app = builder.Build();
+
+// Static files: /assets
+var assetsPath = Path.Combine(builder.Environment.ContentRootPath, "assets");
+if (!Directory.Exists(assetsPath)) Directory.CreateDirectory(assetsPath);
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "assets")),
+    FileProvider = new PhysicalFileProvider(assetsPath),
     RequestPath = "/assets"
 });
 
@@ -92,6 +152,8 @@ if (app.Environment.IsDevelopment())
 }
 
 // Enable CORS
+app.UseHttpsRedirection();
+
 app.UseCors("FrontendPolicy");
 
 app.UseAuthorization();

@@ -52,22 +52,11 @@ namespace Gozba_na_klik.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAsync(int id, [FromForm] UpdateUserDto dto, IFormFile? userimage)
         {
-            var user = await _userService.GetUserByIdAsync(id);
-            if (user == null) return NotFound();
-
-            // update fields
-            user.Username = dto.Username;
-            user.Email = dto.Email;
-            if (!string.IsNullOrEmpty(dto.Password))
-                user.Password = dto.Password;
-
-            // handle file upload
-            if (userimage != null && userimage.Length > 0)
+            var updatedUser = await _userService.UpdateUserAsync(id, dto, userimage);
+            if (updatedUser == null)
             {
-                user.UserImage = await _fileService.SaveUserImageAsync(userimage);
+                return NotFound();
             }
-
-            var updatedUser = await _userService.UpdateUserAsync(user);
             return Ok(updatedUser);
         }
 

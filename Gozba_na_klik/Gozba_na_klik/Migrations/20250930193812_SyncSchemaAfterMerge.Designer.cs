@@ -3,6 +3,7 @@ using System;
 using Gozba_na_klik.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Gozba_na_klik.Migrations
 {
     [DbContext(typeof(GozbaNaKlikDbContext))]
-    partial class GozbaNaKlikDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250930193812_SyncSchemaAfterMerge")]
+    partial class SyncSchemaAfterMerge
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,65 +24,6 @@ namespace Gozba_na_klik.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("Gozba_na_klik.Models.Customers.Address", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Apartment")
-                        .HasColumnType("text");
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Entrance")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Floor")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsDefault")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Label")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<double?>("Latitude")
-                        .HasColumnType("double precision");
-
-                    b.Property<double?>("Longitude")
-                        .HasColumnType("double precision");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PostalCode")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Street")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Addresses");
-                });
 
             modelBuilder.Entity("Gozba_na_klik.Models.MealModels.Alergen", b =>
                 {
@@ -115,7 +59,8 @@ namespace Gozba_na_klik.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ImagePath")
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
@@ -133,98 +78,6 @@ namespace Gozba_na_klik.Migrations
                     b.HasIndex("RestaurantId");
 
                     b.ToTable("Meals");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Description = "Classic Italian pasta with pancetta, egg, and pecorino cheese.",
-                            ImagePath = "...",
-                            Name = "Spaghetti Carbonara",
-                            Price = 950m,
-                            RestaurantId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Description = "Fresh mozzarella, tomato sauce, and basil on a wood-fired crust.",
-                            ImagePath = "...",
-                            Name = "Margherita Pizza",
-                            Price = 890m,
-                            RestaurantId = 1
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "Layered pasta with beef ragù, bechamel sauce, and parmesan.",
-                            ImagePath = "...",
-                            Name = "Lasagna al Forno",
-                            Price = 1100m,
-                            RestaurantId = 1
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Description = "Fresh salmon on seasoned rice, served with wasabi.",
-                            ImagePath = "...",
-                            Name = "Salmon Nigiri",
-                            Price = 620m,
-                            RestaurantId = 2
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Description = "Crab, avocado, and cucumber rolled in sesame rice.",
-                            ImagePath = "...",
-                            Name = "California Roll",
-                            Price = 750m,
-                            RestaurantId = 2
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Description = "Thinly sliced tuna served with soy sauce and wasabi.",
-                            ImagePath = "...",
-                            Name = "Tuna Sashimi",
-                            Price = 980m,
-                            RestaurantId = 2
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Description = "Rich miso broth with noodles, egg, and pork slices.",
-                            ImagePath = "...",
-                            Name = "Ramen Bowl",
-                            Price = 1100m,
-                            RestaurantId = 2
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Description = "Slow-cooked ribs with tangy BBQ sauce.",
-                            ImagePath = "...",
-                            Name = "BBQ Ribs",
-                            Price = 1450m,
-                            RestaurantId = 3
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Description = "Juicy grilled chicken with seasonal vegetables.",
-                            ImagePath = "...",
-                            Name = "Grilled Chicken Breast",
-                            Price = 980m,
-                            RestaurantId = 3
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Description = "Classic beef burger with cheddar, lettuce, and tomato.",
-                            ImagePath = "...",
-                            Name = "Beef Burger",
-                            Price = 890m,
-                            RestaurantId = 3
-                        });
                 });
 
             modelBuilder.Entity("Gozba_na_klik.Models.MealModels.MealAddon", b =>
@@ -284,21 +137,18 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 1,
                             Date = new DateTime(2025, 12, 25, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Reason = "Christmas",
                             RestaurantId = 1
                         },
                         new
                         {
                             Id = 2,
                             Date = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Reason = "New Year",
                             RestaurantId = 2
                         },
                         new
                         {
                             Id = 3,
                             Date = new DateTime(2025, 7, 4, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Reason = "Independence Day",
                             RestaurantId = 3
                         });
                 });
@@ -423,34 +273,28 @@ namespace Gozba_na_klik.Migrations
                         new
                         {
                             Id = 1,
-                            Address = "Some address 1",
                             CreatedAt = new DateTime(2025, 9, 28, 8, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Authentic Italian dishes made with fresh ingredients.",
                             Name = "Bella Italia",
                             OwnerId = 7,
-                            Phone = "123456",
                             PhotoUrl = "..."
                         },
                         new
                         {
                             Id = 2,
-                            Address = "Some address 2",
                             CreatedAt = new DateTime(2025, 9, 28, 8, 30, 0, 0, DateTimeKind.Utc),
                             Description = "Authentic Japanese dishes made with fresh ingredients.",
                             Name = "Sushi Master",
                             OwnerId = 8,
-                            Phone = "234567",
                             PhotoUrl = "..."
                         },
                         new
                         {
                             Id = 3,
-                            Address = "Some address 3",
                             CreatedAt = new DateTime(2025, 9, 28, 9, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Authentic Ausie dishes made with fresh ingredients.",
                             Name = "Grill House",
                             OwnerId = 9,
-                            Phone = "345678",
                             PhotoUrl = "..."
                         });
                 });
