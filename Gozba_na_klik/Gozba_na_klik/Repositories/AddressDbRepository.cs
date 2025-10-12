@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Gozba_na_klik.Models.Customers;
 using Microsoft.EntityFrameworkCore;
 using Gozba_na_klik.Models;
 
-namespace Gozba_na_klik.Repositories.AddressRepositories
+namespace Gozba_na_klik.Repositories
 {
     public class AddressDbRepository : IAddressRepository
     {

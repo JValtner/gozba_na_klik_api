@@ -25,11 +25,11 @@ namespace Gozba_na_klik.Controllers
             _logger = logger;
         }
 
-        // ---------- GET: api/mealaddons ----------
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<ResponseAddonDTO>>> GetAllAsync()
+        // GET: api/mealaddons/meal/5
+        [HttpGet("meal/{mealId}")]
+        public async Task<ActionResult<IEnumerable<ResponseAddonDTO>>> GetByMealIdAsync(int mealId)
         {
-            var addons = await _mealAddonService.GetAllMealAddonsAsync();
+            var addons = await _mealAddonService.GetAddonsByMealIdAsync(mealId);
             var response = _mapper.Map<IEnumerable<ResponseAddonDTO>>(addons);
             return Ok(response);
         }
@@ -48,7 +48,6 @@ namespace Gozba_na_klik.Controllers
 
         // ---------- POST: api/mealaddons ----------
         [HttpPost]
-        [HttpPost]
         public async Task<ActionResult<ResponseAddonDTO>> CreateAsync([FromBody] RequestAddonDto request)
         {
             if (!ModelState.IsValid)
@@ -59,7 +58,15 @@ namespace Gozba_na_klik.Controllers
 
             _logger.LogInformation("Addon '{Name}' created for MealId {MealId}", created.Name, created.MealId);
 
-            return CreatedAtAction(nameof(GetByIdAsync), new { id = created.Id }, created);
+            return created;
+        }
+
+        // ---------- PUT: api/mealaddons/{addonId}/activate ----------
+        [HttpPut("{addonId}/activate")]
+        public async Task<IActionResult> ActivateChosenAddon(int addonId)
+        {
+            await _mealAddonService.SetActiveChosenAddon(addonId);
+            return NoContent();
         }
 
 

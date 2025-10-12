@@ -9,5 +9,6 @@ namespace Gozba_na_klik.DTOs.Response
         public decimal Price { get; set; }
         public string Type { get; set; }
         public int MealId { get; set; }
+        public bool IsActive { get; set; }
     }
 }

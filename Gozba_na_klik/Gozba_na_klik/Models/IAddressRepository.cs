@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Gozba_na_klik.Models.Customers;
 
-namespace Gozba_na_klik.Repositories.AddressRepositories
+namespace Gozba_na_klik.Models
 {
     public interface IAddressRepository
     {

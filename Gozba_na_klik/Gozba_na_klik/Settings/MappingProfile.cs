@@ -31,7 +31,7 @@ namespace Gozba_na_klik.Settings
             // ---------- Alergen ----------
             CreateMap<RequestAlergenDto, Alergen>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.Meal, opt => opt.Ignore());
+                .ForMember(dest => dest.Meals, opt => opt.Ignore()); // ✅ updated property name
 
             CreateMap<Alergen, ResponseAlergenDto>();
         }

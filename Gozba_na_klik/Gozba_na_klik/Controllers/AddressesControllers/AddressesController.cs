@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Gozba_na_klik.DTOs.Addresses;
-using Gozba_na_klik.Models.Customers;
+using Gozba_na_klik.Models;
 using Gozba_na_klik.Services.AddressServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

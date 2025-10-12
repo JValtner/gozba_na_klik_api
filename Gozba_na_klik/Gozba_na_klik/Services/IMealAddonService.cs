@@ -5,9 +5,10 @@ namespace Gozba_na_klik.Services
 {
     public interface IMealAddonService
     {
-        Task<IEnumerable<ResponseAddonDTO>> GetAllMealAddonsAsync();
+        Task<IEnumerable<ResponseAddonDTO>> GetAddonsByMealIdAsync(int mealId);
         Task<ResponseAddonDTO> GetMealAddonByIdAsync(int id);
         Task<ResponseAddonDTO> CreateMealAddonAsync(RequestAddonDto request);
+        Task SetActiveChosenAddon(int addonId);
         Task DeleteMealAddonAsync(int id);
         Task<bool> MealAddonExistsAsync(int id);
     }

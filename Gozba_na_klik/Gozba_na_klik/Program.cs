@@ -5,10 +5,7 @@ using Gozba_na_klik.Repositories;
 using Gozba_na_klik.Services;
 using Gozba_na_klik.Settings;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using Gozba_na_klik.Repositories.AddressRepositories;
-using Gozba_na_klik.Services.AddressServices;
 using Microsoft.OpenApi.Models;
 using Serilog;
 

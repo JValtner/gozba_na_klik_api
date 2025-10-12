@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Gozba_na_klik.Models.Customers;
 
 namespace Gozba_na_klik.Models
 {
@@ -14,8 +13,58 @@ namespace Gozba_na_klik.Models
         public DbSet<ClosedDate> ClosedDates { get; set; }
         public DbSet<WorkSchedule> WorkSchedules { get; set; }
         public DbSet<Address> Addresses { get; set; }
+
+
+
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // --- Many-to-Many Relationship between Meals and Alergens ---
+            modelBuilder.Entity<Meal>()
+            .HasMany(m => m.Alergens)
+            .WithMany(a => a.Meals)
+            .UsingEntity(j =>
+            {
+                j.ToTable("MealAlergens");
+                j.HasData(
+                    // Meal 1
+                    new { MealsId = 1, AlergensId = 1 }, // Gluten
+                    new { MealsId = 1, AlergensId = 2 }, // Eggs
+                    new { MealsId = 1, AlergensId = 3 }, // Milk
+
+                    // Meal 2
+                    new { MealsId = 2, AlergensId = 1 }, // Gluten
+                    new { MealsId = 2, AlergensId = 3 }, // Milk
+
+                    // Meal 3
+                    new { MealsId = 3, AlergensId = 2 }, // Eggs
+                    new { MealsId = 3, AlergensId = 3 }, // Milk
+
+                    // Meal 4
+                    new { MealsId = 4, AlergensId = 4 }, // Fish
+
+                    // Meal 5
+                    new { MealsId = 5, AlergensId = 5 }, // Soy
+                    new { MealsId = 5, AlergensId = 6 }, // Crustaceans
+                    new { MealsId = 5, AlergensId = 7 }, // Sesame
+
+                    // Meal 7
+                    new { MealsId = 7, AlergensId = 5 }, // Soy
+
+                    // Meal 8
+                    new { MealsId = 8, AlergensId = 5 }, // Soy
+                    new { MealsId = 8, AlergensId = 8 }, // Mustard
+
+                    // Meal 9
+                    new { MealsId = 9, AlergensId = 3 }, // Milk
+                    new { MealsId = 9, AlergensId = 5 }, // Soy
+
+                    // Meal 10
+                    new { MealsId = 10, AlergensId = 1 } // Gluten
+                );
+            });
+
             // --- Predefined Users ---
             modelBuilder.Entity<User>().HasData(
                 new User { Id = 1, Username = "Josip_admin", Password = "pass_jv", Email = "josipvaltner@gmail.com", Role = "Admin", UserImage = null },
@@ -81,6 +130,66 @@ namespace Gozba_na_klik.Models
                 new Meal { Id = 9, Name = "Grilled Chicken Breast", Description = "Juicy grilled chicken with seasonal vegetables.", Price = 980, ImagePath = "...", RestaurantId = 3 },
                 new Meal { Id = 10, Name = "Beef Burger", Description = "Classic beef burger with cheddar, lettuce, and tomato.", Price = 890, ImagePath = "...", RestaurantId = 3 }
             );
+            // ---------------------------
+            // Seed Addons (20 total)
+            // ---------------------------
+            modelBuilder.Entity<MealAddon>().HasData(
+                // MealId 1
+                new MealAddon { Id = 2, Name = "Garlic Bread", Price = 150, Type = "independent", MealId = 1, IsActive = false },
+                new MealAddon { Id = 4, Name = "Extra Sauce", Price = 100, Type = "chosen", MealId = 1, IsActive = true }, // active chosen addon
+
+                // MealId 2
+                new MealAddon { Id = 1, Name = "Extra Cheese", Price = 120, Type = "chosen", MealId = 2, IsActive = true },
+                new MealAddon { Id = 5, Name = "Chili Flakes", Price = 50, Type = "independent", MealId = 2, IsActive = false },
+
+                // MealId 3
+                new MealAddon { Id = 3, Name = "Parmesan", Price = 80, Type = "chosen", MealId = 3, IsActive = true },
+
+                // MealId 4
+                new MealAddon { Id = 6, Name = "Soy Sauce", Price = 60, Type = "independent", MealId = 4, IsActive = false },
+                new MealAddon { Id = 17, Name = "Teriyaki Sauce", Price = 90, Type = "chosen", MealId = 4, IsActive = true },
+
+                // MealId 5
+                new MealAddon { Id = 7, Name = "Extra Wasabi", Price = 70, Type = "chosen", MealId = 5, IsActive = false },
+                new MealAddon { Id = 16, Name = "Spicy Mayo", Price = 80, Type = "chosen", MealId = 5, IsActive = true },
+
+                // MealId 6
+                new MealAddon { Id = 8, Name = "Ginger", Price = 50, Type = "independent", MealId = 6, IsActive = false },
+
+                // MealId 7
+                new MealAddon { Id = 9, Name = "Boiled Egg", Price = 120, Type = "chosen", MealId = 7, IsActive = false },
+                new MealAddon { Id = 10, Name = "Extra Pork", Price = 200, Type = "chosen", MealId = 7, IsActive = true },
+                new MealAddon { Id = 18, Name = "Extra Noodles", Price = 140, Type = "chosen", MealId = 7, IsActive = false },
+
+                // MealId 8
+                new MealAddon { Id = 13, Name = "BBQ Sauce", Price = 90, Type = "chosen", MealId = 8, IsActive = true },
+                new MealAddon { Id = 14, Name = "Coleslaw", Price = 130, Type = "independent", MealId = 8, IsActive = false },
+
+                // MealId 9
+                new MealAddon { Id = 15, Name = "Grilled Vegetables", Price = 150, Type = "independent", MealId = 9, IsActive = false },
+                new MealAddon { Id = 20, Name = "Caesar Salad", Price = 190, Type = "independent", MealId = 9, IsActive = false },
+
+                // MealId 10
+                new MealAddon { Id = 11, Name = "Fries", Price = 180, Type = "independent", MealId = 10, IsActive = false },
+                new MealAddon { Id = 12, Name = "Onion Rings", Price = 160, Type = "independent", MealId = 10, IsActive = false },
+                new MealAddon { Id = 19, Name = "Extra Beef", Price = 220, Type = "chosen", MealId = 10, IsActive = true }
+            );
+
+
+            // ---------------------------
+            // Seed Alergens (8 total)
+            // ---------------------------
+            modelBuilder.Entity<Alergen>().HasData(
+                new Alergen { Id = 1, Name = "Gluten" },
+                new Alergen { Id = 2, Name = "Eggs" },
+                new Alergen { Id = 3, Name = "Milk" },
+                new Alergen { Id = 4, Name = "Fish" },
+                new Alergen { Id = 5, Name = "Soy" },
+                new Alergen { Id = 6, Name = "Crustaceans" },
+                new Alergen { Id = 7, Name = "Sesame" },
+                new Alergen { Id = 8, Name = "Mustard" }
+            );
+
 
             modelBuilder.Entity<WorkSchedule>().HasData(
                 new WorkSchedule { Id = 1, DayOfWeek = DayOfWeek.Monday, OpenTime = new TimeSpan(9, 0, 0), CloseTime = new TimeSpan(21, 0, 0), RestaurantId = 1 },

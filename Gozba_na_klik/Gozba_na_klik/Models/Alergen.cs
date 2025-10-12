@@ -4,7 +4,6 @@
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public int MealId { get; set; }
-        public Meal Meal { get; set; }
+        public List<Meal> Meals { get; set; } = new();
     }
 }

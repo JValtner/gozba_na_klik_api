@@ -3,6 +3,7 @@ using System;
 using Gozba_na_klik.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Gozba_na_klik.Migrations
 {
     [DbContext(typeof(GozbaNaKlikDbContext))]
-    partial class GozbaNaKlikDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251011080930_AddonAlergenSeed")]
+    partial class AddonAlergenSeed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,109 +25,198 @@ namespace Gozba_na_klik.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("AlergenMeal", b =>
+            modelBuilder.Entity("Gozba_na_klik.Models.Alergen", b =>
                 {
-                    b.Property<int>("AlergensId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    b.Property<int>("MealsId")
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MealId")
                         .HasColumnType("integer");
 
-                    b.HasKey("AlergensId", "MealsId");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.HasIndex("MealsId");
+                    b.HasKey("Id");
 
-                    b.ToTable("MealAlergens", (string)null);
+                    b.HasIndex("MealId");
+
+                    b.ToTable("Alergens");
 
                     b.HasData(
                         new
                         {
-                            AlergensId = 1,
-                            MealsId = 1
+                            Id = 1,
+                            MealId = 1,
+                            Name = "Gluten"
                         },
                         new
                         {
-                            AlergensId = 2,
-                            MealsId = 1
+                            Id = 2,
+                            MealId = 1,
+                            Name = "Eggs"
                         },
                         new
                         {
-                            AlergensId = 3,
-                            MealsId = 1
+                            Id = 3,
+                            MealId = 1,
+                            Name = "Milk"
                         },
                         new
                         {
-                            AlergensId = 1,
-                            MealsId = 2
+                            Id = 4,
+                            MealId = 2,
+                            Name = "Gluten"
                         },
                         new
                         {
-                            AlergensId = 3,
-                            MealsId = 2
+                            Id = 5,
+                            MealId = 2,
+                            Name = "Milk"
                         },
                         new
                         {
-                            AlergensId = 2,
-                            MealsId = 3
+                            Id = 6,
+                            MealId = 4,
+                            Name = "Fish"
                         },
                         new
                         {
-                            AlergensId = 3,
-                            MealsId = 3
+                            Id = 7,
+                            MealId = 5,
+                            Name = "Soy"
                         },
                         new
                         {
-                            AlergensId = 4,
-                            MealsId = 4
+                            Id = 8,
+                            MealId = 5,
+                            Name = "Crustaceans"
                         },
                         new
                         {
-                            AlergensId = 5,
-                            MealsId = 5
+                            Id = 9,
+                            MealId = 6,
+                            Name = "Fish"
                         },
                         new
                         {
-                            AlergensId = 6,
-                            MealsId = 5
+                            Id = 10,
+                            MealId = 7,
+                            Name = "Soy"
                         },
                         new
                         {
-                            AlergensId = 7,
-                            MealsId = 5
+                            Id = 11,
+                            MealId = 5,
+                            Name = "Sesame"
                         },
                         new
                         {
-                            AlergensId = 5,
-                            MealsId = 7
+                            Id = 12,
+                            MealId = 8,
+                            Name = "Mustard"
                         },
                         new
                         {
-                            AlergensId = 5,
-                            MealsId = 8
+                            Id = 13,
+                            MealId = 8,
+                            Name = "Soy"
                         },
                         new
                         {
-                            AlergensId = 8,
-                            MealsId = 8
+                            Id = 14,
+                            MealId = 9,
+                            Name = "Milk"
                         },
                         new
                         {
-                            AlergensId = 3,
-                            MealsId = 9
+                            Id = 15,
+                            MealId = 10,
+                            Name = "Gluten"
                         },
                         new
                         {
-                            AlergensId = 5,
-                            MealsId = 9
+                            Id = 16,
+                            MealId = 7,
+                            Name = "Soy"
                         },
                         new
                         {
-                            AlergensId = 1,
-                            MealsId = 10
+                            Id = 17,
+                            MealId = 4,
+                            Name = "Fish"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            MealId = 3,
+                            Name = "Eggs"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            MealId = 3,
+                            Name = "Milk"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            MealId = 9,
+                            Name = "Soy"
                         });
                 });
 
-            modelBuilder.Entity("Gozba_na_klik.Models.Address", b =>
+            modelBuilder.Entity("Gozba_na_klik.Models.ClosedDate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text");
+
+                    b.Property<int>("RestaurantId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RestaurantId");
+
+                    b.ToTable("ClosedDates");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Date = new DateTime(2025, 12, 25, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Reason = "Christmas",
+                            RestaurantId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Date = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Reason = "New Year",
+                            RestaurantId = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Date = new DateTime(2025, 7, 4, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Reason = "Independence Day",
+                            RestaurantId = 3
+                        });
+                });
+
+            modelBuilder.Entity("Gozba_na_klik.Models.Customers.Address", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -181,112 +273,6 @@ namespace Gozba_na_klik.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Addresses");
-                });
-
-            modelBuilder.Entity("Gozba_na_klik.Models.Alergen", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Alergens");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Gluten"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Eggs"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Milk"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Fish"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "Soy"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "Crustaceans"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Name = "Sesame"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Name = "Mustard"
-                        });
-                });
-
-            modelBuilder.Entity("Gozba_na_klik.Models.ClosedDate", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Reason")
-                        .HasColumnType("text");
-
-                    b.Property<int>("RestaurantId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RestaurantId");
-
-                    b.ToTable("ClosedDates");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Date = new DateTime(2025, 12, 25, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Reason = "Christmas",
-                            RestaurantId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Date = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Reason = "New Year",
-                            RestaurantId = 2
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Date = new DateTime(2025, 7, 4, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Reason = "Independence Day",
-                            RestaurantId = 3
-                        });
                 });
 
             modelBuilder.Entity("Gozba_na_klik.Models.Meal", b =>
@@ -421,9 +407,6 @@ namespace Gozba_na_klik.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
                     b.Property<int>("MealId")
                         .HasColumnType("integer");
 
@@ -447,26 +430,7 @@ namespace Gozba_na_klik.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 2,
-                            IsActive = false,
-                            MealId = 1,
-                            Name = "Garlic Bread",
-                            Price = 150m,
-                            Type = "independent"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            IsActive = true,
-                            MealId = 1,
-                            Name = "Extra Sauce",
-                            Price = 100m,
-                            Type = "chosen"
-                        },
-                        new
-                        {
                             Id = 1,
-                            IsActive = true,
                             MealId = 2,
                             Name = "Extra Cheese",
                             Price = 120m,
@@ -474,17 +438,15 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
-                            Id = 5,
-                            IsActive = false,
-                            MealId = 2,
-                            Name = "Chili Flakes",
-                            Price = 50m,
+                            Id = 2,
+                            MealId = 1,
+                            Name = "Garlic Bread",
+                            Price = 150m,
                             Type = "independent"
                         },
                         new
                         {
                             Id = 3,
-                            IsActive = true,
                             MealId = 3,
                             Name = "Parmesan",
                             Price = 80m,
@@ -492,8 +454,23 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
+                            Id = 4,
+                            MealId = 1,
+                            Name = "Extra Sauce",
+                            Price = 100m,
+                            Type = "chosen"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            MealId = 2,
+                            Name = "Chili Flakes",
+                            Price = 50m,
+                            Type = "independent"
+                        },
+                        new
+                        {
                             Id = 6,
-                            IsActive = false,
                             MealId = 4,
                             Name = "Soy Sauce",
                             Price = 60m,
@@ -501,17 +478,7 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
-                            Id = 17,
-                            IsActive = true,
-                            MealId = 4,
-                            Name = "Teriyaki Sauce",
-                            Price = 90m,
-                            Type = "chosen"
-                        },
-                        new
-                        {
                             Id = 7,
-                            IsActive = false,
                             MealId = 5,
                             Name = "Extra Wasabi",
                             Price = 70m,
@@ -519,17 +486,7 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
-                            Id = 16,
-                            IsActive = true,
-                            MealId = 5,
-                            Name = "Spicy Mayo",
-                            Price = 80m,
-                            Type = "chosen"
-                        },
-                        new
-                        {
                             Id = 8,
-                            IsActive = false,
                             MealId = 6,
                             Name = "Ginger",
                             Price = 50m,
@@ -538,7 +495,6 @@ namespace Gozba_na_klik.Migrations
                         new
                         {
                             Id = 9,
-                            IsActive = false,
                             MealId = 7,
                             Name = "Boiled Egg",
                             Price = 120m,
@@ -547,7 +503,6 @@ namespace Gozba_na_klik.Migrations
                         new
                         {
                             Id = 10,
-                            IsActive = true,
                             MealId = 7,
                             Name = "Extra Pork",
                             Price = 200m,
@@ -555,53 +510,7 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
-                            Id = 18,
-                            IsActive = false,
-                            MealId = 7,
-                            Name = "Extra Noodles",
-                            Price = 140m,
-                            Type = "chosen"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            IsActive = true,
-                            MealId = 8,
-                            Name = "BBQ Sauce",
-                            Price = 90m,
-                            Type = "chosen"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            IsActive = false,
-                            MealId = 8,
-                            Name = "Coleslaw",
-                            Price = 130m,
-                            Type = "independent"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            IsActive = false,
-                            MealId = 9,
-                            Name = "Grilled Vegetables",
-                            Price = 150m,
-                            Type = "independent"
-                        },
-                        new
-                        {
-                            Id = 20,
-                            IsActive = false,
-                            MealId = 9,
-                            Name = "Caesar Salad",
-                            Price = 190m,
-                            Type = "independent"
-                        },
-                        new
-                        {
                             Id = 11,
-                            IsActive = false,
                             MealId = 10,
                             Name = "Fries",
                             Price = 180m,
@@ -610,7 +519,6 @@ namespace Gozba_na_klik.Migrations
                         new
                         {
                             Id = 12,
-                            IsActive = false,
                             MealId = 10,
                             Name = "Onion Rings",
                             Price = 160m,
@@ -618,12 +526,67 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
+                            Id = 13,
+                            MealId = 8,
+                            Name = "BBQ Sauce",
+                            Price = 90m,
+                            Type = "chosen"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            MealId = 8,
+                            Name = "Coleslaw",
+                            Price = 130m,
+                            Type = "independent"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            MealId = 9,
+                            Name = "Grilled Vegetables",
+                            Price = 150m,
+                            Type = "independent"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            MealId = 5,
+                            Name = "Spicy Mayo",
+                            Price = 80m,
+                            Type = "chosen"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            MealId = 4,
+                            Name = "Teriyaki Sauce",
+                            Price = 90m,
+                            Type = "chosen"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            MealId = 7,
+                            Name = "Extra Noodles",
+                            Price = 140m,
+                            Type = "chosen"
+                        },
+                        new
+                        {
                             Id = 19,
-                            IsActive = true,
                             MealId = 10,
                             Name = "Extra Beef",
                             Price = 220m,
                             Type = "chosen"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            MealId = 9,
+                            Name = "Caesar Salad",
+                            Price = 190m,
+                            Type = "independent"
                         });
                 });
 
@@ -882,19 +845,15 @@ namespace Gozba_na_klik.Migrations
                         });
                 });
 
-            modelBuilder.Entity("AlergenMeal", b =>
+            modelBuilder.Entity("Gozba_na_klik.Models.Alergen", b =>
                 {
-                    b.HasOne("Gozba_na_klik.Models.Alergen", null)
-                        .WithMany()
-                        .HasForeignKey("AlergensId")
+                    b.HasOne("Gozba_na_klik.Models.Meal", "Meal")
+                        .WithMany("Alergens")
+                        .HasForeignKey("MealId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Gozba_na_klik.Models.Meal", null)
-                        .WithMany()
-                        .HasForeignKey("MealsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Meal");
                 });
 
             modelBuilder.Entity("Gozba_na_klik.Models.ClosedDate", b =>
@@ -962,6 +921,8 @@ namespace Gozba_na_klik.Migrations
             modelBuilder.Entity("Gozba_na_klik.Models.Meal", b =>
                 {
                     b.Navigation("Addons");
+
+                    b.Navigation("Alergens");
                 });
 
             modelBuilder.Entity("Gozba_na_klik.Models.Restaurant", b =>

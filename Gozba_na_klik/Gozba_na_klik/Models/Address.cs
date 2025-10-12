@@ -1,6 +1,6 @@
 using System;
 
-namespace Gozba_na_klik.Models.Customers
+namespace Gozba_na_klik.Models
 {
 	public class Address
 	{
