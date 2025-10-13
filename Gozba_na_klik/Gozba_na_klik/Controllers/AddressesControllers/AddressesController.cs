@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Gozba_na_klik.DTOs.Addresses;
 using Gozba_na_klik.Models.Customers;
 using Gozba_na_klik.Services.AddressServices;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
 
 namespace Gozba_na_klik.Controllers
 {
@@ -15,159 +12,83 @@ namespace Gozba_na_klik.Controllers
     [Route("api/addresses")]
     public class AddressesController : ControllerBase
     {
-        private readonly IAddressService _svc;
+        private readonly IAddressService _addressService;
 
-        public AddressesController(IAddressService svc)
+        public AddressesController(IAddressService addressService)
         {
-            _svc = svc;
+            _addressService = addressService;
         }
 
-        private int RequireUserIdOrThrow()
-        {
-            StringValues raw;
-            if (!Request.Headers.TryGetValue("X-User-Id", out raw))
-            {
-                throw new UnauthorizedAccessException("Missing X-User-Id");
-            }
-
-            int uidParsed;
-            if (!int.TryParse(raw.ToString(), out uidParsed))
-            {
-                throw new UnauthorizedAccessException("Invalid X-User-Id");
-            }
-
-            return uidParsed;
-        }
-
-        private IActionResult MapExceptionToResult(Exception ex)
-        {
-            return ex switch
-            {
-                UnauthorizedAccessException uae =>
-                    string.Equals(uae.Message, "Missing X-User-Id", StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(uae.Message, "Invalid X-User-Id", StringComparison.OrdinalIgnoreCase)
-                        ? Unauthorized(uae.Message)                               // 401 – hiányzó/hibás header
-                        : StatusCode(StatusCodes.Status403Forbidden),             // 403 – jogosultság hiánya (auth-scheme nélkül)
-                KeyNotFoundException => NotFound(),                               // 404 – erőforrás nem található
-                ArgumentException ae => BadRequest(ae.Message),                   // 400 – validációs hiba
-                InvalidOperationException ioe => BadRequest(ioe.Message),         // 400 – üzleti hiba
-                _ => Problem(statusCode: 500, detail: ex.Message)                 // 500 – váratlan hiba
-            };
-        }
-
+        // GET api/addresses/my
         [HttpGet("my")]
-        [ProducesResponseType(typeof(List<AddressListItemDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> GetMy()
+        public async Task<ActionResult<List<AddressListItemDto>>> GetMy(
+            [FromHeader(Name = "X-User-Id")] int userId)
         {
-            try
-            {
-                int uid = RequireUserIdOrThrow();
-                List<Address> items = await _svc.GetMyAsync(uid);
+            List<Address> items = await _addressService.GetMyAsync(userId);
 
-                List<AddressListItemDto> dto = items.Select(a => new AddressListItemDto
-                {
-                    Id = a.Id,
-                    Label = a.Label,
-                    Street = a.Street,
-                    City = a.City,
-                    PostalCode = a.PostalCode,
-                    IsDefault = a.IsDefault
-                }).ToList();
-
-                return Ok(dto);
-            }
-            catch (Exception ex)
+            List<AddressListItemDto> dto = items.Select(a => new AddressListItemDto
             {
-                return MapExceptionToResult(ex);
-            }
+                Id = a.Id,
+                Label = a.Label,
+                Street = a.Street,
+                City = a.City,
+                PostalCode = a.PostalCode,
+                IsDefault = a.IsDefault
+            }).ToList();
+
+            return Ok(dto);
         }
 
+        // POST api/addresses
         [HttpPost]
-        [ProducesResponseType(typeof(AddressListItemDto), StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> Create([FromBody] AddressCreateDto dto)
+        public async Task<ActionResult<AddressListItemDto>> Create(
+            [FromHeader(Name = "X-User-Id")] int userId,
+            [FromBody] AddressCreateDto dtoIn)
         {
-            try
-            {
-                int uid = RequireUserIdOrThrow();
-                Address created = await _svc.CreateAsync(uid, dto);
+            Address created = await _addressService.CreateAsync(userId, dtoIn);
 
-                AddressListItemDto outDto = new AddressListItemDto
-                {
-                    Id = created.Id,
-                    Label = created.Label,
-                    Street = created.Street,
-                    City = created.City,
-                    PostalCode = created.PostalCode,
-                    IsDefault = created.IsDefault
-                };
-
-                return CreatedAtAction(nameof(GetMy), new { }, outDto);
-            }
-            catch (Exception ex)
+            AddressListItemDto dtoOut = new AddressListItemDto
             {
-                return MapExceptionToResult(ex);
-            }
+                Id = created.Id,
+                Label = created.Label,
+                Street = created.Street,
+                City = created.City,
+                PostalCode = created.PostalCode,
+                IsDefault = created.IsDefault
+            };
+
+            return CreatedAtAction(nameof(GetMy), null, dtoOut);
         }
 
+        // PUT api/addresses/{id}
         [HttpPut("{id:int}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Update(int id, [FromBody] AddressUpdateDto dto)
+        public async Task<IActionResult> Update(
+            [FromHeader(Name = "X-User-Id")] int userId,
+            int id,
+            [FromBody] AddressUpdateDto dto)
         {
-            try
-            {
-                int uid = RequireUserIdOrThrow();
-                await _svc.UpdateAsync(uid, id, dto);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return MapExceptionToResult(ex);
-            }
+            await _addressService.UpdateAsync(userId, id, dto);
+            return NoContent();
         }
 
+        // DELETE api/addresses/{id}
         [HttpDelete("{id:int}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(
+            [FromHeader(Name = "X-User-Id")] int userId,
+            int id)
         {
-            try
-            {
-                int uid = RequireUserIdOrThrow();
-                await _svc.DeleteAsync(uid, id);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return MapExceptionToResult(ex);
-            }
+            await _addressService.DeleteAsync(userId, id);
+            return NoContent();
         }
 
+        // PUT api/addresses/{id}/default
         [HttpPut("{id:int}/default")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> SetDefault(int id)
+        public async Task<IActionResult> SetDefault(
+            [FromHeader(Name = "X-User-Id")] int userId,
+            int id)
         {
-            try
-            {
-                int uid = RequireUserIdOrThrow();
-                await _svc.SetDefaultAsync(uid, id);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return MapExceptionToResult(ex);
-            }
+            await _addressService.SetDefaultAsync(userId, id);
+            return NoContent();
         }
     }
 }
