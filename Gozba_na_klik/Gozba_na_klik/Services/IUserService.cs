@@ -7,6 +7,7 @@ namespace Gozba_na_klik.Services
     {
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<User?> GetUserByIdAsync(int userId);
+        Task<IEnumerable<User>> GetAllRestaurantOnwersAsync();
         Task<bool> UserExistsAsync(int userId);
         Task<User> CreateUserAsync(User user);
         Task<User> UpdateUserAsync(int id, UpdateUserDto dto, IFormFile? userimage);

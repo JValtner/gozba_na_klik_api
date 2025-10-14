@@ -38,6 +38,12 @@ namespace Gozba_na_klik.Services
             return users;
         }
 
+        // Vlasnici restorana
+        public async Task<IEnumerable<User>> GetAllRestaurantOnwersAsync()
+        {
+            return await _userRepository.GetAllRestaurantOwnersAsync();
+        }
+
         public async Task<User?> GetUserByIdAsync(int authorId)
         {
             var user = await _userRepository.GetByIdAsync(authorId);
