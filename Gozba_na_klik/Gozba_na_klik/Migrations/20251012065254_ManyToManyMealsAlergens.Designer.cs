@@ -3,6 +3,7 @@ using System;
 using Gozba_na_klik.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Gozba_na_klik.Migrations
 {
     [DbContext(typeof(GozbaNaKlikDbContext))]
-    partial class GozbaNaKlikDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251012065254_ManyToManyMealsAlergens")]
+    partial class ManyToManyMealsAlergens
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -421,9 +424,6 @@ namespace Gozba_na_klik.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
                     b.Property<int>("MealId")
                         .HasColumnType("integer");
 
@@ -447,26 +447,7 @@ namespace Gozba_na_klik.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 2,
-                            IsActive = false,
-                            MealId = 1,
-                            Name = "Garlic Bread",
-                            Price = 150m,
-                            Type = "independent"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            IsActive = true,
-                            MealId = 1,
-                            Name = "Extra Sauce",
-                            Price = 100m,
-                            Type = "chosen"
-                        },
-                        new
-                        {
                             Id = 1,
-                            IsActive = true,
                             MealId = 2,
                             Name = "Extra Cheese",
                             Price = 120m,
@@ -474,17 +455,15 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
-                            Id = 5,
-                            IsActive = false,
-                            MealId = 2,
-                            Name = "Chili Flakes",
-                            Price = 50m,
+                            Id = 2,
+                            MealId = 1,
+                            Name = "Garlic Bread",
+                            Price = 150m,
                             Type = "independent"
                         },
                         new
                         {
                             Id = 3,
-                            IsActive = true,
                             MealId = 3,
                             Name = "Parmesan",
                             Price = 80m,
@@ -492,8 +471,23 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
+                            Id = 4,
+                            MealId = 1,
+                            Name = "Extra Sauce",
+                            Price = 100m,
+                            Type = "chosen"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            MealId = 2,
+                            Name = "Chili Flakes",
+                            Price = 50m,
+                            Type = "independent"
+                        },
+                        new
+                        {
                             Id = 6,
-                            IsActive = false,
                             MealId = 4,
                             Name = "Soy Sauce",
                             Price = 60m,
@@ -501,17 +495,7 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
-                            Id = 17,
-                            IsActive = true,
-                            MealId = 4,
-                            Name = "Teriyaki Sauce",
-                            Price = 90m,
-                            Type = "chosen"
-                        },
-                        new
-                        {
                             Id = 7,
-                            IsActive = false,
                             MealId = 5,
                             Name = "Extra Wasabi",
                             Price = 70m,
@@ -519,17 +503,7 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
-                            Id = 16,
-                            IsActive = true,
-                            MealId = 5,
-                            Name = "Spicy Mayo",
-                            Price = 80m,
-                            Type = "chosen"
-                        },
-                        new
-                        {
                             Id = 8,
-                            IsActive = false,
                             MealId = 6,
                             Name = "Ginger",
                             Price = 50m,
@@ -538,7 +512,6 @@ namespace Gozba_na_klik.Migrations
                         new
                         {
                             Id = 9,
-                            IsActive = false,
                             MealId = 7,
                             Name = "Boiled Egg",
                             Price = 120m,
@@ -547,7 +520,6 @@ namespace Gozba_na_klik.Migrations
                         new
                         {
                             Id = 10,
-                            IsActive = true,
                             MealId = 7,
                             Name = "Extra Pork",
                             Price = 200m,
@@ -555,53 +527,7 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
-                            Id = 18,
-                            IsActive = false,
-                            MealId = 7,
-                            Name = "Extra Noodles",
-                            Price = 140m,
-                            Type = "chosen"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            IsActive = true,
-                            MealId = 8,
-                            Name = "BBQ Sauce",
-                            Price = 90m,
-                            Type = "chosen"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            IsActive = false,
-                            MealId = 8,
-                            Name = "Coleslaw",
-                            Price = 130m,
-                            Type = "independent"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            IsActive = false,
-                            MealId = 9,
-                            Name = "Grilled Vegetables",
-                            Price = 150m,
-                            Type = "independent"
-                        },
-                        new
-                        {
-                            Id = 20,
-                            IsActive = false,
-                            MealId = 9,
-                            Name = "Caesar Salad",
-                            Price = 190m,
-                            Type = "independent"
-                        },
-                        new
-                        {
                             Id = 11,
-                            IsActive = false,
                             MealId = 10,
                             Name = "Fries",
                             Price = 180m,
@@ -610,7 +536,6 @@ namespace Gozba_na_klik.Migrations
                         new
                         {
                             Id = 12,
-                            IsActive = false,
                             MealId = 10,
                             Name = "Onion Rings",
                             Price = 160m,
@@ -618,12 +543,67 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
+                            Id = 13,
+                            MealId = 8,
+                            Name = "BBQ Sauce",
+                            Price = 90m,
+                            Type = "chosen"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            MealId = 8,
+                            Name = "Coleslaw",
+                            Price = 130m,
+                            Type = "independent"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            MealId = 9,
+                            Name = "Grilled Vegetables",
+                            Price = 150m,
+                            Type = "independent"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            MealId = 5,
+                            Name = "Spicy Mayo",
+                            Price = 80m,
+                            Type = "chosen"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            MealId = 4,
+                            Name = "Teriyaki Sauce",
+                            Price = 90m,
+                            Type = "chosen"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            MealId = 7,
+                            Name = "Extra Noodles",
+                            Price = 140m,
+                            Type = "chosen"
+                        },
+                        new
+                        {
                             Id = 19,
-                            IsActive = true,
                             MealId = 10,
                             Name = "Extra Beef",
                             Price = 220m,
                             Type = "chosen"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            MealId = 9,
+                            Name = "Caesar Salad",
+                            Price = 190m,
+                            Type = "independent"
                         });
                 });
 

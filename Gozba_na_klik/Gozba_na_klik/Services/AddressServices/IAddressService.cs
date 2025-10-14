@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Gozba_na_klik.DTOs.Addresses;
-using Gozba_na_klik.Models.Customers;
+using Gozba_na_klik.Models;
 
 namespace Gozba_na_klik.Services.AddressServices
 {
