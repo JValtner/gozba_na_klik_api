@@ -21,14 +21,14 @@ namespace Gozba_na_klik.Models
         {
             // --- Predefined Users ---
             modelBuilder.Entity<User>().HasData(
-                new User { Id = 1, Username = "Josip_admin", Password = "pass_jv", Email = "josipvaltner@gmail.com", Role = "Admin", UserImage = null },
-                new User { Id = 2, Username = "Luka_admin", Password = "pass_lk", Email = "lukakovacevic@gmail.com", Role = "Admin", UserImage = null },
-                new User { Id = 3, Username = "Boris_admin", Password = "pass_bl", Email = "borislaketic@gmail.com", Role = "Admin", UserImage = null },
-                new User { Id = 4, Username = "Tamas_admin", Password = "pass_kt", Email = "kopasztamas@gmail.com", Role = "Admin", UserImage = null },
-                new User { Id = 5, Username = "Uros_admin", Password = "pass_um", Email = "urosmilinovic@gmail.com", Role = "Admin", UserImage = null },
-                new User { Id = 7, Username = "Milan_owner", Password = "pass_mo", Email = "milan.owner@example.com", Role = "RestaurantOwner", UserImage = null },
-                new User { Id = 8, Username = "Ana_owner", Password = "pass_ao", Email = "ana.owner@example.com", Role = "RestaurantOwner", UserImage = null },
-                new User { Id = 9, Username = "Ivan_owner", Password = "pass_io", Email = "ivan.owner@example.com", Role = "RestaurantOwner", UserImage = null }
+                new User { Id = 1, Username = "Josip_admin", Password = "pass_jv", Email = "josipvaltner@gmail.com", Role = "Admin", UserImage = null, IsActive = true },
+                new User { Id = 2, Username = "Luka_admin", Password = "pass_lk", Email = "lukakovacevic@gmail.com", Role = "Admin", UserImage = null, IsActive = true },
+                new User { Id = 3, Username = "Boris_admin", Password = "pass_bl", Email = "borislaketic@gmail.com", Role = "Admin", UserImage = null, IsActive = true },
+                new User { Id = 4, Username = "Tamas_admin", Password = "pass_kt", Email = "kopasztamas@gmail.com", Role = "Admin", UserImage = null, IsActive = true },
+                new User { Id = 5, Username = "Uros_admin", Password = "pass_um", Email = "urosmilinovic@gmail.com", Role = "Admin", UserImage = null, IsActive = true },
+                new User { Id = 7, Username = "Milan_owner", Password = "pass_mo", Email = "milan.owner@example.com", Role = "RestaurantOwner", UserImage = null, IsActive = true },
+                new User { Id = 8, Username = "Ana_owner", Password = "pass_ao", Email = "ana.owner@example.com", Role = "RestaurantOwner", UserImage = null, IsActive = true },
+                new User { Id = 9, Username = "Ivan_owner", Password = "pass_io", Email = "ivan.owner@example.com", Role = "RestaurantOwner", UserImage = null, IsActive = true }
             );
 
             // --- Restaurants ---
@@ -84,6 +84,25 @@ namespace Gozba_na_klik.Models
                 new ClosedDate { Id = 2, Date = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc), RestaurantId = 2, Reason = "New Year" },
                 new ClosedDate { Id = 3, Date = new DateTime(2025, 7, 4, 0, 0, 0, DateTimeKind.Utc), RestaurantId = 3, Reason = "Independence Day" }
             );
+
+            // Konfiguracija povezanosti izmedjuu User i Restaurant:
+            // - Jedan restoran moze imati vise zaposlenih (One-to-Many)
+            // - RestaurantId u User tabeli je foreign key (nullable)
+            // - Kada se restoran obrise, RestaurantId u User ce biti NULL (zaposleni ostaju u sistemu, u slucaju da vlasnik zatvara jedan restoran, otvara drugi npr)
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Restaurant)
+                .WithMany(r => r.Employees)
+                .HasForeignKey(u => u.RestaurantId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Konfiguracija povezanosti Owner-Restaurant (jedan vlasnik, vise restorana)
+            // - Restaurant.Owner navigation property koristi Restaurant.OwnerId kao foreign key
+            // - Ne dozvoljava brisanje vlasnika ako ima restorane (Restrict)
+            modelBuilder.Entity<Restaurant>()
+                .HasOne(r => r.Owner)
+                .WithMany()
+                .HasForeignKey(r => r.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
