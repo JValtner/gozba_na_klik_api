@@ -6,6 +6,7 @@ namespace Gozba_na_klik.Services.UserServices
     public interface IUserService
     {
         Task<IEnumerable<User>> GetAllUsersAsync();
+        Task<IEnumerable<User>> GetAllRestaurantOnwersAsync();
         Task<User?> GetUserByIdAsync(int userId);
         Task<bool> UserExistsAsync(int userId);
         Task<User> CreateUserAsync(User user);

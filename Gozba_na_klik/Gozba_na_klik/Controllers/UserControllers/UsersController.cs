@@ -29,6 +29,13 @@ namespace Gozba_na_klik.Controllers.UserControllers
             return Ok(await _userService.GetAllUsersAsync());
         }
 
+        // GET api/users/restaurant-owners
+        [HttpGet("restaurant-owners")]
+        public async Task<IActionResult> GetAllOwnersAsync()
+        {
+            return Ok(await _userService.GetAllRestaurantOnwersAsync());
+        }
+
         // GET api/users/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOneAsync(int id)

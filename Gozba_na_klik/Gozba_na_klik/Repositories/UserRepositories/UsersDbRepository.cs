@@ -16,6 +16,13 @@ namespace Gozba_na_klik.Repositories.UserRepositories
         {
             return await _context.Users.ToListAsync();
         }
+        // Vlasnici restorana
+        public async Task<IEnumerable<User>> GetAllRestaurantOwnersAsync()
+        {
+            return await _context.Users
+                .Where(u => u.Role == "RestaurantOwner")
+                .ToListAsync();
+        }
         public async Task<User?> GetByIdAsync(int id)
         {
             return await _context.Users.FindAsync(id);

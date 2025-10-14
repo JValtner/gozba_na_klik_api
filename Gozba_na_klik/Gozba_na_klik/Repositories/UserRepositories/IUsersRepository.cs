@@ -5,6 +5,7 @@ namespace Gozba_na_klik.Repositories.UserRepositories
     public interface IUsersRepository
     {
         Task<IEnumerable<User>> GetAllAsync();
+        Task<IEnumerable<User>> GetAllRestaurantOwnersAsync();
         Task<User?> GetByIdAsync(int userId);
         Task<User> AddAsync(User user);
         Task<User> UpdateAsync(User user);
