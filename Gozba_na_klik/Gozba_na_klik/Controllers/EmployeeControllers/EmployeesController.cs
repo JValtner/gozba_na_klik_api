@@ -1,194 +1,78 @@
 ﻿using Gozba_na_klik.DTOs;
 using Gozba_na_klik.DTOs.Employee;
-using Gozba_na_klik.DTOs.Employees;
-using Gozba_na_klik.Services.EmployeeServices; // ← promenio
+using Gozba_na_klik.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Gozba_na_klik.Controllers.EmployeeControllers
+namespace Gozba_na_klik.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class EmployeesController : ControllerBase
+    [Route("api/[controller]")]
+    public class EmployeeController : ControllerBase
     {
-        private readonly IEmployeeService _employeeService; // ← promenio
+        private readonly IEmployeeService _employeeService;
+        private readonly ILogger<EmployeeController> _logger;
 
-        public EmployeesController(IEmployeeService employeeService) // ← promenio
+        public EmployeeController(IEmployeeService employeeService, ILogger<EmployeeController> logger)
         {
             _employeeService = employeeService;
+            _logger = logger;
         }
 
+        // GET: api/employee/restaurant/{restaurantId}
         [HttpGet("restaurant/{restaurantId}")]
-        public async Task<IActionResult> GetEmployeesByRestaurant(
+        public async Task<ActionResult<IEnumerable<EmployeeListItemDto>>> GetEmployeesByRestaurant(
             int restaurantId,
-            [FromHeader(Name = "X-User-Id")] int? userId)
+            [FromHeader(Name = "X-User-Id")] int ownerId)
         {
-            if (userId == null || userId <= 0)
-                return Unauthorized(new { message = "Nedostaje ili je neispravan X-User-Id header." });
-
-            try
-            {
-                var employees = await _employeeService.GetEmployeesByRestaurantAsync(restaurantId, userId.Value);
-
-                var employeeDtos = employees.Select(e => new EmployeeListItemDto
-                {
-                    Id = e.Id,
-                    Username = e.Username,
-                    Email = e.Email,
-                    Role = e.Role,
-                    IsActive = e.IsActive,
-                    UserImage = e.UserImage
-                });
-
-                return Ok(employeeDtos);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Forbid();
-            }
+            _logger.LogInformation("Fetching employees for restaurant {RestaurantId}", restaurantId);
+            var employees = await _employeeService.GetEmployeesByRestaurantAsync(restaurantId, ownerId);
+            return Ok(employees);
         }
 
+        // POST: api/employee/restaurant/{restaurantId}
         [HttpPost("restaurant/{restaurantId}")]
-        public async Task<IActionResult> RegisterEmployee(
+        public async Task<ActionResult<EmployeeListItemDto>> RegisterEmployee(
             int restaurantId,
-            [FromBody] RegisterEmployeeDto dto,
-            [FromHeader(Name = "X-User-Id")] int? userId)
+            [FromHeader(Name = "X-User-Id")] int ownerId,
+            [FromBody] RegisterEmployeeDto dto)
         {
-            if (userId == null || userId <= 0)
-                return Unauthorized(new { message = "Nedostaje ili je neispravan X-User-Id header." });
-
-            try
-            {
-                var createdEmployee = await _employeeService.RegisterEmployeeAsync(restaurantId, userId.Value, dto);
-
-                var resultDto = new EmployeeListItemDto
-                {
-                    Id = createdEmployee.Id,
-                    Username = createdEmployee.Username,
-                    Email = createdEmployee.Email,
-                    Role = createdEmployee.Role,
-                    IsActive = createdEmployee.IsActive,
-                    UserImage = createdEmployee.UserImage
-                };
-
-                return Ok(resultDto);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Forbid();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
+            _logger.LogInformation("Registering employee for restaurant {RestaurantId}", restaurantId);
+            var employee = await _employeeService.RegisterEmployeeAsync(restaurantId, ownerId, dto);
+            return Ok(employee);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateEmployee(
-            int id,
-            [FromBody] UpdateEmployeeDto dto,
-            [FromHeader(Name = "X-User-Id")] int? userId)
+        // PUT: api/employee/{employeeId}
+        [HttpPut("{employeeId}")]
+        public async Task<ActionResult<EmployeeListItemDto>> UpdateEmployee(
+            int employeeId,
+            [FromHeader(Name = "X-User-Id")] int ownerId,
+            [FromBody] UpdateEmployeeDto dto)
         {
-            if (userId == null || userId <= 0)
-                return Unauthorized(new { message = "Nedostaje ili je neispravan X-User-Id header." });
-
-            try
-            {
-                var updatedEmployee = await _employeeService.UpdateEmployeeAsync(id, userId.Value, dto);
-
-                var resultDto = new EmployeeListItemDto
-                {
-                    Id = updatedEmployee.Id,
-                    Username = updatedEmployee.Username,
-                    Email = updatedEmployee.Email,
-                    Role = updatedEmployee.Role,
-                    IsActive = updatedEmployee.IsActive,
-                    UserImage = updatedEmployee.UserImage
-                };
-
-                return Ok(resultDto);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Forbid();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            _logger.LogInformation("Updating employee {EmployeeId}", employeeId);
+            var updated = await _employeeService.UpdateEmployeeAsync(employeeId, ownerId, dto);
+            return Ok(updated);
         }
 
-        [HttpPut("{id}/suspend")]
+        // PUT: api/employee/{employeeId}/suspend
+        [HttpPut("{employeeId}/suspend")]
         public async Task<IActionResult> SuspendEmployee(
-            int id,
-            [FromHeader(Name = "X-User-Id")] int? userId)
+            int employeeId,
+            [FromHeader(Name = "X-User-Id")] int ownerId)
         {
-            if (userId == null || userId <= 0)
-                return Unauthorized(new { message = "Nedostaje ili je neispravan X-User-Id header." });
-
-            try
-            {
-                await _employeeService.SuspendEmployeeAsync(id, userId.Value);
-                return Ok(new { message = "Zaposleni je uspešno suspendovan." });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Forbid();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            _logger.LogInformation("Suspending employee {EmployeeId}", employeeId);
+            await _employeeService.SuspendEmployeeAsync(employeeId, ownerId);
+            return NoContent();
         }
 
-        [HttpPut("{id}/activate")]
+        // PUT: api/employee/{employeeId}/activate
+        [HttpPut("{employeeId}/activate")]
         public async Task<IActionResult> ActivateEmployee(
-            int id,
-            [FromHeader(Name = "X-User-Id")] int? userId)
+            int employeeId,
+            [FromHeader(Name = "X-User-Id")] int ownerId)
         {
-            if (userId == null || userId <= 0)
-                return Unauthorized(new { message = "Nedostaje ili je neispravan X-User-Id header." });
-
-            try
-            {
-                await _employeeService.ActivateEmployeeAsync(id, userId.Value);
-                return Ok(new { message = "Zaposleni je uspešno aktiviran." });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Forbid();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            _logger.LogInformation("Activating employee {EmployeeId}", employeeId);
+            await _employeeService.ActivateEmployeeAsync(employeeId, ownerId);
+            return NoContent();
         }
     }
 }

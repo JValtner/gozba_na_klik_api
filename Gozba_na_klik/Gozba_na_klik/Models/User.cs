@@ -1,4 +1,4 @@
-﻿using Gozba_na_klik.Models.Restaurants;
+﻿using Gozba_na_klik.Models;
 
 namespace Gozba_na_klik.Models
 {
