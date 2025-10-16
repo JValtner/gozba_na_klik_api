@@ -5,7 +5,7 @@
 namespace Gozba_na_klik.Migrations
 {
     /// <inheritdoc />
-    public partial class adress : Migration
+    public partial class KP13_AddEmployeeSeedData : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -3,6 +3,7 @@ using AutoMapper;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Repositories;
 using Gozba_na_klik.Services;
+using Gozba_na_klik.Services;
 using Gozba_na_klik.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -61,6 +62,8 @@ builder.Services.AddAutoMapper(cfg => {cfg.AddProfile<MappingProfile>();
 });
 
 // Register repositories and services
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+
 builder.Services.AddScoped<IUsersRepository, UsersDbRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 

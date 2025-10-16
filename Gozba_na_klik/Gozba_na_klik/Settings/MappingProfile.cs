@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
-using Gozba_na_klik.Models;
+using Gozba_na_klik.DTOs;
+using Gozba_na_klik.DTOs.Employee;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
+using Gozba_na_klik.Models;
 
 namespace Gozba_na_klik.Settings
 {
@@ -11,8 +13,8 @@ namespace Gozba_na_klik.Settings
         {
             // ---------- Meal ----------
             CreateMap<RequestMealDto, Meal>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore()) // ID handled by DB
-                .ForMember(dest => dest.Restaurant, opt => opt.Ignore()) // linked via RestaurantId
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Restaurant, opt => opt.Ignore())
                 .ForMember(dest => dest.Addons, opt => opt.Ignore())
                 .ForMember(dest => dest.Alergens, opt => opt.Ignore());
 
@@ -31,9 +33,28 @@ namespace Gozba_na_klik.Settings
             // ---------- Alergen ----------
             CreateMap<RequestAlergenDto, Alergen>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.Meals, opt => opt.Ignore()); // ✅ updated property name
+                .ForMember(dest => dest.Meals, opt => opt.Ignore());
 
             CreateMap<Alergen, ResponseAlergenDto>();
+
+            // ---------- Employee (User) ----------
+            // User → EmployeeListItemDto (za response)
+            CreateMap<User, EmployeeListItemDto>();
+
+            // RegisterEmployeeDto → User (za kreiranje)
+            CreateMap<RegisterEmployeeDto, User>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.RestaurantId, opt => opt.Ignore()) // ← Service postavlja
+                .ForMember(dest => dest.IsActive, opt => opt.Ignore())     // ← Service postavlja
+                .ForMember(dest => dest.UserImage, opt => opt.Ignore());
+
+            // UpdateEmployeeDto → User (za update)
+            CreateMap<UpdateEmployeeDto, User>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.RestaurantId, opt => opt.Ignore())
+                .ForMember(dest => dest.IsActive, opt => opt.Ignore())
+                .ForMember(dest => dest.UserImage, opt => opt.Ignore())
+                .ForMember(dest => dest.Password, opt => opt.Condition(src => !string.IsNullOrEmpty(src.Password))); // ← Samo ako postoji!
         }
     }
 }

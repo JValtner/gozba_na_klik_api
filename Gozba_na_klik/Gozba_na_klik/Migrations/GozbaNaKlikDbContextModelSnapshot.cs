@@ -714,6 +714,9 @@ namespace Gozba_na_klik.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("text");
@@ -743,6 +746,7 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 1,
                             Email = "josipvaltner@gmail.com",
+                            IsActive = true,
                             Password = "pass_jv",
                             Role = "Admin",
                             Username = "Josip_admin"
@@ -751,6 +755,7 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 2,
                             Email = "lukakovacevic@gmail.com",
+                            IsActive = true,
                             Password = "pass_lk",
                             Role = "Admin",
                             Username = "Luka_admin"
@@ -759,6 +764,7 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 3,
                             Email = "borislaketic@gmail.com",
+                            IsActive = true,
                             Password = "pass_bl",
                             Role = "Admin",
                             Username = "Boris_admin"
@@ -767,6 +773,7 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 4,
                             Email = "kopasztamas@gmail.com",
+                            IsActive = true,
                             Password = "pass_kt",
                             Role = "Admin",
                             Username = "Tamas_admin"
@@ -775,6 +782,7 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 5,
                             Email = "urosmilinovic@gmail.com",
+                            IsActive = true,
                             Password = "pass_um",
                             Role = "Admin",
                             Username = "Uros_admin"
@@ -783,6 +791,7 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 7,
                             Email = "milan.owner@example.com",
+                            IsActive = true,
                             Password = "pass_mo",
                             Role = "RestaurantOwner",
                             Username = "Milan_owner"
@@ -791,6 +800,7 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 8,
                             Email = "ana.owner@example.com",
+                            IsActive = true,
                             Password = "pass_ao",
                             Role = "RestaurantOwner",
                             Username = "Ana_owner"
@@ -799,9 +809,70 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 9,
                             Email = "ivan.owner@example.com",
+                            IsActive = true,
                             Password = "pass_io",
                             Role = "RestaurantOwner",
                             Username = "Ivan_owner"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Email = "petar.employee@example.com",
+                            IsActive = true,
+                            Password = "pass_pe",
+                            RestaurantId = 1,
+                            Role = "RestaurantEmployee",
+                            Username = "Petar_employee"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Email = "marko.delivery@example.com",
+                            IsActive = true,
+                            Password = "pass_md",
+                            RestaurantId = 1,
+                            Role = "DeliveryPerson",
+                            Username = "Marko_delivery"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Email = "ana.employee@example.com",
+                            IsActive = true,
+                            Password = "pass_ae",
+                            RestaurantId = 2,
+                            Role = "RestaurantEmployee",
+                            Username = "Ana_employee"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Email = "jovan.delivery@example.com",
+                            IsActive = true,
+                            Password = "pass_jd",
+                            RestaurantId = 2,
+                            Role = "DeliveryPerson",
+                            Username = "Jovan_delivery"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Email = "nikola.employee@example.com",
+                            IsActive = true,
+                            Password = "pass_ne",
+                            RestaurantId = 3,
+                            Role = "RestaurantEmployee",
+                            Username = "Nikola_employee"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Email = "sara.employee@example.com",
+                            IsActive = false,
+                            Password = "pass_se",
+                            RestaurantId = 1,
+                            Role = "RestaurantEmployee",
+                            Username = "Sara_employee"
                         });
                 });
 
@@ -935,7 +1006,7 @@ namespace Gozba_na_klik.Migrations
                     b.HasOne("Gozba_na_klik.Models.User", "Owner")
                         .WithMany()
                         .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Owner");
@@ -943,9 +1014,12 @@ namespace Gozba_na_klik.Migrations
 
             modelBuilder.Entity("Gozba_na_klik.Models.User", b =>
                 {
-                    b.HasOne("Gozba_na_klik.Models.Restaurant", null)
+                    b.HasOne("Gozba_na_klik.Models.Restaurant", "Restaurant")
                         .WithMany("Employees")
-                        .HasForeignKey("RestaurantId");
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Restaurant");
                 });
 
             modelBuilder.Entity("Gozba_na_klik.Models.WorkSchedule", b =>

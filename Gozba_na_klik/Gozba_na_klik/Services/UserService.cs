@@ -91,5 +91,30 @@ namespace Gozba_na_klik.Services
         {
             return await _userRepository.ExistsAsync(userId);
         }
+        public async Task<IEnumerable<User>> GetEmployeesByRestaurantAsync(int restaurantId)
+        {
+            var allUsers = await _userRepository.GetAllAsync();
+            return allUsers.Where(u => u.RestaurantId == restaurantId);
+        }
+
+        public async Task SuspendEmployeeAsync(int employeeId)
+        {
+            var user = await _userRepository.GetByIdAsync(employeeId);
+            if (user != null)
+            {
+                user.IsActive = false;
+                await _userRepository.UpdateAsync(user);
+            }
+        }
+
+        public async Task ActivateEmployeeAsync(int employeeId)
+        {
+            var user = await _userRepository.GetByIdAsync(employeeId);
+            if (user != null)
+            {
+                user.IsActive = true;
+                await _userRepository.UpdateAsync(user);
+            }
+        }
     }
 }

@@ -184,7 +184,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // POST: api/restaurants/{id}/workschedules
-        [HttpPost("{id}/workschedules")]
+        [HttpPut("{id}/workschedules")]
         public async Task<IActionResult> UpdateWorkSchedulesAsync(int id, [FromBody] List<WorkScheduleDto> scheduleDtos)
         {
             try

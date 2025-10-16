@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Gozba_na_klik.Migrations
 {
     [DbContext(typeof(GozbaNaKlikDbContext))]
-    [Migration("20251012065254_ManyToManyMealsAlergens")]
-    partial class ManyToManyMealsAlergens
+    [Migration("20251014162241_KP13_AddEmployeeSeedData")]
+    partial class KP13_AddEmployeeSeedData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -424,6 +424,9 @@ namespace Gozba_na_klik.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("MealId")
                         .HasColumnType("integer");
 
@@ -447,15 +450,8 @@ namespace Gozba_na_klik.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
-                            MealId = 2,
-                            Name = "Extra Cheese",
-                            Price = 120m,
-                            Type = "chosen"
-                        },
-                        new
-                        {
                             Id = 2,
+                            IsActive = false,
                             MealId = 1,
                             Name = "Garlic Bread",
                             Price = 150m,
@@ -463,15 +459,8 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
-                            Id = 3,
-                            MealId = 3,
-                            Name = "Parmesan",
-                            Price = 80m,
-                            Type = "chosen"
-                        },
-                        new
-                        {
                             Id = 4,
+                            IsActive = true,
                             MealId = 1,
                             Name = "Extra Sauce",
                             Price = 100m,
@@ -479,7 +468,17 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
+                            Id = 1,
+                            IsActive = true,
+                            MealId = 2,
+                            Name = "Extra Cheese",
+                            Price = 120m,
+                            Type = "chosen"
+                        },
+                        new
+                        {
                             Id = 5,
+                            IsActive = false,
                             MealId = 2,
                             Name = "Chili Flakes",
                             Price = 50m,
@@ -487,7 +486,17 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
+                            Id = 3,
+                            IsActive = true,
+                            MealId = 3,
+                            Name = "Parmesan",
+                            Price = 80m,
+                            Type = "chosen"
+                        },
+                        new
+                        {
                             Id = 6,
+                            IsActive = false,
                             MealId = 4,
                             Name = "Soy Sauce",
                             Price = 60m,
@@ -495,7 +504,17 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
+                            Id = 17,
+                            IsActive = true,
+                            MealId = 4,
+                            Name = "Teriyaki Sauce",
+                            Price = 90m,
+                            Type = "chosen"
+                        },
+                        new
+                        {
                             Id = 7,
+                            IsActive = false,
                             MealId = 5,
                             Name = "Extra Wasabi",
                             Price = 70m,
@@ -503,7 +522,17 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
+                            Id = 16,
+                            IsActive = true,
+                            MealId = 5,
+                            Name = "Spicy Mayo",
+                            Price = 80m,
+                            Type = "chosen"
+                        },
+                        new
+                        {
                             Id = 8,
+                            IsActive = false,
                             MealId = 6,
                             Name = "Ginger",
                             Price = 50m,
@@ -512,6 +541,7 @@ namespace Gozba_na_klik.Migrations
                         new
                         {
                             Id = 9,
+                            IsActive = false,
                             MealId = 7,
                             Name = "Boiled Egg",
                             Price = 120m,
@@ -520,6 +550,7 @@ namespace Gozba_na_klik.Migrations
                         new
                         {
                             Id = 10,
+                            IsActive = true,
                             MealId = 7,
                             Name = "Extra Pork",
                             Price = 200m,
@@ -527,23 +558,17 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
-                            Id = 11,
-                            MealId = 10,
-                            Name = "Fries",
-                            Price = 180m,
-                            Type = "independent"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            MealId = 10,
-                            Name = "Onion Rings",
-                            Price = 160m,
-                            Type = "independent"
+                            Id = 18,
+                            IsActive = false,
+                            MealId = 7,
+                            Name = "Extra Noodles",
+                            Price = 140m,
+                            Type = "chosen"
                         },
                         new
                         {
                             Id = 13,
+                            IsActive = true,
                             MealId = 8,
                             Name = "BBQ Sauce",
                             Price = 90m,
@@ -552,6 +577,7 @@ namespace Gozba_na_klik.Migrations
                         new
                         {
                             Id = 14,
+                            IsActive = false,
                             MealId = 8,
                             Name = "Coleslaw",
                             Price = 130m,
@@ -560,6 +586,7 @@ namespace Gozba_na_klik.Migrations
                         new
                         {
                             Id = 15,
+                            IsActive = false,
                             MealId = 9,
                             Name = "Grilled Vegetables",
                             Price = 150m,
@@ -567,43 +594,39 @@ namespace Gozba_na_klik.Migrations
                         },
                         new
                         {
-                            Id = 16,
-                            MealId = 5,
-                            Name = "Spicy Mayo",
-                            Price = 80m,
-                            Type = "chosen"
-                        },
-                        new
-                        {
-                            Id = 17,
-                            MealId = 4,
-                            Name = "Teriyaki Sauce",
-                            Price = 90m,
-                            Type = "chosen"
-                        },
-                        new
-                        {
-                            Id = 18,
-                            MealId = 7,
-                            Name = "Extra Noodles",
-                            Price = 140m,
-                            Type = "chosen"
-                        },
-                        new
-                        {
-                            Id = 19,
-                            MealId = 10,
-                            Name = "Extra Beef",
-                            Price = 220m,
-                            Type = "chosen"
-                        },
-                        new
-                        {
                             Id = 20,
+                            IsActive = false,
                             MealId = 9,
                             Name = "Caesar Salad",
                             Price = 190m,
                             Type = "independent"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            IsActive = false,
+                            MealId = 10,
+                            Name = "Fries",
+                            Price = 180m,
+                            Type = "independent"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            IsActive = false,
+                            MealId = 10,
+                            Name = "Onion Rings",
+                            Price = 160m,
+                            Type = "independent"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            IsActive = true,
+                            MealId = 10,
+                            Name = "Extra Beef",
+                            Price = 220m,
+                            Type = "chosen"
                         });
                 });
 
@@ -694,6 +717,9 @@ namespace Gozba_na_klik.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("text");
@@ -723,6 +749,7 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 1,
                             Email = "josipvaltner@gmail.com",
+                            IsActive = true,
                             Password = "pass_jv",
                             Role = "Admin",
                             Username = "Josip_admin"
@@ -731,6 +758,7 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 2,
                             Email = "lukakovacevic@gmail.com",
+                            IsActive = true,
                             Password = "pass_lk",
                             Role = "Admin",
                             Username = "Luka_admin"
@@ -739,6 +767,7 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 3,
                             Email = "borislaketic@gmail.com",
+                            IsActive = true,
                             Password = "pass_bl",
                             Role = "Admin",
                             Username = "Boris_admin"
@@ -747,6 +776,7 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 4,
                             Email = "kopasztamas@gmail.com",
+                            IsActive = true,
                             Password = "pass_kt",
                             Role = "Admin",
                             Username = "Tamas_admin"
@@ -755,6 +785,7 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 5,
                             Email = "urosmilinovic@gmail.com",
+                            IsActive = true,
                             Password = "pass_um",
                             Role = "Admin",
                             Username = "Uros_admin"
@@ -763,6 +794,7 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 7,
                             Email = "milan.owner@example.com",
+                            IsActive = true,
                             Password = "pass_mo",
                             Role = "RestaurantOwner",
                             Username = "Milan_owner"
@@ -771,6 +803,7 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 8,
                             Email = "ana.owner@example.com",
+                            IsActive = true,
                             Password = "pass_ao",
                             Role = "RestaurantOwner",
                             Username = "Ana_owner"
@@ -779,9 +812,70 @@ namespace Gozba_na_klik.Migrations
                         {
                             Id = 9,
                             Email = "ivan.owner@example.com",
+                            IsActive = true,
                             Password = "pass_io",
                             Role = "RestaurantOwner",
                             Username = "Ivan_owner"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Email = "petar.employee@example.com",
+                            IsActive = true,
+                            Password = "pass_pe",
+                            RestaurantId = 1,
+                            Role = "RestaurantEmployee",
+                            Username = "Petar_employee"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Email = "marko.delivery@example.com",
+                            IsActive = true,
+                            Password = "pass_md",
+                            RestaurantId = 1,
+                            Role = "DeliveryPerson",
+                            Username = "Marko_delivery"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Email = "ana.employee@example.com",
+                            IsActive = true,
+                            Password = "pass_ae",
+                            RestaurantId = 2,
+                            Role = "RestaurantEmployee",
+                            Username = "Ana_employee"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Email = "jovan.delivery@example.com",
+                            IsActive = true,
+                            Password = "pass_jd",
+                            RestaurantId = 2,
+                            Role = "DeliveryPerson",
+                            Username = "Jovan_delivery"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Email = "nikola.employee@example.com",
+                            IsActive = true,
+                            Password = "pass_ne",
+                            RestaurantId = 3,
+                            Role = "RestaurantEmployee",
+                            Username = "Nikola_employee"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Email = "sara.employee@example.com",
+                            IsActive = false,
+                            Password = "pass_se",
+                            RestaurantId = 1,
+                            Role = "RestaurantEmployee",
+                            Username = "Sara_employee"
                         });
                 });
 
@@ -915,7 +1009,7 @@ namespace Gozba_na_klik.Migrations
                     b.HasOne("Gozba_na_klik.Models.User", "Owner")
                         .WithMany()
                         .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Owner");
@@ -923,9 +1017,12 @@ namespace Gozba_na_klik.Migrations
 
             modelBuilder.Entity("Gozba_na_klik.Models.User", b =>
                 {
-                    b.HasOne("Gozba_na_klik.Models.Restaurant", null)
+                    b.HasOne("Gozba_na_klik.Models.Restaurant", "Restaurant")
                         .WithMany("Employees")
-                        .HasForeignKey("RestaurantId");
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Restaurant");
                 });
 
             modelBuilder.Entity("Gozba_na_klik.Models.WorkSchedule", b =>

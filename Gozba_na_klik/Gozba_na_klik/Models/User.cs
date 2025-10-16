@@ -1,4 +1,6 @@
-﻿namespace Gozba_na_klik.Models
+﻿using Gozba_na_klik.Models;
+
+namespace Gozba_na_klik.Models
 {
     public class User
     {
@@ -8,6 +10,8 @@
         public string Email { get; set; }
         public string Role { get; set; } // e.g., "Client", "Admin", "RestaurantOwner", "RestaurantEmployee", "DeliveryPerson"
         public string? UserImage { get; set; }
-
+        public bool IsActive { get; set; } = true;
+        public int? RestaurantId { get; set; }
+        public Restaurant? Restaurant { get; set; }
     }
 }
