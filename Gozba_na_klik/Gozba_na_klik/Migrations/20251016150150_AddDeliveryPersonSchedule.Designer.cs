@@ -3,6 +3,7 @@ using System;
 using Gozba_na_klik.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Gozba_na_klik.Migrations
 {
     [DbContext(typeof(GozbaNaKlikDbContext))]
-    partial class GozbaNaKlikDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251016150150_AddDeliveryPersonSchedule")]
+    partial class AddDeliveryPersonSchedule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -180,7 +183,7 @@ namespace Gozba_na_klik.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Addresses", (string)null);
+                    b.ToTable("Addresses");
                 });
 
             modelBuilder.Entity("Gozba_na_klik.Models.Alergen", b =>
@@ -197,7 +200,7 @@ namespace Gozba_na_klik.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Alergens", (string)null);
+                    b.ToTable("Alergens");
 
                     b.HasData(
                         new
@@ -263,7 +266,7 @@ namespace Gozba_na_klik.Migrations
 
                     b.HasIndex("RestaurantId");
 
-                    b.ToTable("ClosedDates", (string)null);
+                    b.ToTable("ClosedDates");
 
                     b.HasData(
                         new
@@ -348,7 +351,7 @@ namespace Gozba_na_klik.Migrations
 
                     b.HasIndex("RestaurantId");
 
-                    b.ToTable("Meals", (string)null);
+                    b.ToTable("Meals");
 
                     b.HasData(
                         new
@@ -472,7 +475,7 @@ namespace Gozba_na_klik.Migrations
 
                     b.HasIndex("MealId");
 
-                    b.ToTable("MealAddons", (string)null);
+                    b.ToTable("MealAddons");
 
                     b.HasData(
                         new
@@ -694,7 +697,7 @@ namespace Gozba_na_klik.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Restaurants", (string)null);
+                    b.ToTable("Restaurants");
 
                     b.HasData(
                         new
@@ -769,7 +772,7 @@ namespace Gozba_na_klik.Migrations
 
                     b.HasIndex("RestaurantId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
 
                     b.HasData(
                         new
@@ -930,7 +933,7 @@ namespace Gozba_na_klik.Migrations
 
                     b.HasIndex("RestaurantId");
 
-                    b.ToTable("WorkSchedules", (string)null);
+                    b.ToTable("WorkSchedules");
 
                     b.HasData(
                         new

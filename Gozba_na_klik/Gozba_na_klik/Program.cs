@@ -62,6 +62,9 @@ builder.Services.AddAutoMapper(cfg => {cfg.AddProfile<MappingProfile>();
 });
 
 // Register repositories and services
+builder.Services.AddScoped<IDeliveryPersonScheduleRepository, DeliveryPersonScheduleRepository>();
+builder.Services.AddScoped<IDeliveryPersonScheduleService, DeliveryPersonScheduleService>();
+
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
 builder.Services.AddScoped<IUsersRepository, UsersDbRepository>();
