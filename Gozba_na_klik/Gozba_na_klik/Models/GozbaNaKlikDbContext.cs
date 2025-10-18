@@ -13,6 +13,7 @@ namespace Gozba_na_klik.Models
         public DbSet<ClosedDate> ClosedDates { get; set; }
         public DbSet<WorkSchedule> WorkSchedules { get; set; }
         public DbSet<Address> Addresses { get; set; }
+        public DbSet<DeliveryPersonSchedule> DeliveryPersonSchedules { get; set; }
 
 
 
@@ -231,6 +232,12 @@ namespace Gozba_na_klik.Models
                 .WithMany()
                 .HasForeignKey(r => r.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DeliveryPersonSchedule>()
+                .HasOne(s => s.DeliveryPerson)
+                .WithMany()
+                .HasForeignKey(s => s.DeliveryPersonId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

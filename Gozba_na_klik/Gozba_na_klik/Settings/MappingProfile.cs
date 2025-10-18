@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Gozba_na_klik.DTOs;
+using Gozba_na_klik.DTOs.DeliveryPersonSchedule;
 using Gozba_na_klik.DTOs.Employee;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.Utils;
 
 namespace Gozba_na_klik.Settings
 {
@@ -55,6 +57,14 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.IsActive, opt => opt.Ignore())
                 .ForMember(dest => dest.UserImage, opt => opt.Ignore())
                 .ForMember(dest => dest.Password, opt => opt.Condition(src => !string.IsNullOrEmpty(src.Password))); // ← Samo ako postoji!
+
+            // ---------- DeliveryPersonSchedule ----------
+            CreateMap<DeliveryPersonSchedule, DeliveryScheduleDto>()
+                .ForMember(dest => dest.DayOfWeek, opt => opt.MapFrom(src => (int)src.DayOfWeek))
+                .ForMember(dest => dest.DayName, opt => opt.MapFrom(src => DateTimeHelper.GetDayName(src.DayOfWeek)))
+                .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.StartTime.ToString(@"hh\:mm")))
+                .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.EndTime.ToString(@"hh\:mm")))
+                .ForMember(dest => dest.Hours, opt => opt.MapFrom(src => Math.Round((src.EndTime - src.StartTime).TotalHours, 2)));
         }
     }
 }
