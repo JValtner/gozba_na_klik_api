@@ -11,6 +11,13 @@ namespace Gozba_na_klik.Settings
     {
         public MappingProfile()
         {
+            // ---------- Restaurant ----------
+            CreateMap<RequestCreateRestaurantByAdminDto, Restaurant>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
+
+            CreateMap<RequestUpdateRestaurantByAdminDto, Restaurant>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
+
             // ---------- Meal ----------
             CreateMap<RequestMealDto, Meal>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())

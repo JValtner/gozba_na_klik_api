@@ -8,7 +8,7 @@ public class Restaurant
     public string? Description { get; set; }
     public string? Phone { get; set; }
     public int OwnerId { get; set; }
-    public User Owner { get; set; }
+    public User? Owner { get; set; }
     public List<Meal> Menu { get; set; } = new();
 
     // Standardno radno vreme po danima

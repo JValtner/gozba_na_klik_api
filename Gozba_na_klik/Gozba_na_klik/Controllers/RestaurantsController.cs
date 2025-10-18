@@ -14,11 +14,13 @@ namespace Gozba_na_klik.Controllers
     {
         private readonly IRestaurantService _restaurantService;
         private readonly IUserService _userService;
+        private readonly ILogger<RestaurantsController> _logger;
 
-        public RestaurantsController(IRestaurantService restaurantService, IUserService userService)
+        public RestaurantsController(IRestaurantService restaurantService, IUserService userService, ILogger<RestaurantsController> logger)
         {
             _restaurantService = restaurantService;
             _userService = userService;
+            _logger = logger;
         }
 
         // GET: api/restaurants
@@ -44,14 +46,30 @@ namespace Gozba_na_klik.Controllers
         }
 
         // POST: api/restaurants
-        // Kreiranje novog restorana (tipično admin)
+        // Kreiranje novog restorana (admin)
         [HttpPost]
-        public async Task<IActionResult> PostAsync([FromBody] Restaurant restaurant)
+        public async Task<IActionResult> PostByAdminAsync([FromBody] RequestCreateRestaurantByAdminDto dto)
         {
-            // Opcionalno: osigurati CreatedAt
-            restaurant.CreatedAt = DateTime.UtcNow;
-            Restaurant created = await _restaurantService.CreateRestaurantAsync(restaurant);
-            return Ok(created);
+            _logger.LogInformation("Creating new restaurant");
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _restaurantService.CreateRestaurantByAdminAsync(dto);
+            return Ok(result);
+        }
+
+        //PUT: api/restaurants/:{id}/admin-edit
+        [HttpPut("{id}/admin-edit")]
+        public async Task<IActionResult> UpdateByAdminAsync(int id, [FromBody] RequestUpdateRestaurantByAdminDto dto)
+        {
+            _logger.LogInformation("Updating existing restaurant");
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _restaurantService.UpdateRestaurantByAdminAsync(id,dto);
+            return Ok(result);
         }
 
         // GET: api/restaurants/my
