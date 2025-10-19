@@ -180,7 +180,7 @@ namespace Gozba_na_klik.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Addresses");
+                    b.ToTable("Addresses", (string)null);
                 });
 
             modelBuilder.Entity("Gozba_na_klik.Models.Alergen", b =>
@@ -197,7 +197,7 @@ namespace Gozba_na_klik.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Alergens");
+                    b.ToTable("Alergens", (string)null);
 
                     b.HasData(
                         new
@@ -263,7 +263,7 @@ namespace Gozba_na_klik.Migrations
 
                     b.HasIndex("RestaurantId");
 
-                    b.ToTable("ClosedDates");
+                    b.ToTable("ClosedDates", (string)null);
 
                     b.HasData(
                         new
@@ -348,7 +348,7 @@ namespace Gozba_na_klik.Migrations
 
                     b.HasIndex("RestaurantId");
 
-                    b.ToTable("Meals");
+                    b.ToTable("Meals", (string)null);
 
                     b.HasData(
                         new
@@ -472,7 +472,7 @@ namespace Gozba_na_klik.Migrations
 
                     b.HasIndex("MealId");
 
-                    b.ToTable("MealAddons");
+                    b.ToTable("MealAddons", (string)null);
 
                     b.HasData(
                         new
@@ -694,7 +694,7 @@ namespace Gozba_na_klik.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Restaurants");
+                    b.ToTable("Restaurants", (string)null);
 
                     b.HasData(
                         new
@@ -769,7 +769,7 @@ namespace Gozba_na_klik.Migrations
 
                     b.HasIndex("RestaurantId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
 
                     b.HasData(
                         new
@@ -930,7 +930,7 @@ namespace Gozba_na_klik.Migrations
 
                     b.HasIndex("RestaurantId");
 
-                    b.ToTable("WorkSchedules");
+                    b.ToTable("WorkSchedules", (string)null);
 
                     b.HasData(
                         new

@@ -1,5 +1,8 @@
-﻿using Gozba_na_klik.Models;
+﻿using AutoMapper;
+using Gozba_na_klik.DTOs.Request;
+using Gozba_na_klik.Models;
 using Microsoft.EntityFrameworkCore;
+using Gozba_na_klik.Exceptions;
 
 namespace Gozba_na_klik.Services
 {
@@ -7,11 +10,15 @@ namespace Gozba_na_klik.Services
     {
         private readonly IRestaurantRepository _restaurantRepository;
         private readonly GozbaNaKlikDbContext _context;
+        private readonly IMapper _mapper;
+        private readonly ILogger<RestaurantService> _logger;
 
-        public RestaurantService(IRestaurantRepository restaurantRepository, GozbaNaKlikDbContext context)
+        public RestaurantService(IRestaurantRepository restaurantRepository, GozbaNaKlikDbContext context, IMapper mapper, ILogger<RestaurantService> logger)
         {
             _restaurantRepository = restaurantRepository;
             _context = context;
+            _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<Restaurant>> GetAllRestaurantsAsync()
@@ -28,9 +35,40 @@ namespace Gozba_na_klik.Services
         {
             return await _restaurantRepository.AddAsync(restaurant);
         }
-
         public async Task<Restaurant> UpdateRestaurantAsync(Restaurant restaurant)
         {
+            return await _restaurantRepository.UpdateAsync(restaurant);
+        }
+
+        // ADMIN Create 
+        public async Task<Restaurant> CreateRestaurantByAdminAsync(RequestCreateRestaurantByAdminDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name) || dto.OwnerId == null)
+            {
+                throw new BadRequestException("Name and Owner ID cannot be null.");
+            }
+            _logger.LogInformation("Creating new restaurant");
+            var restaurant = _mapper.Map<Restaurant>(dto);
+            restaurant.CreatedAt = DateTime.UtcNow;
+            return await _restaurantRepository.AddAsync(restaurant);
+        }
+
+        // ADMIN Update
+        public async Task<Restaurant> UpdateRestaurantByAdminAsync(int id, RequestUpdateRestaurantByAdminDto dto)
+        {
+            var restaurant = await _restaurantRepository.GetByIdAsync(id);
+            if (restaurant == null)
+                return null;
+
+            if (string.IsNullOrWhiteSpace(dto.Name) || dto.OwnerId == null)
+            {
+                throw new BadRequestException("Name and Owner ID cannot be null.");
+            }
+
+            _logger.LogInformation("Updating restaurant");
+            restaurant.Name = dto.Name;
+            restaurant.OwnerId = dto.OwnerId;
+            restaurant.UpdatedAt = DateTime.UtcNow;
             return await _restaurantRepository.UpdateAsync(restaurant);
         }
 

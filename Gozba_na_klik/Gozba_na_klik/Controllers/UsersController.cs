@@ -55,6 +55,18 @@ namespace Gozba_na_klik.Controllers
             return Ok(new_user);
         }
 
+        // ADMIN PUT api/users/5/admin-users
+        [HttpPut("{id}/admin-users")]
+        public async Task<IActionResult> PutByAdminAsync(int id, [FromBody] RequestUpdateUserByAdminDto dto)
+        {
+            var updatedUser = await _userService.UpdateUserByAdminAsync(id, dto);
+            if (updatedUser == null)
+            {
+                return NotFound();
+            }
+            return Ok(updatedUser);
+        }
+
         // PUT api/users/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAsync(int id, [FromForm] UpdateUserDto dto, IFormFile? userimage)

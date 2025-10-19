@@ -1,4 +1,5 @@
 ﻿using Gozba_na_klik.DTOs;
+using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.Models;
 namespace Gozba_na_klik.Services
 {
@@ -59,6 +60,18 @@ namespace Gozba_na_klik.Services
         public async Task<User> CreateUserAsync(User user)
         {
             return await _userRepository.AddAsync(user);
+        }
+
+        // ADMIN UPDATE USER (ROLE CHANGE)
+        public async Task<User> UpdateUserByAdminAsync(int id, RequestUpdateUserByAdminDto dto)
+        {
+            var user = await GetUserByIdAsync(id);
+            if (user == null)
+                return null;
+
+            user.Role = dto.Role;
+
+            return await _userRepository.UpdateAsync(user);
         }
 
         public async Task<User> UpdateUserAsync(int id, UpdateUserDto dto, IFormFile? userimage)
