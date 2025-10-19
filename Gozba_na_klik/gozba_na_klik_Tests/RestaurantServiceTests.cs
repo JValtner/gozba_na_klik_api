@@ -1,5 +1,7 @@
-﻿using Gozba_na_klik.Models;
+﻿using AutoMapper;
+using Gozba_na_klik.Models;
 using Gozba_na_klik.Services;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
 
@@ -8,11 +10,18 @@ namespace gozba_na_klik_Tests.Services
     public class RestaurantServiceTests
     {
         private readonly Mock<IRestaurantRepository> _repoMock = new();
+        private readonly Mock<IMapper> _mapperMock = new();
+        private readonly Mock<ILogger<RestaurantService>> _loggerMock = new();
         private readonly RestaurantService _service;
 
         public RestaurantServiceTests()
         {
-            _service = new RestaurantService(_repoMock.Object, null!);
+            _service = new RestaurantService(
+                _repoMock.Object,
+                null!,
+                _mapperMock.Object,
+                _loggerMock.Object
+            );
         }
 
         [Theory]
