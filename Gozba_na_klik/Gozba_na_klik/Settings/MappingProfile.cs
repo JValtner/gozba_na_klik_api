@@ -17,6 +17,22 @@ namespace Gozba_na_klik.Settings
             CreateMap<RequestUpdateUserByAdminDto, User>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
 
+            CreateMap<RequestUpdateAlergenByUserDto, User>()
+                 .ForMember(dest => dest.Id, opt => opt.Ignore())
+                 .AfterMap((dto, user) =>
+                 {
+                     user.UserAlergens.Clear();
+
+                     foreach (var alergenId in dto.AlergensIds)
+                     {
+                         user.UserAlergens.Add(new UserAlergen
+                         {
+                             UserId = user.Id,
+                             AlergenId = alergenId
+                         });
+                     }
+                 });
+
             // ---------- Restaurant ----------
             CreateMap<RequestCreateRestaurantByAdminDto, Restaurant>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
@@ -49,6 +65,19 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.Meals, opt => opt.Ignore());
 
             CreateMap<Alergen, ResponseAlergenDto>();
+
+            CreateMap<Alergen, ResponseAlergenBasicDto>();
+
+            // Mapiranje pojedinačnog alergena iz UserAlergen
+            CreateMap<UserAlergen, ResponseAlergenBasicDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Alergen.Id))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Alergen.Name));
+
+            // Mapiranje korisnika sa listom alergena
+            CreateMap<User, ResponseUserAlergenDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Alergens, opt => opt.MapFrom(src => src.UserAlergens));
+
 
             // ---------- Employee (User) ----------
             // User → EmployeeListItemDto (za response)
