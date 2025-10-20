@@ -1,5 +1,6 @@
 ﻿using Gozba_na_klik.DTOs;
 using Gozba_na_klik.DTOs.Request;
+using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Models;
 
 namespace Gozba_na_klik.Services
@@ -8,6 +9,7 @@ namespace Gozba_na_klik.Services
     {
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<User?> GetUserByIdAsync(int userId);
+        Task<ResponseUserAlergenDto?> GetUserWithAlergensAsync(int userId);
         Task<IEnumerable<User>> GetAllRestaurantOnwersAsync();
         Task<bool> UserExistsAsync(int userId);
         Task<User> CreateUserAsync(User user);
@@ -16,6 +18,7 @@ namespace Gozba_na_klik.Services
         Task<User> UpdateUserByAdminAsync(int id, RequestUpdateUserByAdminDto dto);
 
         Task<User> UpdateUserAsync(int id, UpdateUserDto dto, IFormFile? userimage);
+        Task<ResponseUserAlergenDto?> UpdateUserAlergensAsync(int userId, RequestUpdateAlergenByUserDto dto);
         Task DeleteUserAsync(int id);
     }
 }

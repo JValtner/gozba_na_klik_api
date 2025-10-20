@@ -4,9 +4,11 @@
     {
         Task<IEnumerable<User>> GetAllAsync();
         Task<User?> GetByIdAsync(int userId);
+        Task<User?> GetByIdWithAlergensAsync(int userId);
         Task<IEnumerable<User>> GetAllRestaurantOwnersAsync();
         Task<User> AddAsync(User user);
         Task<User> UpdateAsync(User user);
+        Task<User?> UpdateUserAlergensAsync(int userId, List<int> alergenIds);
         Task<bool> DeleteAsync(int userId);
         Task<bool> ExistsAsync(int userId);
     }
