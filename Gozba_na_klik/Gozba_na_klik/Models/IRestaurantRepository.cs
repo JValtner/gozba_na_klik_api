@@ -1,4 +1,8 @@
-﻿namespace Gozba_na_klik.Models;
+﻿using BookstoreApplication.Utils;
+using Gozba_na_klik.DTOs.Request;
+using Gozba_na_klik.Utils;
+
+namespace Gozba_na_klik.Models;
 
 public interface IRestaurantRepository
 {
@@ -9,4 +13,7 @@ public interface IRestaurantRepository
     Task<bool> DeleteAsync(int id);
     Task<bool> ExistsAsync(int id);
     Task<IEnumerable<Restaurant>> GetByOwnerAsync(int ownerId);
+    Task<PaginatedList<Restaurant>> GetAllFilteredSortedPagedAsync(RestaurantFilter filter, int sortType, int page, int pageSize);
+    Task<List<SortTypeOption>> GetSortTypesAsync();
+
 }

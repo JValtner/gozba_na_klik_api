@@ -1,5 +1,7 @@
-﻿using Gozba_na_klik.DTOs.Request;
+﻿using BookstoreApplication.Utils;
+using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
+using Gozba_na_klik.Enums;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -35,6 +37,17 @@ namespace Gozba_na_klik.Controllers
             if (meal == null)
                 return NotFound();
             return Ok(meal);
+        }
+        // GET: api/meals/paged
+        [HttpGet("filterSortPage")]
+        public async Task<ActionResult<PaginatedList<ResponseMealDto>>> GetFilteredSortedPagedAsync(
+        [FromQuery] MealFilter filter,
+        [FromQuery] int sortType = (int)MealSortType.A_Z,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+        {
+            var result = await _mealService.GetAllFilteredSortedPagedAsync(filter, sortType, page, pageSize);
+            return Ok(result);
         }
 
         // POST: api/meals

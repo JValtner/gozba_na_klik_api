@@ -24,6 +24,19 @@ namespace Gozba_na_klik.Settings
             CreateMap<RequestUpdateRestaurantByAdminDto, Restaurant>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
 
+            CreateMap<Restaurant, ResponseRestaurantDTO>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => src.PhotoUrl))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
+                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Phone))
+                .ForMember(dest => dest.Menu, opt => opt.MapFrom(src => src.Menu))
+                .ForMember(dest => dest.WorkSchedule, opt => opt.MapFrom(src => src.WorkSchedules))
+                .ForMember(dest => dest.isOpen, opt => opt.Ignore()) // 👈 Explicitly ignore
+                .ForMember(dest => dest.ClosedDates, opt => opt.MapFrom(src => src.ClosedDates))
+                .ReverseMap(); 
+
             // ---------- Meal ----------
             CreateMap<RequestMealDto, Meal>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())

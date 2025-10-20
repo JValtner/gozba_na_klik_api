@@ -1,10 +1,13 @@
-﻿using AutoMapper;
+﻿using System.Text.Json;
+using AutoMapper;
+using BookstoreApplication.Utils;
+using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Exceptions;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Repositories;
+using Gozba_na_klik.Utils;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
 
 namespace Gozba_na_klik.Services
 {
@@ -60,6 +63,23 @@ namespace Gozba_na_klik.Services
                 meal.ImagePath = DefaultMealImagePath;
 
             return _mapper.Map<ResponseMealDto>(meal);
+        }
+        public async Task<PaginatedList<ResponseMealDto>> GetAllFilteredSortedPagedAsync(
+            MealFilter filter, int sortType, int page, int pageSize)
+        {
+            _logger.LogInformation("Fetching paged meal list: page={Page}, size={PageSize}", page, pageSize);
+
+            if (page <= 0 || pageSize <= 0)
+                throw new BadRequestException("Page and pageSize must be greater than zero.");
+
+            var pagedMeals = await _mealsRepository.GetAllFilteredSortedPagedAsync(filter, sortType, page, pageSize);
+
+            var dtoItems = _mapper.Map<List<ResponseMealDto>>(pagedMeals.Items);
+            return new PaginatedList<ResponseMealDto>(dtoItems, pagedMeals.Count, pagedMeals.PageIndex, pageSize);
+        }
+        public async Task<List<SortTypeOption>> GetSortTypesAsync()  //dobavlja vrste sortiranja
+        {
+            return await _mealsRepository.GetSortTypesAsync();
         }
 
         public async Task<ResponseMealDto> CreateMealAsync(Meal meal)

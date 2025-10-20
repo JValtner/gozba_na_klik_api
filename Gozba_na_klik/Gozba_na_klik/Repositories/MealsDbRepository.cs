@@ -1,5 +1,9 @@
 ﻿using System;
+using BookstoreApplication.Utils;
+using Gozba_na_klik.DTOs.Request;
+using Gozba_na_klik.Enums;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gozba_na_klik.Repositories
@@ -58,6 +62,71 @@ namespace Gozba_na_klik.Repositories
             _context.Meals.Remove(meal);
             await _context.SaveChangesAsync();
             return true;
+        }
+        public async Task<PaginatedList<Meal>> GetAllFilteredSortedPagedAsync(MealFilter filter, int sortType, int page, int pageSize)
+        {
+            IQueryable<Meal> query = _context.Meals
+                .Include(m => m.Restaurant)
+                .Include(m => m.Addons)
+                .Include(m => m.Alergens);
+
+            query = FilterMeals(query, filter);
+            query = SortMeals(query, sortType);
+
+            int count = await query.CountAsync();
+            int skip = (page - 1) * pageSize;
+            List<Meal> items = await query.Skip(skip).Take(pageSize).ToListAsync();
+
+            return new PaginatedList<Meal>(items, count, page, pageSize);
+        }
+
+        public IQueryable<Meal> FilterMeals(IQueryable<Meal> query, MealFilter filter)
+        {
+            if (!string.IsNullOrEmpty(filter.Name))
+                query = query.Where(m => m.Name.ToLower().Contains(filter.Name.ToLower()));
+
+            if (filter.MinPrice.HasValue && filter.MinPrice.Value > 0)
+                query = query.Where(m => m.Price >= filter.MinPrice.Value);
+
+            if (filter.MaxPrice.HasValue && filter.MaxPrice.Value > 0)
+                query = query.Where(m => m.Price <= filter.MaxPrice.Value);
+
+            if (!string.IsNullOrEmpty(filter.RestaurantName))
+                query = query.Where(m => m.Restaurant != null &&
+                                         m.Restaurant.Name.ToLower().Contains(filter.RestaurantName.ToLower()));
+
+            if (filter.Alergens != null && filter.Alergens.Any())
+                query = query.Where(m => m.Alergens.Any(a => filter.Alergens.Contains(a.Name)));
+
+            if (filter.Addons != null && filter.Addons.Any())
+                query = query.Where(m => m.Addons.Any(ad => filter.Addons.Contains(ad.Name)));
+
+            return query;
+        }
+        
+
+        public IQueryable<Meal> SortMeals(IQueryable<Meal> query, int sortType)
+        {
+            return sortType switch
+            {
+                (int)MealSortType.A_Z => query.OrderBy(m => m.Name),
+                (int)MealSortType.Z_A => query.OrderByDescending(m => m.Name),
+                (int)MealSortType.Price_Lowest => query.OrderBy(m => m.Price),
+                (int)MealSortType.Price_Highest => query.OrderByDescending(m => m.Price),
+                (int)MealSortType.Has_Alergens => query.OrderByDescending(m => m.Alergens.Count),
+                (int)MealSortType.No_Alergens => query.OrderBy(m => m.Alergens.Count),
+                _ => query.OrderBy(m => m.Name)
+            };
+        }
+        public async Task<List<SortTypeOption>> GetSortTypesAsync()
+        {
+            List<SortTypeOption> options = new List<SortTypeOption>();
+            var enumValues = Enum.GetValues(typeof(MealSortType));  // preuzimanje niza vrednosti za enumeraciju
+            foreach (MealSortType sortType in enumValues)           // svaku vrednost za enumeraciju konvertuje u SortTypeOption
+            {
+                options.Add(new SortTypeOption(sortType));
+            }
+            return options;
         }
     }
 }

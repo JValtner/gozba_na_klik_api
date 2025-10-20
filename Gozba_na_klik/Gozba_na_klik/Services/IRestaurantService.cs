@@ -1,5 +1,8 @@
-﻿using Gozba_na_klik.DTOs.Request;
+﻿using BookstoreApplication.Utils;
+using Gozba_na_klik.DTOs.Request;
+using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.Utils;
 
 namespace Gozba_na_klik.Services
 {
@@ -7,6 +10,9 @@ namespace Gozba_na_klik.Services
     {
         Task<IEnumerable<Restaurant>> GetAllRestaurantsAsync();
         Task<Restaurant?> GetRestaurantByIdAsync(int id);
+
+        Task<PaginatedList<ResponseRestaurantDTO>> GetAllFilteredSortedPagedAsync(RestaurantFilter filter, int sortType, int page, int pageSize);
+        Task<List<SortTypeOption>> GetSortTypesAsync();
         Task<bool> RestaurantExistsAsync(int id);
         Task<Restaurant> CreateRestaurantAsync(Restaurant restaurant);
 
