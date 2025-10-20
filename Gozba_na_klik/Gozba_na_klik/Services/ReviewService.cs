@@ -24,7 +24,7 @@ public class ReviewService : IReviewService
         {
             OrderId = dto.OrderId,
             RestaurantId = order.RestaurantId,
-            CourierId = order.CourierId,
+            //CourierId = order.CourierId,
             RestaurantRating = dto.RestaurantRating,
             RestaurantComment = dto.RestaurantComment,
             RestaurantPhotoUrl = dto.RestaurantPhoto != null ? await SavePhotoAsync(dto.RestaurantPhoto) : null,
