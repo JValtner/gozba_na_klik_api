@@ -3,7 +3,7 @@ using AutoMapper;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Repositories;
 using Gozba_na_klik.Services;
-using Gozba_na_klik.Services;
+using Gozba_na_klik.Services.AddressServices;
 using Gozba_na_klik.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -62,6 +62,9 @@ builder.Services.AddAutoMapper(cfg => {cfg.AddProfile<MappingProfile>();
 });
 
 // Register repositories and services
+builder.Services.AddScoped<IOrderRepository, OrderDbRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
 builder.Services.AddScoped<IDeliveryPersonScheduleRepository, DeliveryPersonScheduleRepository>();
 builder.Services.AddScoped<IDeliveryPersonScheduleService, DeliveryPersonScheduleService>();
 
@@ -81,6 +84,9 @@ builder.Services.AddScoped<IMealService, MealService>();
 
 builder.Services.AddScoped<IAlergensRepository, AlergensDbRepository>();
 builder.Services.AddScoped<IAlergenService, AlergenService>();
+
+builder.Services.AddScoped<IAddressRepository, AddressDbRepository>();
+builder.Services.AddScoped<IAddressService, AddressService>();
 
 builder.Services.AddScoped<IFileService, FileService>();
 
