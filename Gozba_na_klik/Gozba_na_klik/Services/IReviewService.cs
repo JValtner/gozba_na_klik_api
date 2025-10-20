@@ -1,4 +1,3 @@
-using Gozba_na_klik.DTOs.Review;
 using Gozba_na_klik.Models;
 
 public interface IReviewService

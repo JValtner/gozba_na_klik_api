@@ -1,5 +1,4 @@
 using Gozba_na_klik.Models;
-using Gozba_na_klik.DTOs.Review;
 
 public class ReviewService : IReviewService
 {
