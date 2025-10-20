@@ -13,5 +13,6 @@ namespace Gozba_na_klik.Models
         public bool IsActive { get; set; } = true;
         public int? RestaurantId { get; set; }
         public Restaurant? Restaurant { get; set; }
+        public List<UserAlergen> UserAlergens { get; set; } = new();
     }
 }

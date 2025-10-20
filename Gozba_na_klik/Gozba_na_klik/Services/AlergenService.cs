@@ -26,6 +26,13 @@ namespace Gozba_na_klik.Services
             _logger = logger;
         }
 
+        // Vracan basic dto Alergena (Id i Name)
+        public async Task<IEnumerable<ResponseAlergenBasicDto>> GetAllBasicAlergensAsync()
+        {
+            _logger.LogInformation("Fetching all allergens from repository...");
+            var alergens = await _alergensRepository.GetAllAsync();
+            return _mapper.Map<IEnumerable<ResponseAlergenBasicDto>>(alergens);
+        }
         public async Task<IEnumerable<ResponseAlergenDto>> GetAllAlergenAsync()
         {
             _logger.LogInformation("Fetching all allergens from repository...");

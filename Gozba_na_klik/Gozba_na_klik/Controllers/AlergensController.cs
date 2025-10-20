@@ -26,6 +26,15 @@ namespace Gozba_na_klik.Controllers
             return Ok(alergens);
         }
 
+        // GET: api/alergens/all (Koristi DTO koji sadrzi samo ID i naziv)
+        [HttpGet("all")]
+        public async Task<ActionResult<IEnumerable<ResponseAlergenBasicDto>>> GetAllAlergensAsync()
+        {
+            _logger.LogInformation("Fetching all allergens...");
+            var alergens = await _alergenService.GetAllBasicAlergensAsync();
+            return Ok(alergens);
+        }
+
         // GET: api/alergens/meal/5
         [HttpGet("meal/{mealId:int}")]
         public async Task<ActionResult<IEnumerable<ResponseAlergenDto>>> GetByMealIdAsync(int mealId)

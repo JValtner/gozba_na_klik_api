@@ -14,6 +14,7 @@ namespace Gozba_na_klik.Models
         public DbSet<WorkSchedule> WorkSchedules { get; set; }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<DeliveryPersonSchedule> DeliveryPersonSchedules { get; set; }
+        public DbSet<UserAlergen> UserAlergens { get; set; }
 
 
 
@@ -21,6 +22,25 @@ namespace Gozba_na_klik.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // --- Many-to-Many Relationship between Users and Alergens ---
+            modelBuilder.Entity<UserAlergen>()
+                .HasOne(ua => ua.User)
+                .WithMany(u => u.UserAlergens)
+                .HasForeignKey(ua => ua.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+
+            modelBuilder.Entity<UserAlergen>()
+                .HasOne(ua => ua.Alergen)
+                .WithMany(a => a.UserAlergens)
+                .HasForeignKey(ua => ua.AlergenId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Sprecava duplikate i zadrzava Id kao primarni kljuc
+            modelBuilder.Entity<UserAlergen>()
+                .HasIndex(ua => new { ua.UserId, ua.AlergenId })
+                .IsUnique();
+
             // --- Many-to-Many Relationship between Meals and Alergens ---
             modelBuilder.Entity<Meal>()
             .HasMany(m => m.Alergens)
