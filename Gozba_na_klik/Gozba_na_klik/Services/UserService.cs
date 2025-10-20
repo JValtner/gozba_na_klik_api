@@ -1,5 +1,6 @@
-﻿using Gozba_na_klik.DTOs;
+﻿using AutoMapper;
 using Gozba_na_klik.DTOs.Request;
+using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Models;
 namespace Gozba_na_klik.Services
 {
@@ -7,22 +8,16 @@ namespace Gozba_na_klik.Services
     {
         private readonly IUsersRepository _userRepository;
         private readonly IFileService _fileService;
-        private IFileService? fileService;
+        private readonly IMapper _mapper;
 
-        
-        public UserService(IUsersRepository userRepository, IFileService fileService)
+        public UserService(IUsersRepository userRepository, IFileService fileService, IMapper mapper)
         {
             _userRepository = userRepository;
             _fileService = fileService;
+            _mapper = mapper;
         }
         // Fallback image path (relative)
         private const string DefaultProfileImagePath = "/assets/profileImg/default_profile.png";
-
-        public UserService(IUsersRepository userRepository)
-        {
-            _userRepository = userRepository;
-            _fileService = fileService;
-        }
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
@@ -55,6 +50,16 @@ namespace Gozba_na_klik.Services
             }
 
             return user;
+        }
+
+        // GET USER WITH ALERGENS
+        public async Task<ResponseUserAlergenDto?> GetUserWithAlergensAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdWithAlergensAsync(userId);
+            if (user == null)
+                return null;
+
+            return _mapper.Map<ResponseUserAlergenDto>(user);
         }
 
         public async Task<User> CreateUserAsync(User user)
@@ -94,6 +99,19 @@ namespace Gozba_na_klik.Services
             return await _userRepository.UpdateAsync(user);
 
         }
+
+        // UPDATE USER (ALERGENS)
+        public async Task<ResponseUserAlergenDto?> UpdateUserAlergensAsync(int userId, RequestUpdateAlergenByUserDto dto)
+        {
+            await _userRepository.UpdateUserAlergensAsync(userId, dto.AlergensIds);
+
+            // Ponovo učitaj entitet sa uključeniim alergenima
+            var updatedUser = await _userRepository.GetByIdWithAlergensAsync(userId);
+            if (updatedUser == null) return null;
+
+            return _mapper.Map<ResponseUserAlergenDto>(updatedUser);
+        }
+
 
         public async Task DeleteUserAsync(int userId)
         {

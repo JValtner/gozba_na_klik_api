@@ -47,12 +47,31 @@ namespace Gozba_na_klik.Controllers
             return Ok(user);
         }
 
+        // GET api/users/5/alergens   (User sa svojim alergenima)
+        [HttpGet("{id}/alergens")]
+        public async Task<IActionResult> GetUserWithAlergens(int id)
+        {
+            return Ok(await _userService.GetUserWithAlergensAsync(id));
+
+        }
+
         // POST api/users
         [HttpPost]
         public async Task<IActionResult> PostAsync(User user)
         {
             User new_user = await _userService.CreateUserAsync(user);
             return Ok(new_user);
+        }
+
+        // PUT api/users/5/alergens   (User dodaje sebi alergene)
+        [HttpPut("{id}/alergens")]
+        public async Task<IActionResult> PutUserAlergens(int id, [FromBody] RequestUpdateAlergenByUserDto dto)
+        {
+            var updatedUser = await _userService.UpdateUserAlergensAsync(id, dto);
+            if (updatedUser == null)
+                return NotFound();
+
+            return Ok(updatedUser);
         }
 
         // ADMIN PUT api/users/5/admin-users
