@@ -3,6 +3,7 @@ using System;
 using Gozba_na_klik.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Gozba_na_klik.Migrations
 {
     [DbContext(typeof(GozbaNaKlikDbContext))]
-    partial class GozbaNaKlikDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251019163318_AddOrderTables")]
+    partial class AddOrderTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -991,30 +994,6 @@ namespace Gozba_na_klik.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Gozba_na_klik.Models.UserAlergen", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AlergenId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AlergenId");
-
-                    b.HasIndex("UserId", "AlergenId")
-                        .IsUnique();
-
-                    b.ToTable("UserAlergens");
-                });
-
             modelBuilder.Entity("Gozba_na_klik.Models.WorkSchedule", b =>
                 {
                     b.Property<int>("Id")
@@ -1217,25 +1196,6 @@ namespace Gozba_na_klik.Migrations
                     b.Navigation("Restaurant");
                 });
 
-            modelBuilder.Entity("Gozba_na_klik.Models.UserAlergen", b =>
-                {
-                    b.HasOne("Gozba_na_klik.Models.Alergen", "Alergen")
-                        .WithMany("UserAlergens")
-                        .HasForeignKey("AlergenId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Gozba_na_klik.Models.User", "User")
-                        .WithMany("UserAlergens")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Alergen");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Gozba_na_klik.Models.WorkSchedule", b =>
                 {
                     b.HasOne("Gozba_na_klik.Models.Restaurant", "Restaurant")
@@ -1245,11 +1205,6 @@ namespace Gozba_na_klik.Migrations
                         .IsRequired();
 
                     b.Navigation("Restaurant");
-                });
-
-            modelBuilder.Entity("Gozba_na_klik.Models.Alergen", b =>
-                {
-                    b.Navigation("UserAlergens");
                 });
 
             modelBuilder.Entity("Gozba_na_klik.Models.Meal", b =>
@@ -1271,11 +1226,6 @@ namespace Gozba_na_klik.Migrations
                     b.Navigation("Menu");
 
                     b.Navigation("WorkSchedules");
-                });
-
-            modelBuilder.Entity("Gozba_na_klik.Models.User", b =>
-                {
-                    b.Navigation("UserAlergens");
                 });
 #pragma warning restore 612, 618
         }
