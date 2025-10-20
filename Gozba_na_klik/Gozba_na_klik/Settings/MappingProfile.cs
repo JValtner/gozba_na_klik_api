@@ -2,10 +2,13 @@
 using Gozba_na_klik.DTOs;
 using Gozba_na_klik.DTOs.DeliveryPersonSchedule;
 using Gozba_na_klik.DTOs.Employee;
+using Gozba_na_klik.DTOs.Orders;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.Models.Orders;
 using Gozba_na_klik.Utils;
+using System.Text.Json;
 
 namespace Gozba_na_klik.Settings
 {
@@ -51,14 +54,13 @@ namespace Gozba_na_klik.Settings
             CreateMap<Alergen, ResponseAlergenDto>();
 
             // ---------- Employee (User) ----------
-            // User → EmployeeListItemDto (za response)
             CreateMap<User, EmployeeListItemDto>();
 
             // RegisterEmployeeDto → User (za kreiranje)
             CreateMap<RegisterEmployeeDto, User>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.RestaurantId, opt => opt.Ignore()) // ← Service postavlja
-                .ForMember(dest => dest.IsActive, opt => opt.Ignore())     // ← Service postavlja
+                .ForMember(dest => dest.RestaurantId, opt => opt.Ignore())
+                .ForMember(dest => dest.IsActive, opt => opt.Ignore())
                 .ForMember(dest => dest.UserImage, opt => opt.Ignore());
 
             // UpdateEmployeeDto → User (za update)
@@ -67,7 +69,7 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.RestaurantId, opt => opt.Ignore())
                 .ForMember(dest => dest.IsActive, opt => opt.Ignore())
                 .ForMember(dest => dest.UserImage, opt => opt.Ignore())
-                .ForMember(dest => dest.Password, opt => opt.Condition(src => !string.IsNullOrEmpty(src.Password))); // ← Samo ako postoji!
+                .ForMember(dest => dest.Password, opt => opt.Condition(src => !string.IsNullOrEmpty(src.Password)));
 
             // ---------- DeliveryPersonSchedule ----------
             CreateMap<DeliveryPersonSchedule, DeliveryScheduleDto>()
@@ -76,6 +78,27 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.StartTime.ToString(@"hh\:mm")))
                 .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.EndTime.ToString(@"hh\:mm")))
                 .ForMember(dest => dest.Hours, opt => opt.MapFrom(src => Math.Round((src.EndTime - src.StartTime).TotalHours, 2)));
+
+            /// ---------- Order ----------
+        CreateMap<Order, OrderResponseDto>()
+            .ForMember(dest => dest.RestaurantName,
+                opt => opt.MapFrom(src => src.Restaurant != null ? src.Restaurant.Name : ""))
+            .ForMember(dest => dest.DeliveryAddress,
+                opt => opt.MapFrom(src =>
+                    src.Address != null
+                        ? $"{src.Address.Street}, {src.Address.City}, {src.Address.PostalCode}"
+                        : ""))
+            .ForMember(dest => dest.Items,
+                opt => opt.MapFrom(src => src.Items));
+
+            CreateMap<OrderItem, OrderItemResponseDto>()
+                .ForMember(dest => dest.MealName,
+                    opt => opt.MapFrom(src => src.Meal != null ? src.Meal.Name : "Unknown"))
+                .ForMember(dest => dest.MealImagePath,
+                    opt => opt.MapFrom(src => src.Meal != null ? src.Meal.ImagePath : null))
+                .ForMember(dest => dest.SelectedAddons,
+                    opt => opt.MapFrom(src => JsonHelper.DeserializeStringList(src.SelectedAddons)));
+
         }
     }
 }

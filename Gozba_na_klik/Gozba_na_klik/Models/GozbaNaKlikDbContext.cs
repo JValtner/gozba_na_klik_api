@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Gozba_na_klik.Models.Orders;
+using Microsoft.EntityFrameworkCore;
 
 namespace Gozba_na_klik.Models
 {
@@ -14,7 +15,8 @@ namespace Gozba_na_klik.Models
         public DbSet<WorkSchedule> WorkSchedules { get; set; }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<DeliveryPersonSchedule> DeliveryPersonSchedules { get; set; }
-
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
 
 
 
@@ -238,6 +240,36 @@ namespace Gozba_na_klik.Models
                 .WithMany()
                 .HasForeignKey(s => s.DeliveryPersonId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.User)
+                .WithMany()
+                .HasForeignKey(o => o.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Restaurant)
+                .WithMany()
+                .HasForeignKey(o => o.RestaurantId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Address)
+                .WithMany()
+                .HasForeignKey(o => o.AddressId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.Order)
+                .WithMany(o => o.Items)
+                .HasForeignKey(oi => oi.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.Meal)
+                .WithMany()
+                .HasForeignKey(oi => oi.MealId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
