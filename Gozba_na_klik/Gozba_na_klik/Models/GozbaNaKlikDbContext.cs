@@ -16,6 +16,7 @@ namespace Gozba_na_klik.Models
         public DbSet<DeliveryPersonSchedule> DeliveryPersonSchedules { get; set; }
         public DbSet<UserAlergen> UserAlergens { get; set; }
 
+        public DbSet<Review> Reviews { get; set; }
 
 
 
