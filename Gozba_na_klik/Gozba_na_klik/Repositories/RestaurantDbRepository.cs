@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using BookstoreApplication.Utils;
-using Gozba_na_klik.DTOs.Request;
-using Gozba_na_klik.Enums;
+﻿using Gozba_na_klik.Enums;
 using Gozba_na_klik.Models;
 using Microsoft.EntityFrameworkCore;
 using Gozba_na_klik.Utils;

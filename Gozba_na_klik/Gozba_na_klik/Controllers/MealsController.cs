@@ -1,4 +1,4 @@
-﻿using BookstoreApplication.Utils;
+﻿using Gozba_na_klik.Utils;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Enums;
@@ -21,6 +21,11 @@ namespace Gozba_na_klik.Controllers
             _fileService = fileService;
         }
 
+        public async Task<IActionResult> GetAllAsync()
+        {
+            IEnumerable<ResponseMealDto> result = await _mealService.GetAllMealsAsync();
+            return Ok(result);
+        }
         // GET: api/meals/restaurant/3
         [HttpGet("restaurant/{restaurantId}")]
         public async Task<ActionResult<IEnumerable<ResponseMealDto>>> GetMealsByRestaurant(int restaurantId)

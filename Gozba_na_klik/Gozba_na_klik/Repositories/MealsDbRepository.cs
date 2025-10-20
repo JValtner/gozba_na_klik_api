@@ -1,7 +1,4 @@
-﻿using System;
-using BookstoreApplication.Utils;
-using Gozba_na_klik.DTOs.Request;
-using Gozba_na_klik.Enums;
+﻿using Gozba_na_klik.Enums;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +12,16 @@ namespace Gozba_na_klik.Repositories
         public MealsDbRepository(GozbaNaKlikDbContext context)
         {
             _context = context;
+        }
+
+        public async Task<IEnumerable<Meal>> GetAllAsync()
+        {
+            return await _context.Meals
+                .Include(m => m.Addons)
+                .Include(m => m.Alergens)
+                .Include(m => m.Restaurant)
+                .AsNoTracking()
+                .ToListAsync();
         }
         public async Task<IEnumerable<Meal>> GetMealsByRestaurantIdAsync(int restaurantId)
         {

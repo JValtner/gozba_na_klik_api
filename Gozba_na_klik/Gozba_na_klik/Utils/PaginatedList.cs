@@ -1,4 +1,4 @@
-﻿namespace BookstoreApplication.Utils
+﻿namespace Gozba_na_klik.Utils
 {
     public class PaginatedList<T>
     {

@@ -1,7 +1,5 @@
 ﻿using System.Text.Json;
 using AutoMapper;
-using BookstoreApplication.Utils;
-using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Exceptions;
 using Gozba_na_klik.Models;
@@ -26,6 +24,10 @@ namespace Gozba_na_klik.Services
             _logger = logger;
         }
 
+        Task<IEnumerable<ResponseMealDto>> IMealService.GetAllMealsAsync()
+        {
+            throw new NotImplementedException();
+        }
         public async Task<IEnumerable<ResponseMealDto>> GetMealsByRestaurantIdAsync(int restaurantId)
         {
             if (restaurantId <= 0)
