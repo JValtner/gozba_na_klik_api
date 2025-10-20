@@ -75,8 +75,9 @@ namespace Gozba_na_klik.Settings
 
             // Mapiranje korisnika sa listom alergena
             CreateMap<User, ResponseUserAlergenDto>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.Alergens, opt => opt.MapFrom(src => src.UserAlergens));
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.Alergens, opt => opt.MapFrom(src => src.UserAlergens.Select(ua => ua.Alergen)));
+
 
 
             // ---------- Employee (User) ----------

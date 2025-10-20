@@ -103,11 +103,15 @@ namespace Gozba_na_klik.Services
         // UPDATE USER (ALERGENS)
         public async Task<ResponseUserAlergenDto?> UpdateUserAlergensAsync(int userId, RequestUpdateAlergenByUserDto dto)
         {
-            var updatedUser = await _userRepository.UpdateUserAlergensAsync(userId, dto.AlergensIds);
+            await _userRepository.UpdateUserAlergensAsync(userId, dto.AlergensIds);
+
+            // Ponovo učitaj entitet sa uključeniim alergenima
+            var updatedUser = await _userRepository.GetByIdWithAlergensAsync(userId);
             if (updatedUser == null) return null;
 
             return _mapper.Map<ResponseUserAlergenDto>(updatedUser);
         }
+
 
         public async Task DeleteUserAsync(int userId)
         {
