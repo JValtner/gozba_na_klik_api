@@ -5,6 +5,7 @@ using Gozba_na_klik.DTOs.Addresses;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Services.AddressServices;
 using Microsoft.AspNetCore.Mvc;
+using AutoMapper;
 
 namespace Gozba_na_klik.Controllers
 {
@@ -13,10 +14,12 @@ namespace Gozba_na_klik.Controllers
     public class AddressesController : ControllerBase
     {
         private readonly IAddressService _addressService;
+        private readonly IMapper _mapper;
 
-        public AddressesController(IAddressService addressService)
+        public AddressesController(IAddressService addressService, IMapper mapper)
         {
             _addressService = addressService;
+            _mapper = mapper;
         }
 
         // GET api/addresses/my
@@ -25,16 +28,7 @@ namespace Gozba_na_klik.Controllers
             [FromHeader(Name = "X-User-Id")] int userId)
         {
             List<Address> items = await _addressService.GetMyAsync(userId);
-
-            List<AddressListItemDto> dto = items.Select(a => new AddressListItemDto
-            {
-                Id = a.Id,
-                Label = a.Label,
-                Street = a.Street,
-                City = a.City,
-                PostalCode = a.PostalCode,
-                IsDefault = a.IsDefault
-            }).ToList();
+            List<AddressListItemDto> dto = _mapper.Map<List<AddressListItemDto>>(items);
 
             return Ok(dto);
         }
@@ -47,15 +41,7 @@ namespace Gozba_na_klik.Controllers
         {
             Address created = await _addressService.CreateAsync(userId, dtoIn);
 
-            AddressListItemDto dtoOut = new AddressListItemDto
-            {
-                Id = created.Id,
-                Label = created.Label,
-                Street = created.Street,
-                City = created.City,
-                PostalCode = created.PostalCode,
-                IsDefault = created.IsDefault
-            };
+            AddressListItemDto dtoOut = _mapper.Map<AddressListItemDto>(created);
 
             return CreatedAtAction(nameof(GetMy), null, dtoOut);
         }

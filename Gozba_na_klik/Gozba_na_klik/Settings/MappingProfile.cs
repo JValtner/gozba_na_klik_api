@@ -5,6 +5,7 @@ using Gozba_na_klik.DTOs.Employee;
 using Gozba_na_klik.DTOs.Orders;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
+using Gozba_na_klik.DTOs.Addresses;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
 using Gozba_na_klik.Utils;
@@ -42,6 +43,18 @@ namespace Gozba_na_klik.Settings
 
             CreateMap<RequestUpdateRestaurantByAdminDto, Restaurant>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
+
+            // ---------- Address ----------
+            CreateMap<AddressCreateDto, Address>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.UserId, opt => opt.Ignore());
+
+            CreateMap<AddressUpdateDto, Address>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.UserId, opt => opt.Ignore())
+                .ForMember(dest => dest.IsActive, opt => opt.Ignore());
+
+            CreateMap<Address, AddressListItemDto>();
 
             // ---------- Meal ----------
             CreateMap<RequestMealDto, Meal>()
