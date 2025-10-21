@@ -21,6 +21,7 @@ namespace Gozba_na_klik.Controllers
             _fileService = fileService;
         }
 
+        [HttpGet]
         public async Task<IActionResult> GetAllAsync()
         {
             IEnumerable<ResponseMealDto> result = await _mealService.GetAllMealsAsync();
