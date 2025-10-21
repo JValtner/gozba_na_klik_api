@@ -1,5 +1,5 @@
 using Gozba_na_klik.Models;
-using Gozba_na_klik.DTOs.Review;
+using Gozba_na_klik.Models;
 
 public class ReviewService : IReviewService
 {
@@ -25,7 +25,6 @@ public class ReviewService : IReviewService
         {
             OrderId = dto.OrderId,
             RestaurantId = order.RestaurantId,
-            CourierId = order.CourierId,
             RestaurantRating = dto.RestaurantRating,
             RestaurantComment = dto.RestaurantComment,
             RestaurantPhotoUrl = dto.RestaurantPhoto != null ? await SavePhotoAsync(dto.RestaurantPhoto) : null,
