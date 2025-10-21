@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using BookstoreApplication.Utils;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Exceptions;

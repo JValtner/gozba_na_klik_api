@@ -1,6 +1,4 @@
-﻿using BookstoreApplication.Utils;
-using Gozba_na_klik.DTOs.Request;
-using Gozba_na_klik.Utils;
+﻿using Gozba_na_klik.Utils;
 
 namespace Gozba_na_klik.Models
 {
