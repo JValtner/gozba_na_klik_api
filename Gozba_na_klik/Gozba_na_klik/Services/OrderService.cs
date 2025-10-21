@@ -271,5 +271,24 @@ namespace Gozba_na_klik.Services
 
             return $"Restoran radi od {schedule.OpenTime:hh\\:mm} do {schedule.CloseTime:hh\\:mm}.";
         }
+
+        public async Task<PaginatedOrderHistoryResponseDto> GetUserOrderHistoryAsync(int userId, string? statusFilter, int page, int pageSize)
+        {
+            _logger.LogInformation("Getting order history for user {UserId} with filter {StatusFilter}, page {Page}, pageSize {PageSize}",
+                userId, statusFilter, page, pageSize);
+
+            var (orders, totalCount) = await _orderRepository.GetOrdersByUserIdAsync(userId, statusFilter, page, pageSize);
+
+            var orderDtos = _mapper.Map<List<OrderHistoryResponseDto>>(orders);
+
+            return new PaginatedOrderHistoryResponseDto
+            {
+                Orders = orderDtos,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
     }
 }
