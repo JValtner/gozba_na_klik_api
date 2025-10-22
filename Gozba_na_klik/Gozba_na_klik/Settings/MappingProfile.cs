@@ -154,6 +154,18 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.SelectedAddons,
                     opt => opt.MapFrom(src => JsonHelper.DeserializeStringList(src.SelectedAddons)));
 
+            // ---------- Order History ----------
+            CreateMap<Order, OrderHistoryResponseDto>()
+                .ForMember(dest => dest.RestaurantName,
+                    opt => opt.MapFrom(src => src.Restaurant != null ? src.Restaurant.Name : "Nepoznat restoran"))
+                .ForMember(dest => dest.DeliveryAddress,
+                    opt => opt.MapFrom(src =>
+                        src.Address != null
+                            ? $"{src.Address.Street}, {src.Address.City}"
+                            : "Adresa nije dostupna"))
+                .ForMember(dest => dest.Items,
+                    opt => opt.MapFrom(src => src.Items));
+
         }
     }
 }

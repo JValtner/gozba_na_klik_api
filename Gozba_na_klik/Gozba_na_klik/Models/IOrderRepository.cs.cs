@@ -7,5 +7,6 @@ namespace Gozba_na_klik.Models
         Task<Order?> GetByIdAsync(int orderId);
         Task<Order> AddAsync(Order order);
         Task<bool> ExistsAsync(int orderId);
+        Task<(List<Order> Orders, int TotalCount)> GetOrdersByUserIdAsync(int userId, string? statusFilter, int page, int pageSize);
     }
 }

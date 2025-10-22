@@ -49,5 +49,42 @@ namespace Gozba_na_klik.Repositories
         {
             return await _context.Orders.AnyAsync(o => o.Id == orderId);
         }
+
+        public async Task<(List<Order> Orders, int TotalCount)> GetOrdersByUserIdAsync(int userId, string? statusFilter, int page, int pageSize)
+        {
+            var query = _context.Orders
+                .Include(o => o.Restaurant)
+                .Include(o => o.Address)
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Meal)
+                .Where(o => o.UserId == userId);
+
+            if (!string.IsNullOrEmpty(statusFilter))
+            {
+                if (statusFilter.ToUpper() == "ACTIVE")
+                {
+                    query = query.Where(o => o.Status != OrderStatus.ISPORUČENA && o.Status != OrderStatus.OTKAZANA);
+                }
+                else if (statusFilter.ToUpper() == "ARCHIVED")
+                {
+                    query = query.Where(o => o.Status == OrderStatus.ISPORUČENA || o.Status == OrderStatus.OTKAZANA);
+                }
+                else
+                {
+                    query = query.Where(o => o.Status == statusFilter);
+                }
+            }
+
+            query = query.OrderByDescending(o => o.OrderDate);
+
+            var totalCount = await query.CountAsync();
+
+            var orders = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (orders, totalCount);
+        }
     }
 }
