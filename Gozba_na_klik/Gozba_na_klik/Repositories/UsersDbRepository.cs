@@ -1,5 +1,6 @@
 ﻿using System;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.Models.Orders;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gozba_na_klik.Repositories
@@ -35,6 +36,17 @@ namespace Gozba_na_klik.Repositories
                     .ThenInclude(ua => ua.Alergen)
                 .FirstOrDefaultAsync(u => u.Id == userId);
         }
+
+        // Dobavljanje slobodnih dostavljaca (trenutno bez dostave)
+        public async Task<List<User>> GetAllAvailableCouriersAsync()
+        {
+            return await _context.Users
+                .Where(user => user.Role == "RestaurantEmployee" 
+                    && user.IsActive == true 
+                    && user.ActiveOrderId == null)
+                .ToListAsync();
+        }
+
         public async Task<bool> ExistsAsync(int id)
         {
             return await _context.Users.AnyAsync(u => u.Id == id);
@@ -66,6 +78,16 @@ namespace Gozba_na_klik.Repositories
             await _context.SaveChangesAsync();
             return user;
         }
+        // Dodeli dostavu dostavljacu
+        public async Task<User?> AssignOrderToCourier(Order order, User courier)
+        {
+            int orderId = order.Id;
+            courier.ActiveOrderId = orderId;
+
+            await _context.SaveChangesAsync();
+            return courier;
+        }
+
         public async Task<bool> DeleteAsync(int id)
         {
             User user = await _context.Users.FindAsync(id);
