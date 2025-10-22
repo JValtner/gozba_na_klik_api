@@ -2,23 +2,26 @@ using Gozba_na_klik.Models;
 using Microsoft.AspNetCore.Mvc;
 using Gozba_na_klik.Models;
 
-[ApiController]
-[Route("api/reviews")]
-public class ReviewsController : ControllerBase
+namespace Gozba_na_klik.Controllers
 {
-    private readonly IReviewService _service;
-
-    public ReviewsController(IReviewService service)
+    [ApiController]
+    [Route("api/reviews")]
+    public class ReviewsController : ControllerBase
     {
-        _service = service;
-    }
+        private readonly IReviewService _service;
 
-    [HttpPost]
-    public async Task<IActionResult> CreateReview([FromForm] CreateReviewDto dto)
-    {
-        var success = await _service.CreateReviewAsync(dto);
-        if (!success)
-            return BadRequest("Order not found, not completed, or already reviewed.");
-        return Ok();
+        public ReviewsController(IReviewService service)
+        {
+            _service = service;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateReview([FromForm] CreateReviewDto dto)
+        {
+            var success = await _service.CreateReviewAsync(dto);
+            if (!success)
+                return BadRequest("Order not found, not completed, or already reviewed.");
+            return Ok();
+        }
     }
 }
