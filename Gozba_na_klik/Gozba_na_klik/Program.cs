@@ -70,6 +70,9 @@ builder.Services.AddScoped<IAlergenService, AlergenService>();
 builder.Services.AddScoped<IAddressRepository, AddressDbRepository>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 
+builder.Services.AddScoped<IReviewsRepository, ReviewsDbRepository>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+
 builder.Services.AddScoped<IFileService, FileService>();
 
 builder.Services.AddScoped<IOrderAutoAssignerService, OrderAutoAssignerService>();
