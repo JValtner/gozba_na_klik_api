@@ -13,11 +13,17 @@
         {
             Items = items;
             Count = count;
-            PageIndex = pageIndex;
-            PageIndex = Math.Min(Math.Max(0, pageIndex), TotalPages - 1);
-            HasPreviousPage = PageIndex > 0;
-            HasNextPage = PageIndex < TotalPages - 1;
+
+            // calculate total pages first
+            TotalPages = (int)Math.Ceiling(count / (double)pageSize);
+
+            // normalize page index (1-based externally, 0-based internally if you prefer)
+            PageIndex = Math.Max(1, pageIndex); // enforce minimum of 1
+            if (TotalPages > 0 && PageIndex > TotalPages)
+                PageIndex = TotalPages;
+
+            HasPreviousPage = PageIndex > 1;
+            HasNextPage = PageIndex < TotalPages;
         }
     }
-
 }

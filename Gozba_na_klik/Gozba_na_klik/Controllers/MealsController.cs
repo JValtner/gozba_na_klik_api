@@ -110,5 +110,12 @@ namespace Gozba_na_klik.Controllers
             await _mealService.DeleteMealAsync(id);
             return NoContent();
         }
+        // GET /api/publishers/sortTypes
+        [HttpGet("sortTypes")]
+        public async Task<IActionResult> GetSortTypes()
+        {
+            var sortTypes = await _mealService.GetSortTypesAsync();
+            return Ok(sortTypes);
+        }
     }
 }

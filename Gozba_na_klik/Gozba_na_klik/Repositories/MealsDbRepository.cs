@@ -70,26 +70,31 @@ namespace Gozba_na_klik.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
-        public async Task<PaginatedList<Meal>> GetAllFilteredSortedPagedAsync(MealFilter filter, int sortType, int page, int pageSize)
+        public async Task<PaginatedList<Meal>> GetAllFilteredSortedPagedAsync(
+    MealFilter filter, int sortType, int page, int pageSize)
         {
-            IQueryable<Meal> query = _context.Meals
+            var baseQuery = _context.Meals
                 .Include(m => m.Restaurant)
                 .Include(m => m.Addons)
-                .Include(m => m.Alergens);
+                .Include(m => m.Alergens)
+                .AsNoTracking();
 
-            query = FilterMeals(query, filter);
-            query = SortMeals(query, sortType);
+            var filtered = FilterMeals(baseQuery, filter);
+            var sorted = SortMeals(filtered, sortType);
 
-            int count = await query.CountAsync();
-            int skip = (page - 1) * pageSize;
-            List<Meal> items = await query.Skip(skip).Take(pageSize).ToListAsync();
+            int count = await sorted.CountAsync();
+
+            var items = await sorted
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
             return new PaginatedList<Meal>(items, count, page, pageSize);
         }
 
         public IQueryable<Meal> FilterMeals(IQueryable<Meal> query, MealFilter filter)
         {
-            if (!string.IsNullOrEmpty(filter.Name))
+            if (!string.IsNullOrWhiteSpace(filter.Name))
                 query = query.Where(m => m.Name.ToLower().Contains(filter.Name.ToLower()));
 
             if (filter.MinPrice.HasValue && filter.MinPrice.Value > 0)
@@ -98,19 +103,31 @@ namespace Gozba_na_klik.Repositories
             if (filter.MaxPrice.HasValue && filter.MaxPrice.Value > 0)
                 query = query.Where(m => m.Price <= filter.MaxPrice.Value);
 
-            if (!string.IsNullOrEmpty(filter.RestaurantName))
+            if (!string.IsNullOrWhiteSpace(filter.RestaurantName))
                 query = query.Where(m => m.Restaurant != null &&
                                          m.Restaurant.Name.ToLower().Contains(filter.RestaurantName.ToLower()));
 
             if (filter.Alergens != null && filter.Alergens.Any())
-                query = query.Where(m => m.Alergens.Any(a => filter.Alergens.Contains(a.Name)));
+            {
+                foreach (var allergen in filter.Alergens)
+                {
+                    var allergenLower = allergen.ToLower();
+                    query = query.Where(m => m.Alergens.Any(a => a.Name.ToLower().Contains(allergenLower)));
+                }
+            }
 
             if (filter.Addons != null && filter.Addons.Any())
-                query = query.Where(m => m.Addons.Any(ad => filter.Addons.Contains(ad.Name)));
+            {
+                foreach (var addon in filter.Addons)
+                {
+                    var addonLower = addon.ToLower();
+                    query = query.Where(m => m.Addons.Any(ad => ad.Name.ToLower().Contains(addonLower)));
+                }
+            }
 
             return query;
         }
-        
+
 
         public IQueryable<Meal> SortMeals(IQueryable<Meal> query, int sortType)
         {

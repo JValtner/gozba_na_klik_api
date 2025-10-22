@@ -85,8 +85,8 @@ public class RestaurantDbRepository : IRestaurantRepository
             .Include(r => r.Owner)
             .Include(r => r.WorkSchedules)
             .Include(r => r.ClosedDates);
-
-        query = FilterRestaurants(query, filter);
+        //Disabled zbog testiranja ne prikazuje restorane za koje nema definisano radno vreme tj smatra da ne rade
+        //query = FilterRestaurants(query, filter);
         query = SortRestaurants(query, sortType);
 
         int count = await query.CountAsync();
