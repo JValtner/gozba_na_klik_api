@@ -1,10 +1,12 @@
-﻿namespace Gozba_na_klik.Models
+﻿namespace Gozba_na_klik.Enums
 {
     public enum MealSortType
     {
-        NameAsc,
-        NameDesc,
-        PriceASC,
-        PriceDesc
+        A_Z = 1,
+        Z_A = 2,
+        Price_Lowest = 3,
+        Price_Highest = 4,
+        Has_Alergens = 5,
+        No_Alergens = 6
     }
 }

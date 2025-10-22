@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Linq;
+﻿using System.Linq;
+using Gozba_na_klik.DTOs;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
-using Gozba_na_klik.Services;
+using Gozba_na_klik.Enums;
 using Gozba_na_klik.Models;
-using Gozba_na_klik.DTOs;
+using Gozba_na_klik.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Gozba_na_klik.Controllers
 {
@@ -109,6 +110,17 @@ namespace Gozba_na_klik.Controllers
 
             return Ok(list);
         }
+
+        [HttpGet("filterSortPage")]
+        public async Task<IActionResult> GetFilteredSortedPagedAsync(
+        [FromQuery] RestaurantFilter filter,
+        [FromQuery] int sortType = (int)RestaurantSortType.A_Z,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+            {
+                var result = await _restaurantService.GetAllFilteredSortedPagedAsync(filter, sortType, page, pageSize);
+                return Ok(result);
+            }
 
         // PUT: api/restaurants/{id}
         // Izmena osnovnih podataka restorana uz proveru vlasništva (AC #2 i #3)
@@ -238,6 +250,13 @@ namespace Gozba_na_klik.Controllers
         {
             await _restaurantService.RemoveClosedDateAsync(id, dateId);
             return NoContent();
+        }
+        // GET /api/publishers/sortTypes
+        [HttpGet("sortTypes")]
+        public async Task<IActionResult> GetSortTypes()
+        {
+            var sortTypes = await _restaurantService.GetSortTypesAsync();
+            return Ok(sortTypes);
         }
     }
 }
