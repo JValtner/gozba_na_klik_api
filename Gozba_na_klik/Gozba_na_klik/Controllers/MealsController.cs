@@ -1,5 +1,7 @@
-﻿using Gozba_na_klik.DTOs.Request;
+﻿using Gozba_na_klik.Utils;
+using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
+using Gozba_na_klik.Enums;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +21,12 @@ namespace Gozba_na_klik.Controllers
             _fileService = fileService;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllAsync()
+        {
+            IEnumerable<ResponseMealDto> result = await _mealService.GetAllMealsAsync();
+            return Ok(result);
+        }
         // GET: api/meals/restaurant/3
         [HttpGet("restaurant/{restaurantId}")]
         public async Task<ActionResult<IEnumerable<ResponseMealDto>>> GetMealsByRestaurant(int restaurantId)
@@ -35,6 +43,17 @@ namespace Gozba_na_klik.Controllers
             if (meal == null)
                 return NotFound();
             return Ok(meal);
+        }
+        // GET: api/meals/paged
+        [HttpGet("filterSortPage")]
+        public async Task<ActionResult<PaginatedList<ResponseMealDto>>> GetFilteredSortedPagedAsync(
+        [FromQuery] MealFilter filter,
+        [FromQuery] int sortType = (int)MealSortType.A_Z,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+        {
+            var result = await _mealService.GetAllFilteredSortedPagedAsync(filter, sortType, page, pageSize);
+            return Ok(result);
         }
 
         // POST: api/meals
@@ -90,6 +109,13 @@ namespace Gozba_na_klik.Controllers
         {
             await _mealService.DeleteMealAsync(id);
             return NoContent();
+        }
+        // GET /api/publishers/sortTypes
+        [HttpGet("sortTypes")]
+        public async Task<IActionResult> GetSortTypes()
+        {
+            var sortTypes = await _mealService.GetSortTypesAsync();
+            return Ok(sortTypes);
         }
     }
 }

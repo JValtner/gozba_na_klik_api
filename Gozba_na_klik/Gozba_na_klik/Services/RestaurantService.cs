@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Gozba_na_klik.DTOs.Request;
-using Gozba_na_klik.Models;
-using Microsoft.EntityFrameworkCore;
+using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Exceptions;
+using Gozba_na_klik.Models;
+using Gozba_na_klik.Utils;
+using Microsoft.EntityFrameworkCore;
 
 namespace Gozba_na_klik.Services
 {
@@ -124,5 +126,46 @@ namespace Gozba_na_klik.Services
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task<PaginatedList<ResponseRestaurantDTO>> GetAllFilteredSortedPagedAsync(
+    RestaurantFilter filter, int sortType, int page, int pageSize)
+        {
+            var pagedRestaurants = await _restaurantRepository.GetAllFilteredSortedPagedAsync(filter, sortType, page, pageSize);
+            var currentDate = filter.CurrentDate ?? DateTime.UtcNow;
+            var currentDay = currentDate.DayOfWeek;
+            var currentTime = currentDate.TimeOfDay;
+
+            var dtoItems = pagedRestaurants.Items.Select(r => new ResponseRestaurantDTO
+            {
+                Id = r.Id,
+                Name = r.Name,
+                PhotoUrl = r.PhotoUrl,
+                Address = r.Address,
+                Description = r.Description,
+                Phone = r.Phone,
+                Menu = r.Menu,
+                ClosedDates = r.ClosedDates,
+                isOpen = IsRestaurantOpen(r, currentDate)
+
+            }).ToList();
+
+            return new PaginatedList<ResponseRestaurantDTO>(
+                dtoItems, pagedRestaurants.Count, pagedRestaurants.PageIndex, pageSize);
+        }
+        public async Task<List<SortTypeOption>> GetSortTypesAsync()  //dobavlja vrste sortiranja
+        {
+            return await _restaurantRepository.GetSortTypesAsync();
+        }
+        private static bool IsRestaurantOpen(Restaurant r, DateTime currentDate)
+        {
+            var currentDay = currentDate.DayOfWeek;
+            var currentTime = currentDate.TimeOfDay;
+
+            return !r.ClosedDates.Any(cd => cd.Date.Date == currentDate.Date) &&
+                   r.WorkSchedules.Any(ws =>
+                       ws.DayOfWeek == currentDay &&
+                       ws.OpenTime <= currentTime &&
+                       ws.CloseTime >= currentTime);
+        }
+
     }
 }

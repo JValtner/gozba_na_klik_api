@@ -1,4 +1,4 @@
-﻿namespace BookstoreApplication.Utils
+﻿namespace Gozba_na_klik.Utils
 {
     public class PaginatedList<T>
     {
@@ -13,11 +13,17 @@
         {
             Items = items;
             Count = count;
-            PageIndex = pageIndex;
+
+            // calculate total pages first
             TotalPages = (int)Math.Ceiling(count / (double)pageSize);
-            HasPreviousPage = PageIndex > 0;
-            HasNextPage = PageIndex < TotalPages - 1;
+
+            // normalize page index (1-based externally, 0-based internally if you prefer)
+            PageIndex = Math.Max(1, pageIndex); // enforce minimum of 1
+            if (TotalPages > 0 && PageIndex > TotalPages)
+                PageIndex = TotalPages;
+
+            HasPreviousPage = PageIndex > 1;
+            HasNextPage = PageIndex < TotalPages;
         }
     }
-
 }
