@@ -15,7 +15,7 @@ public class ReviewService : IReviewService
     public async Task<bool> CreateReviewAsync(CreateReviewDto dto)
     {
         var order = await _context.Orders.FindAsync(dto.OrderId);
-        if (order == null || order.Status != "ZAVRŠENO")
+        if (order == null || order.Status != "ZAVRÅ ENO")
             return false;
 
         if (await _repository.ReviewExistsForOrderAsync(dto.OrderId))

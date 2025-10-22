@@ -1,4 +1,5 @@
-﻿using Gozba_na_klik.Models;
+﻿using Gozba_na_klik.Enums;
+using Gozba_na_klik.Models;
 
 namespace Gozba_na_klik.Utils
 {
@@ -7,7 +8,7 @@ namespace Gozba_na_klik.Utils
         public int Key { get; set; }
         public string Name { get; set; }
 
-        public SortTypeOption(MealSortType sortType) // prethodno napravljena enumeracija
+        public SortTypeOption(MealSortType sortType) 
         {
             Key = (int)sortType;
             Name = sortType.ToString(); 
@@ -18,6 +19,11 @@ namespace Gozba_na_klik.Utils
             Name = sortType.ToString();
         }
         public SortTypeOption(AlergenSortType sortType)
+        {
+            Key = (int)sortType;
+            Name = sortType.ToString();
+        }
+        public SortTypeOption(RestaurantSortType sortType)
         {
             Key = (int)sortType;
             Name = sortType.ToString();

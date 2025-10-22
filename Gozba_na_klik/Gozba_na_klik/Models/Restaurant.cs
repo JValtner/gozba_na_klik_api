@@ -20,7 +20,7 @@ public class Restaurant
     // Mozda cemo morati da menjamo sa User na Employee zbog nekih suspenzija...
     public List<User> Employees { get; set; } = new();
 
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
 }
