@@ -4,6 +4,7 @@ using Gozba_na_klik.Models;
 using Gozba_na_klik.Repositories;
 using Gozba_na_klik.Services;
 using Gozba_na_klik.Services.AddressServices;
+using Gozba_na_klik.Services.OrderAutoAssignerServices;
 using Gozba_na_klik.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -71,6 +72,9 @@ builder.Services.AddScoped<IAddressService, AddressService>();
 
 builder.Services.AddScoped<IFileService, FileService>();
 
+builder.Services.AddScoped<IOrderAutoAssignerService, OrderAutoAssignerService>();
+builder.Services.AddHostedService<OrderAutoAssignerBackgroundService>();
+
 // Configure PostgreSQL database connection
 builder.Services.AddDbContext<GozbaNaKlikDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -104,6 +108,7 @@ var logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 builder.Logging.AddSerilog(logger);
 
 var app = builder.Build();

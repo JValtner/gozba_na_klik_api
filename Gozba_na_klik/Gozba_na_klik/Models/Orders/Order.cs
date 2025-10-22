@@ -3,10 +3,19 @@
     public class Order
     {
         public int Id { get; set; }
+
+        // Kupac (User)
         public int UserId { get; set; }
         public User User { get; set; }
+
+        // Dostavljac (Delivery person)
+        public int? DeliveryPersonId { get; set; }
+        public User? DeliveryPerson { get; set; }
+
+        // Restoran
         public int RestaurantId { get; set; }
         public Restaurant Restaurant { get; set; }
+
         public int? AddressId { get; set; }
         public Address? Address { get; set; }
         public string Status { get; set; } = "NA_CEKANJU";

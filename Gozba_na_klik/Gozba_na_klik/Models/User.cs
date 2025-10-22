@@ -1,4 +1,5 @@
 ﻿using Gozba_na_klik.Models;
+using Gozba_na_klik.Models.Orders;
 
 namespace Gozba_na_klik.Models
 {
@@ -14,5 +15,9 @@ namespace Gozba_na_klik.Models
         public int? RestaurantId { get; set; }
         public Restaurant? Restaurant { get; set; }
         public List<UserAlergen> UserAlergens { get; set; } = new();
+        
+        // Dostavljac
+        public int? ActiveOrderId { get; set; }
+        public Order ActiveOrder { get; set; }
     }
 }
