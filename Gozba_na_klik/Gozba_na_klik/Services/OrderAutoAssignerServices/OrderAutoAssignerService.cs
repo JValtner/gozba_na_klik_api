@@ -31,15 +31,11 @@ namespace Gozba_na_klik.Services.OrderAutoAssignerServices
                 if (!availableCouriers.Any())
                 {
                     _logger.LogInformation("Nema slobodnih kurira trenutno.");
-                    await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
-                    continue;
                 }
 
                 else if (!ordersOnWait.Any())
                 {
                     _logger.LogInformation("Nema porudzbina na cekanju.");
-                    await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
-                    continue;
                 }
                 else
                 {
