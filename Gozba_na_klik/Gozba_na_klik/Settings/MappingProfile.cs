@@ -5,6 +5,7 @@ using Gozba_na_klik.DTOs.Employee;
 using Gozba_na_klik.DTOs.Orders;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
+using Gozba_na_klik.DTOs.Addresses;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
 using Gozba_na_klik.Utils;
@@ -42,6 +43,30 @@ namespace Gozba_na_klik.Settings
 
             CreateMap<RequestUpdateRestaurantByAdminDto, Restaurant>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
+
+            // ---------- Address ----------
+            CreateMap<AddressCreateDto, Address>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.UserId, opt => opt.Ignore());
+
+            CreateMap<AddressUpdateDto, Address>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.UserId, opt => opt.Ignore())
+                .ForMember(dest => dest.IsActive, opt => opt.Ignore());
+
+            CreateMap<Address, AddressListItemDto>();
+            CreateMap<Restaurant, ResponseRestaurantDTO>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => src.PhotoUrl))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
+                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Phone))
+                .ForMember(dest => dest.Menu, opt => opt.MapFrom(src => src.Menu))
+                .ForMember(dest => dest.WorkSchedule, opt => opt.MapFrom(src => src.WorkSchedules))
+                .ForMember(dest => dest.isOpen, opt => opt.Ignore()) // 👈 Explicitly ignore
+                .ForMember(dest => dest.ClosedDates, opt => opt.MapFrom(src => src.ClosedDates))
+                .ReverseMap(); 
 
             // ---------- Meal ----------
             CreateMap<RequestMealDto, Meal>()
@@ -128,6 +153,18 @@ namespace Gozba_na_klik.Settings
                     opt => opt.MapFrom(src => src.Meal != null ? src.Meal.ImagePath : null))
                 .ForMember(dest => dest.SelectedAddons,
                     opt => opt.MapFrom(src => JsonHelper.DeserializeStringList(src.SelectedAddons)));
+
+            // ---------- Order History ----------
+            CreateMap<Order, OrderHistoryResponseDto>()
+                .ForMember(dest => dest.RestaurantName,
+                    opt => opt.MapFrom(src => src.Restaurant != null ? src.Restaurant.Name : "Nepoznat restoran"))
+                .ForMember(dest => dest.DeliveryAddress,
+                    opt => opt.MapFrom(src =>
+                        src.Address != null
+                            ? $"{src.Address.Street}, {src.Address.City}"
+                            : "Adresa nije dostupna"))
+                .ForMember(dest => dest.Items,
+                    opt => opt.MapFrom(src => src.Items));
 
         }
     }

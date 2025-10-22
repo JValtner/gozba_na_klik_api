@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Gozba_na_klik.DTOs.Addresses;
+using Gozba_na_klik.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Gozba_na_klik.Models;
 
@@ -10,12 +12,14 @@ namespace Gozba_na_klik.Services.AddressServices
     public class AddressService : IAddressService
     {
         private readonly IAddressRepository _repo;
-        private readonly GozbaNaKlikDbContext _ctx; // a default beállításhoz praktikus
+        private readonly GozbaNaKlikDbContext _ctx;
+        private readonly IMapper _mapper;
 
-        public AddressService(IAddressRepository repo, GozbaNaKlikDbContext ctx)
+        public AddressService(IAddressRepository repo, GozbaNaKlikDbContext ctx, IMapper mapper)
         {
             _repo = repo;
             _ctx = ctx;
+            _mapper = mapper;
         }
 
         public Task<List<Address>> GetMyAsync(int userId)
@@ -25,30 +29,21 @@ namespace Gozba_na_klik.Services.AddressServices
 
         public async Task<Address> CreateAsync(int userId, AddressCreateDto dto)
         {
-            Address address = new Address
-            {
-                UserId = userId,
-                Label = dto.Label,
-                Street = dto.Street,
-                City = dto.City,
-                PostalCode = dto.PostalCode,
-                Entrance = dto.Entrance,
-                Floor = dto.Floor,
-                Apartment = dto.Apartment,
-                Latitude = dto.Latitude,
-                Longitude = dto.Longitude,
-                Notes = dto.Notes,
-                IsDefault = dto.IsDefault,
-                IsActive = true
-            };
+            Address address = _mapper.Map<Address>(dto);
+            address.UserId = userId;
+            address.IsActive = true;
 
             if (dto.IsDefault)
             {
-                List<Address> current = await _ctx.Addresses.Where(a => a.UserId == userId && a.IsActive).ToListAsync();
+                List<Address> current = await _ctx.Addresses
+                    .Where(a => a.UserId == userId && a.IsActive)
+                    .ToListAsync();
+
                 foreach (Address a in current)
                 {
                     a.IsDefault = false;
                 }
+
                 _ctx.Addresses.UpdateRange(current);
             }
 
@@ -60,30 +55,29 @@ namespace Gozba_na_klik.Services.AddressServices
         public async Task<Address> UpdateAsync(int userId, int id, AddressUpdateDto dto)
         {
             Address? existing = await _repo.GetByIdAsync(id);
-            if (existing == null || existing.UserId != userId)
+            if (existing == null)
             {
-                throw new System.UnauthorizedAccessException("Nije dozvoljeno.");
+                throw new NotFoundException("Adresa nije pronaÄ‘ena.");
+            }
+            if (existing.UserId != userId)
+            {
+                throw new ForbiddenException("Nije dozvoljeno.");
             }
 
-            existing.Label = dto.Label;
-            existing.Street = dto.Street;
-            existing.City = dto.City;
-            existing.PostalCode = dto.PostalCode;
-            existing.Entrance = dto.Entrance;
-            existing.Floor = dto.Floor;
-            existing.Apartment = dto.Apartment;
-            existing.Latitude = dto.Latitude;
-            existing.Longitude = dto.Longitude;
-            existing.Notes = dto.Notes;
+            _mapper.Map(dto, existing);
 
             bool wantsDefault = dto.IsDefault;
             if (wantsDefault && !existing.IsDefault)
             {
-                List<Address> current = await _ctx.Addresses.Where(a => a.UserId == userId && a.IsActive).ToListAsync();
+                List<Address> current = await _ctx.Addresses
+                    .Where(a => a.UserId == userId && a.IsActive)
+                    .ToListAsync();
+
                 foreach (Address a in current)
                 {
                     a.IsDefault = false;
                 }
+
                 existing.IsDefault = true;
                 _ctx.Addresses.UpdateRange(current);
             }
@@ -100,12 +94,19 @@ namespace Gozba_na_klik.Services.AddressServices
         public async Task SetDefaultAsync(int userId, int id)
         {
             Address? existing = await _repo.GetByIdAsync(id);
-            if (existing == null || existing.UserId != userId)
+            if (existing == null)
             {
-                throw new System.UnauthorizedAccessException("Nije dozvoljeno.");
+                throw new NotFoundException("Adresa nije pronaÄ‘ena.");
+            }
+            if (existing.UserId != userId)
+            {
+                throw new ForbiddenException("Nije dozvoljeno.");
             }
 
-            List<Address> current = await _ctx.Addresses.Where(a => a.UserId == userId && a.IsActive).ToListAsync();
+            List<Address> current = await _ctx.Addresses
+                .Where(a => a.UserId == userId && a.IsActive)
+                .ToListAsync();
+
             foreach (Address a in current)
             {
                 a.IsDefault = false;
@@ -120,12 +121,16 @@ namespace Gozba_na_klik.Services.AddressServices
         public async Task DeleteAsync(int userId, int id)
         {
             Address? existing = await _repo.GetByIdAsync(id);
-            if (existing == null || existing.UserId != userId)
+            if (existing == null)
             {
-                throw new System.UnauthorizedAccessException("Nije dozvoljeno.");
+                throw new NotFoundException("Adresa nije pronaÄ‘ena.");
+            }
+            if (existing.UserId != userId)
+            {
+                throw new ForbiddenException("Nije dozvoljeno.");
             }
 
-            await _repo.DeleteAsync(existing); // soft delete
+            await _repo.DeleteAsync(existing); 
             await _repo.SaveAsync();
         }
     }

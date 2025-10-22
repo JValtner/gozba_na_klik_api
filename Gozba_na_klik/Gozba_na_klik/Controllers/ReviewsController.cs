@@ -1,3 +1,4 @@
+using Gozba_na_klik.Models;
 using Microsoft.AspNetCore.Mvc;
 using Gozba_na_klik.Models;
 

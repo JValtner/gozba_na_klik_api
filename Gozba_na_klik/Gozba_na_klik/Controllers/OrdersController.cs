@@ -41,5 +41,34 @@ namespace Gozba_na_klik.Controllers
             var order = await _orderService.CreateOrderAsync(userId, restaurantId, dto);
             return CreatedAtAction(nameof(CreateOrder), new { orderId = order.Id }, order);
         }
+
+
+        // GET: api/orders/user/{userId}
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<PaginatedOrderHistoryResponseDto>> GetUserOrderHistory(
+            int userId,
+            [FromHeader(Name = "X-User-Id")] int requestingUserId,
+            [FromQuery] string? statusFilter = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            _logger.LogInformation("GET request for order history of user {UserId} by requesting user {RequestingUserId}",
+                userId, requestingUserId);
+
+            if (userId != requestingUserId)
+            {
+                _logger.LogWarning("User {RequestingUserId} attempted to access orders of user {UserId}",
+                    requestingUserId, userId);
+                return Unauthorized(new { message = "Možete videti samo svoje porudžbine." });
+            }
+
+            if (page < 1)
+                page = 1;
+            if (pageSize < 1 || pageSize > 100)
+                pageSize = 10;
+
+            var result = await _orderService.GetUserOrderHistoryAsync(userId, statusFilter, page, pageSize);
+            return Ok(result);
+        }
     }
 }
