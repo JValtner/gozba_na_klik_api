@@ -251,5 +251,12 @@ namespace Gozba_na_klik.Controllers
             await _restaurantService.RemoveClosedDateAsync(id, dateId);
             return NoContent();
         }
+        // GET /api/publishers/sortTypes
+        [HttpGet("sortTypes")]
+        public async Task<IActionResult> GetSortTypes()
+        {
+            var sortTypes = await _restaurantService.GetSortTypesAsync();
+            return Ok(sortTypes);
+        }
     }
 }

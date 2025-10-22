@@ -14,7 +14,7 @@
             Items = items;
             Count = count;
             PageIndex = pageIndex;
-            TotalPages = (int)Math.Ceiling(count / (double)pageSize);
+            PageIndex = Math.Min(Math.Max(0, pageIndex), TotalPages - 1);
             HasPreviousPage = PageIndex > 0;
             HasNextPage = PageIndex < TotalPages - 1;
         }
