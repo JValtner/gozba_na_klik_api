@@ -1,4 +1,5 @@
 ﻿using Gozba_na_klik.Models.Orders;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gozba_na_klik.Models
@@ -292,6 +293,14 @@ namespace Gozba_na_klik.Models
                 .WithMany()
                 .HasForeignKey(oi => oi.MealId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // 1:1 veza imzedju User i Order
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.DeliveryPerson)
+                .WithOne(u => u.ActiveOrder)
+                .HasForeignKey<User>(u => u.ActiveOrderId)
+                .OnDelete(DeleteBehavior.SetNull);
+
         }
     }
 }

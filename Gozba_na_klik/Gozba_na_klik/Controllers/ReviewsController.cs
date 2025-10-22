@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Gozba_na_klik.DTOs.Review;
+using Gozba_na_klik.Models;
 
 [ApiController]
 [Route("api/reviews")]
