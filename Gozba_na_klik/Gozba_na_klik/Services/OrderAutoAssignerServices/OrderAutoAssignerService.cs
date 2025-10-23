@@ -20,40 +20,34 @@ namespace Gozba_na_klik.Services.OrderAutoAssignerServices
 
         public async Task AssignOrderToCourierAsync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            _logger.LogInformation("Dobavljam sve porudzbine sa statusom 'PRIHVAĆENA'.");
+            var ordersOnWait = await _orderRepository.GetAllAcceptedOrdersAsync();
+
+            _logger.LogInformation("Dobavljam sve dostavljace bez dostave.");
+            var availableCouriers = await _usersRepository.GetAllAvailableCouriersAsync();
+
+            if (!availableCouriers.Any())
             {
-                _logger.LogInformation("Dobavljam sve porudzbine sa statusom 'PRIHVAĆENA'.");
-                var ordersOnWait = await _orderRepository.GetAllAcceptedOrdersAsync();
+                _logger.LogInformation("Nema slobodnih kurira trenutno.");
+            }
 
-                _logger.LogInformation("Dobavljam sve dostavljace bez dostave.");
-                var availableCouriers = await _usersRepository.GetAllAvailableCouriersAsync();
-
-                if (!availableCouriers.Any())
+            else if (!ordersOnWait.Any())
+            {
+                _logger.LogInformation("Nema porudzbina na cekanju.");
+            }
+            else
+            {
+                int count = Math.Min(ordersOnWait.Count, availableCouriers.Count);
+                for (int i = 0; i < count; i++)
                 {
-                    _logger.LogInformation("Nema slobodnih kurira trenutno.");
+                    var order = ordersOnWait[i];
+                    var courier = availableCouriers[i];
+
+                    await _orderRepository.AssignCourierToOrderAsync(order, courier);
+                    await _usersRepository.AssignOrderToCourierAsync(order, courier);
+
+                    _logger.LogInformation($"Porudzbina {order.Id} dodeljena kuriru {courier.Id}.");
                 }
-
-                else if (!ordersOnWait.Any())
-                {
-                    _logger.LogInformation("Nema porudzbina na cekanju.");
-                }
-                else
-                {
-                    int count = Math.Min(ordersOnWait.Count, availableCouriers.Count);
-                    for (int i = 0; i < count; i++)
-                    {
-                        var order = ordersOnWait[i];
-                        var courier = availableCouriers[i];
-
-                        await _orderRepository.AssignCourierToOrderAsync(order, courier);
-                        await _usersRepository.AssignOrderToCourierAsync(order, courier);
-
-                        _logger.LogInformation($"Porudzbina {order.Id} dodeljena kuriru {courier.Id}.");
-                    }
-                }
-
-                // Čekaj 30 sekundi pre sledeće iteracije
-                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
             }
         }
     }
