@@ -40,10 +40,19 @@ namespace Gozba_na_klik.Repositories
         // Dobavljanje slobodnih dostavljaca (trenutno bez dostave)
         public async Task<List<User>> GetAllAvailableCouriersAsync()
         {
+            var now = DateTime.Now;
+            var currentDay = now.DayOfWeek;
+            var currentTime = now.TimeOfDay;
+
             return await _context.Users
-                .Where(user => user.Role == "RestaurantEmployee" 
-                    && user.IsActive == true 
-                    && user.ActiveOrderId == null)
+                .Where(user => user.Role == "DeliveryPerson" && user.ActiveOrderId == null)
+                .Where(u => _context.DeliveryPersonSchedules.Any(s =>
+                    s.DeliveryPersonId == u.Id &&
+                    s.IsActive &&
+                    s.DayOfWeek == currentDay &&
+                    s.StartTime <= currentTime &&
+                    s.EndTime >= currentTime
+                ))
                 .ToListAsync();
         }
 

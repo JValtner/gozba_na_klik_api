@@ -1,9 +1,9 @@
 using Gozba_na_klik.Models;
 using Microsoft.AspNetCore.Mvc;
+using Gozba_na_klik.Models;
 
 namespace Gozba_na_klik.Controllers
 {
-
     [ApiController]
     [Route("api/reviews")]
     public class ReviewsController : ControllerBase
