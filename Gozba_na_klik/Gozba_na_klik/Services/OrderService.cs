@@ -295,15 +295,18 @@ namespace Gozba_na_klik.Services
 
         //  DA LI IMA DODELJENA DOSTAVA?
         // Dohvati dostavu koja ima dostavljaca i u preuzimanju
-        public async Task<Order?> GetCourierOrderInPickupAsync(int courierId)
+        public async Task<CourierActiveOrderDto?> GetCourierOrderInPickupAsync(int courierId)
         {
-            return await _orderRepository.GetCourierOrderInPickupAsync(courierId);
+            var order = await _orderRepository.GetCourierOrderInPickupAsync(courierId);
+            if (order == null) return null;
+
+            return _mapper.Map<CourierActiveOrderDto>(order);
         }
 
 
         // DOSTAVA U TOKU 
         // Dodeli dostavi status "DOSTAVA U TOKU"
-        public async Task<Order?> UpdateOrderToInDeliveryAsync(int orderId)
+        public async Task<OrderStatusDto?> UpdateOrderToInDeliveryAsync(int orderId)
         {
             _logger.LogInformation("Trazim dostavu po id iz repoa");
             var order = await _orderRepository.GetByIdAsync(orderId);
@@ -313,12 +316,14 @@ namespace Gozba_na_klik.Services
             }
             order.Status = "DOSTAVA U TOKU";
             _logger.LogInformation("Menjam status dostave u DOSTAVA U TOKU");
-            return await _orderRepository.UpdateOrderStatusAsync(order);
+            var updatedOrder = await _orderRepository.UpdateOrderStatusAsync(order);
+
+            return _mapper.Map<OrderStatusDto>(updatedOrder);
         }
 
         // DOSTAVA SE ZAVRSAVA
         // Dodeli dostavu status "ZAVRSENO"
-        public async Task<Order?> UpdateOrderToDeliveredAsync(int orderId)
+        public async Task<OrderStatusDto?> UpdateOrderToDeliveredAsync(int orderId)
         {
             _logger.LogInformation("Trazim dostavu po id iz repoa");
             var order = await _orderRepository.GetByIdAsync(orderId);
@@ -332,7 +337,7 @@ namespace Gozba_na_klik.Services
             _logger.LogInformation("Menjam status dostave u ZAVRŠENO");
             order.Status = "ZAVRŠENO";
             order.DeliveryPersonId = null;
-            await _orderRepository.UpdateOrderStatusAsync(order);
+            var updatedOrder = await _orderRepository.UpdateOrderStatusAsync(order);
 
             if (courierId.HasValue)
             {
@@ -344,7 +349,7 @@ namespace Gozba_na_klik.Services
                 }
             }
 
-            return order;
+            return _mapper.Map<OrderStatusDto>(updatedOrder);
         }
 
     }

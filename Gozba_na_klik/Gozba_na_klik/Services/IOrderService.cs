@@ -8,8 +8,8 @@ namespace Gozba_na_klik.Services
         Task<OrderPreviewDto> GetOrderPreviewAsync(int userId, int restaurantId, CreateOrderDto dto);
         Task<OrderResponseDto> CreateOrderAsync(int userId, int restaurantId, CreateOrderDto dto);
         Task<PaginatedOrderHistoryResponseDto> GetUserOrderHistoryAsync(int userId, string? statusFilter, int page, int pageSize);
-        Task<Order?> GetCourierOrderInPickupAsync(int courierId);
-        Task<Order?> UpdateOrderToInDeliveryAsync(int orderId);
-        Task<Order?> UpdateOrderToDeliveredAsync(int orderId);
+        Task<CourierActiveOrderDto?> GetCourierOrderInPickupAsync(int courierId);
+        Task<OrderStatusDto?> UpdateOrderToInDeliveryAsync(int orderId);
+        Task<OrderStatusDto?> UpdateOrderToDeliveredAsync(int orderId);
     }
 }
