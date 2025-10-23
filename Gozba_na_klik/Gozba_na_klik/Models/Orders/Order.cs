@@ -24,6 +24,10 @@
         public decimal TotalPrice { get; set; }
         public string? CustomerNote { get; set; }
         public bool HasAllergenWarning { get; set; } = false;
+        public DateTime? AcceptedAt { get; set; }
+        public int? EstimatedPreparationMinutes { get; set; }
+        public DateTime? CancelledAt { get; set; }
+        public string? CancellationReason { get; set; }
         public List<OrderItem> Items { get; set; } = new();
 
         public string Status { get; set; } = "NA ČEKANJU";

@@ -1,5 +1,4 @@
-namespace Gozba_na_klik.Models;
-
+namespace Gozba_na_klik.DTOs.Review;
 public class RestaurantReviewDto
 {
     public int RestaurantRating { get; set; }

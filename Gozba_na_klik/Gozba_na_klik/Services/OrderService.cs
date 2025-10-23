@@ -1,29 +1,32 @@
-﻿using System.Text.Json;
-using AutoMapper;
+﻿using AutoMapper;
 using Gozba_na_klik.DTOs.Orders;
 using Gozba_na_klik.Exceptions;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
 using Gozba_na_klik.Repositories;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Gozba_na_klik.Services
 {
     public class OrderService : IOrderService
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly IUsersRepository _userRepository;
         private readonly IRestaurantRepository _restaurantRepository;
+        private readonly GozbaNaKlikDbContext _context;
         private readonly IMealsRepository _mealsRepository;
         private readonly IMealAddonsRepository _addonRepository;
         private readonly IAddressRepository _addressRepository;
         private readonly IUsersRepository _usersRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<OrderService> _logger;
-        private const decimal DELIVERY_FEE = 200m;
 
         public OrderService(
             IOrderRepository orderRepository,
+            IUsersRepository userRepository,
             IRestaurantRepository restaurantRepository,
+            GozbaNaKlikDbContext context,
             IMealsRepository mealsRepository,
             IMealAddonsRepository addonRepository,
             IAddressRepository addressRepository,
@@ -32,7 +35,9 @@ namespace Gozba_na_klik.Services
             ILogger<OrderService> logger)
         {
             _orderRepository = orderRepository;
+            _userRepository = userRepository;
             _restaurantRepository = restaurantRepository;
+            _context = context;
             _mealsRepository = mealsRepository;
             _addonRepository = addonRepository;
             _addressRepository = addressRepository;
@@ -43,54 +48,84 @@ namespace Gozba_na_klik.Services
 
         public async Task<OrderPreviewDto> GetOrderPreviewAsync(int userId, int restaurantId, CreateOrderDto dto)
         {
-            _logger.LogInformation("Creating order preview for user {UserId} at restaurant {RestaurantId}",
-                userId, restaurantId);
+            _logger.LogInformation("Creating order preview for user {UserId} at restaurant {RestaurantId}", userId, restaurantId);
 
-            var restaurant = await _restaurantRepository.GetByIdAsync(restaurantId);
+            var user = await _context.Users
+                .AsNoTracking()
+                .Include(u => u.UserAlergens)
+                    .ThenInclude(ua => ua.Alergen)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+                throw new NotFoundException("Korisnik nije pronađen.");
+
+            var restaurant = await _context.Restaurants
+                .AsNoTracking()
+                .Include(r => r.WorkSchedules)
+                .Include(r => r.ClosedDates)
+                .FirstOrDefaultAsync(r => r.Id == restaurantId);
+
             if (restaurant == null)
-                throw new NotFoundException($"Restoran sa ID {restaurantId} nije pronađen.");
+                throw new NotFoundException("Restoran nije pronađen.");
 
-            var isOpen = IsRestaurantOpen(restaurant);
+            var now = DateTime.Now;
+            var today = now.DayOfWeek;
+            var currentTime = now.TimeOfDay;
+
+            var todaySchedule = restaurant.WorkSchedules.FirstOrDefault(ws => ws.DayOfWeek == today);
+            bool isOpen = todaySchedule != null &&
+                         currentTime >= todaySchedule.OpenTime &&
+                         currentTime <= todaySchedule.CloseTime;
+
+            var isClosed = restaurant.ClosedDates.Any(cd => cd.Date.Date == now.Date);
             string? closedReason = null;
 
-            if (!isOpen)
+            if (isClosed)
             {
-                closedReason = GetClosedReason(restaurant);
+                isOpen = false;
+                var closedDate = restaurant.ClosedDates.FirstOrDefault(cd => cd.Date.Date == now.Date);
+                closedReason = closedDate?.Reason ?? "Restoran je zatvoren danas.";
+            }
+            else if (!isOpen && todaySchedule == null)
+            {
+                closedReason = "Restoran ne radi danas.";
+            }
+            else if (!isOpen)
+            {
+                closedReason = $"Restoran radi od {todaySchedule!.OpenTime:hh\\:mm} do {todaySchedule.CloseTime:hh\\:mm}.";
             }
 
-            decimal subtotal = 0;
+            var address = await _context.Addresses
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.Id == dto.AddressId && a.UserId == userId && a.IsActive);
+
+            if (address == null)
+                throw new NotFoundException("Adresa nije pronađena ili ne pripada korisniku.");
+
             var itemPreviews = new List<OrderItemPreviewDto>();
             var allergenSet = new HashSet<string>();
+            decimal subtotal = 0;
 
-            foreach (var itemDto in dto.Items)
+            foreach (var item in dto.Items)
             {
-                var meal = await _mealsRepository.GetByIdAsync(itemDto.MealId);
+                var meal = await _context.Meals
+                    .AsNoTracking()
+                    .Include(m => m.Addons)
+                    .Include(m => m.Alergens)
+                    .FirstOrDefaultAsync(m => m.Id == item.MealId);
+
                 if (meal == null)
-                    throw new NotFoundException($"Jelo sa ID {itemDto.MealId} nije pronađeno.");
+                    throw new NotFoundException($"Jelo sa ID {item.MealId} nije pronađeno.");
 
-                if (meal.RestaurantId != restaurantId)
-                    throw new BadRequestException($"Jelo {meal.Name} ne pripada restoranu {restaurant.Name}.");
-
-                decimal itemPrice = meal.Price * itemDto.Quantity;
+                decimal itemPrice = meal.Price;
                 var selectedAddons = new List<AddonPreviewDto>();
 
-                foreach (var allergen in meal.Alergens)
+                if (item.SelectedAddonIds != null && item.SelectedAddonIds.Any())
                 {
-                    allergenSet.Add(allergen.Name);
-                }
-
-                if (itemDto.SelectedAddonIds != null && itemDto.SelectedAddonIds.Any())
-                {
-                    foreach (var addonId in itemDto.SelectedAddonIds)
+                    var addons = meal.Addons.Where(a => item.SelectedAddonIds.Contains(a.Id)).ToList();
+                    foreach (var addon in addons)
                     {
-                        var addon = await _addonRepository.GetByIdAsync(addonId);
-                        if (addon == null)
-                            throw new NotFoundException($"Dodatak sa ID {addonId} nije pronađen.");
-
-                        if (addon.MealId != meal.Id)
-                            throw new BadRequestException($"Dodatak ne pripada ovom jelu.");
-
-                        itemPrice += addon.Price * itemDto.Quantity;
+                        itemPrice += addon.Price;
                         selectedAddons.Add(new AddonPreviewDto
                         {
                             Id = addon.Id,
@@ -100,21 +135,30 @@ namespace Gozba_na_klik.Services
                     }
                 }
 
-                subtotal += itemPrice;
+                decimal itemTotal = itemPrice * item.Quantity;
+                subtotal += itemTotal;
+
+                foreach (var alergen in meal.Alergens)
+                {
+                    allergenSet.Add(alergen.Name);
+                }
 
                 itemPreviews.Add(new OrderItemPreviewDto
                 {
                     MealId = meal.Id,
                     MealName = meal.Name,
                     MealImagePath = meal.ImagePath,
-                    Quantity = itemDto.Quantity,
+                    Quantity = item.Quantity,
                     UnitPrice = meal.Price,
-                    TotalPrice = itemPrice,
+                    TotalPrice = itemTotal,
                     SelectedAddons = selectedAddons
                 });
             }
 
-            return new OrderPreviewDto
+            bool hasUserAllergens = user.UserAlergens.Any(ua =>
+                allergenSet.Contains(ua.Alergen.Name));
+
+            var preview = new OrderPreviewDto
             {
                 RestaurantId = restaurantId,
                 RestaurantName = restaurant.Name,
@@ -122,89 +166,83 @@ namespace Gozba_na_klik.Services
                 ClosedReason = closedReason,
                 Items = itemPreviews,
                 SubtotalPrice = subtotal,
-                DeliveryFee = DELIVERY_FEE,
-                TotalPrice = subtotal + DELIVERY_FEE,
-                HasAllergens = allergenSet.Any(),
+                DeliveryFee = 200m,
+                TotalPrice = subtotal + 200m,
+                HasAllergens = hasUserAllergens,
                 Allergens = allergenSet.ToList()
             };
+
+            _logger.LogInformation("Order preview created successfully. Total: {Total}, Has allergens: {HasAllergens}",
+                preview.TotalPrice, preview.HasAllergens);
+
+            return preview;
         }
 
         public async Task<OrderResponseDto> CreateOrderAsync(int userId, int restaurantId, CreateOrderDto dto)
         {
-            _logger.LogInformation("Creating order for user {UserId} at restaurant {RestaurantId}",
-                userId, restaurantId);
+            _context.ChangeTracker.Clear();
 
-            var restaurant = await _restaurantRepository.GetByIdAsync(restaurantId);
-            if (restaurant == null)
-                throw new NotFoundException($"Restoran sa ID {restaurantId} nije pronađen.");
+            var userExists = await _context.Users
+                .AsNoTracking()
+                .AnyAsync(u => u.Id == userId);
 
-            if (!IsRestaurantOpen(restaurant))
-            {
-                var reason = GetClosedReason(restaurant);
-                throw new BadRequestException($"Restoran je trenutno zatvoren. {reason}");
-            }
+            if (!userExists)
+                throw new NotFoundException("Korisnik nije pronađen.");
 
-            var address = await _addressRepository.GetByIdAsync(dto.AddressId);
-            if (address == null || address.UserId != userId)
-                throw new NotFoundException("Adresa za dostavu nije pronađena ili ne pripada korisniku.");
+            var restaurantExists = await _context.Restaurants
+                .AsNoTracking()
+                .AnyAsync(r => r.Id == restaurantId);
 
-            decimal subtotal = 0;
+            if (!restaurantExists)
+                throw new NotFoundException("Restoran nije pronađen.");
+
+            var addressExists = await _context.Addresses
+                .AsNoTracking()
+                .AnyAsync(a => a.Id == dto.AddressId && a.UserId == userId && a.IsActive);
+
+            if (!addressExists)
+                throw new NotFoundException("Adresa nije pronađena ili ne pripada korisniku.");
+
             var orderItems = new List<OrderItem>();
-            var allergenSet = new HashSet<string>();
+            decimal subtotal = 0;
 
-            foreach (var itemDto in dto.Items)
+            foreach (var item in dto.Items)
             {
-                var meal = await _mealsRepository.GetByIdAsync(itemDto.MealId);
+                var meal = await _context.Meals
+                    .AsNoTracking()
+                    .Include(m => m.Addons)
+                    .FirstOrDefaultAsync(m => m.Id == item.MealId);
+
                 if (meal == null)
-                    throw new NotFoundException($"Jelo sa ID {itemDto.MealId} nije pronađeno.");
+                    throw new NotFoundException($"Jelo sa ID {item.MealId} nije pronađeno.");
 
-                if (meal.RestaurantId != restaurantId)
-                    throw new BadRequestException($"Jelo {meal.Name} ne pripada restoranu {restaurant.Name}.");
+                decimal itemPrice = meal.Price;
+                var selectedAddonNames = new List<string>();
 
-                decimal itemPrice = meal.Price * itemDto.Quantity;
-                var addonNames = new List<string>();
-
-                foreach (var allergen in meal.Alergens)
+                if (item.SelectedAddonIds != null && item.SelectedAddonIds.Any())
                 {
-                    allergenSet.Add(allergen.Name);
-                }
-
-                if (itemDto.SelectedAddonIds != null && itemDto.SelectedAddonIds.Any())
-                {
-                    foreach (var addonId in itemDto.SelectedAddonIds)
+                    var addons = meal.Addons.Where(a => item.SelectedAddonIds.Contains(a.Id)).ToList();
+                    foreach (var addon in addons)
                     {
-                        var addon = await _addonRepository.GetByIdAsync(addonId);
-                        if (addon == null)
-                            throw new NotFoundException($"Dodatak sa ID {addonId} nije pronađen.");
-
-                        if (addon.MealId != meal.Id)
-                            throw new BadRequestException($"Dodatak ne pripada ovom jelu.");
-
-                        itemPrice += addon.Price * itemDto.Quantity;
-                        addonNames.Add(addon.Name);
+                        itemPrice += addon.Price;
+                        selectedAddonNames.Add(addon.Name);
                     }
                 }
 
-                subtotal += itemPrice;
+                decimal itemTotal = itemPrice * item.Quantity;
+                subtotal += itemTotal;
 
                 orderItems.Add(new OrderItem
                 {
-                    MealId = itemDto.MealId,
-                    Quantity = itemDto.Quantity,
+                    MealId = meal.Id,
+                    Quantity = item.Quantity,
                     UnitPrice = meal.Price,
-                    TotalPrice = itemPrice,
-                    SelectedAddons = addonNames.Any() ? JsonSerializer.Serialize(addonNames) : null
+                    TotalPrice = itemTotal,
+                    SelectedAddons = selectedAddonNames.Any()
+                        ? JsonSerializer.Serialize(selectedAddonNames)
+                        : null
                 });
             }
-
-            if (allergenSet.Any() && !dto.AllergenWarningAccepted)
-            {
-                throw new BadRequestException(
-                    $"Ova porudžbina sadrži alergene: {string.Join(", ", allergenSet)}. " +
-                    "Morate prihvatiti upozorenje o alergenima.");
-            }
-
-            var totalPrice = subtotal + DELIVERY_FEE;
 
             var order = new Order
             {
@@ -214,65 +252,174 @@ namespace Gozba_na_klik.Services
                 Status = OrderStatus.NA_CEKANJU,
                 OrderDate = DateTime.UtcNow,
                 SubtotalPrice = subtotal,
-                DeliveryFee = DELIVERY_FEE,
-                TotalPrice = totalPrice,
+                DeliveryFee = 200m,
+                TotalPrice = subtotal + 200m,
                 CustomerNote = dto.CustomerNote,
-                HasAllergenWarning = allergenSet.Any(),
+                HasAllergenWarning = dto.AllergenWarningAccepted,
                 Items = orderItems
             };
 
-            var created = await _orderRepository.AddAsync(order);
+            var createdOrder = await _orderRepository.AddAsync(order);
 
-            // ✅ DODAJ OVE 3 LINIJE ZA DEBUG
-            _logger.LogInformation("Order created. Items count: {ItemsCount}. First item Meal is null: {MealIsNull}",
-                created.Items?.Count ?? 0,
-                created.Items?.FirstOrDefault()?.Meal == null);
-
-            _logger.LogInformation("Order {OrderId} created successfully with total price {TotalPrice}",
-                created.Id, totalPrice);
-
-            return _mapper.Map<OrderResponseDto>(created);
+            return _mapper.Map<OrderResponseDto>(createdOrder);
         }
 
-        private bool IsRestaurantOpen(Restaurant restaurant)
+        public async Task<OrderDetailsDto> GetOrderByIdAsync(int userId, int orderId)
         {
-            var now = DateTime.UtcNow;
-            var today = now.DayOfWeek;
-            var currentTime = now.TimeOfDay;
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            if (order == null)
+                throw new NotFoundException($"Porudžbina sa ID {orderId} nije pronađena.");
 
-            if (restaurant.ClosedDates.Any(cd => cd.Date.Date == now.Date))
+            if (order.UserId != userId)
+                throw new ForbiddenException("Nemate pristup ovoj porudžbini.");
+
+            var dto = new OrderDetailsDto
             {
-                return false;
-            }
+                Id = order.Id,
+                Status = order.Status,
+                OrderDate = order.OrderDate,
+                RestaurantName = order.Restaurant?.Name ?? "N/A",
+                RestaurantId = order.RestaurantId,
+                DeliveryAddress = order.Address != null
+                    ? $"{order.Address.Street}, {order.Address.City}, {order.Address.PostalCode}"
+                    : "N/A",
+                CustomerNote = order.CustomerNote,
+                HasAllergenWarning = order.HasAllergenWarning,
+                Items = order.Items.Select(item => new OrderItemResponseDto
+                {
+                    Id = item.Id,
+                    MealId = item.MealId,
+                    MealName = item.Meal?.Name ?? "Unknown",
+                    MealImagePath = item.Meal?.ImagePath,
+                    Quantity = item.Quantity,
+                    UnitPrice = item.UnitPrice,
+                    TotalPrice = item.TotalPrice,
+                    SelectedAddons = !string.IsNullOrEmpty(item.SelectedAddons)
+                        ? JsonSerializer.Deserialize<List<string>>(item.SelectedAddons)
+                        : new List<string>()
+                }).ToList(),
+                SubtotalPrice = order.SubtotalPrice,
+                DeliveryFee = order.DeliveryFee,
+                TotalPrice = order.TotalPrice
+            };
 
-            var schedule = restaurant.WorkSchedules.FirstOrDefault(ws => ws.DayOfWeek == today);
-            if (schedule == null)
-            {
-                return false;
-            }
-
-            return currentTime >= schedule.OpenTime && currentTime <= schedule.CloseTime;
+            return dto;
         }
 
-        private string GetClosedReason(Restaurant restaurant)
+        public async Task<List<RestaurantOrderDto>> GetRestaurantOrdersAsync(int userId, int restaurantId, string? status = null)
         {
-            var now = DateTime.UtcNow;
-            var closedDate = restaurant.ClosedDates.FirstOrDefault(cd => cd.Date.Date == now.Date);
+            var restaurant = await _context.Restaurants
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.Id == restaurantId);
 
-            if (closedDate != null)
+            if (restaurant == null)
+                throw new NotFoundException("Restoran nije pronađen.");
+
+            if (restaurant.OwnerId != userId)
+                throw new ForbiddenException("Nemate pristup ovom restoranu.");
+
+            var orders = await _orderRepository.GetRestaurantOrdersAsync(restaurantId, status);
+
+            var dtos = orders.Select(order => new RestaurantOrderDto
             {
-                return string.IsNullOrEmpty(closedDate.Reason)
-                    ? "Restoran je zatvoren danas."
-                    : $"Restoran je zatvoren danas. Razlog: {closedDate.Reason}";
-            }
+                Id = order.Id,
+                Status = order.Status,
+                OrderDate = order.OrderDate,
+                CustomerName = order.User?.Username ?? "N/A",
+                CustomerEmail = order.User?.Email,
+                DeliveryAddress = order.Address != null
+                    ? $"{order.Address.Street}, {order.Address.City}"
+                    : "N/A",
+                CustomerNote = order.CustomerNote,
+                ItemsCount = order.Items.Count,
+                TotalPrice = order.TotalPrice,
+                Items = order.Items.Select(item => new RestaurantOrderItemDto
+                {
+                    MealName = item.Meal?.Name ?? "Unknown",
+                    Quantity = item.Quantity,
+                    TotalPrice = item.TotalPrice,
+                    SelectedAddons = !string.IsNullOrEmpty(item.SelectedAddons)
+                        ? JsonSerializer.Deserialize<List<string>>(item.SelectedAddons)
+                        : null
+                }).ToList(),
+                AcceptedAt = order.AcceptedAt,
+                EstimatedPreparationMinutes = order.EstimatedPreparationMinutes
+            }).ToList();
 
-            var schedule = restaurant.WorkSchedules.FirstOrDefault(ws => ws.DayOfWeek == now.DayOfWeek);
-            if (schedule == null)
-            {
-                return "Restoran ne radi danas.";
-            }
+            return dtos;
+        }
 
-            return $"Restoran radi od {schedule.OpenTime:hh\\:mm} do {schedule.CloseTime:hh\\:mm}.";
+        public async Task AcceptOrderAsync(int userId, int orderId, AcceptOrderDto dto)
+        {
+            _logger.LogInformation("Accepting order {OrderId} by user {UserId}", orderId, userId);
+
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            if (order == null)
+                throw new NotFoundException($"Porudžbina sa ID {orderId} nije pronađena.");
+
+
+            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
+            var restaurant = await _context.Restaurants.AsNoTracking().FirstOrDefaultAsync(r => r.Id == order.RestaurantId);
+
+            if (user == null)
+                throw new NotFoundException("Korisnik nije pronađen.");
+
+            if (restaurant == null)
+                throw new NotFoundException("Restoran nije pronađen.");
+
+            bool isOwner = restaurant.OwnerId == user.Id;
+            bool isEmployee = user.RestaurantId == restaurant.Id && user.Role == "RestaurantEmployee";
+
+            if (!isOwner && !isEmployee)
+                throw new ForbiddenException("Nemate pristup ovoj porudžbini.");
+
+            if (!user.IsActive)
+                throw new ForbiddenException("Vaš nalog nije aktivan.");
+
+            if (order.Status != OrderStatus.NA_CEKANJU)
+                throw new BadRequestException("Porudžbina se ne može prihvatiti jer nije u statusu NA_CEKANJU.");
+
+            order.Status = OrderStatus.PRIHVAĆENA;
+            order.AcceptedAt = DateTime.UtcNow;
+            order.EstimatedPreparationMinutes = dto.EstimatedPreparationMinutes;
+
+            await _orderRepository.UpdateAsync(order);
+        }
+
+        public async Task CancelOrderAsync(int userId, int orderId, CancelOrderDto dto)
+        {
+            _logger.LogInformation("Cancelling order {OrderId} by user {UserId}", orderId, userId);
+
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            if (order == null)
+                throw new NotFoundException($"Porudžbina sa ID {orderId} nije pronađena.");
+
+            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
+            var restaurant = await _context.Restaurants.AsNoTracking().FirstOrDefaultAsync(r => r.Id == order.RestaurantId);
+
+            if (user == null)
+                throw new NotFoundException("Korisnik nije pronađen.");
+
+            if (restaurant == null)
+                throw new NotFoundException("Restoran nije pronađen.");
+
+            bool isOwner = restaurant.OwnerId == user.Id;
+            bool isEmployee = user.RestaurantId == restaurant.Id && user.Role == "RestaurantEmployee";
+
+            if (!isOwner && !isEmployee)
+                throw new ForbiddenException("Nemate pristup ovoj porudžbini.");
+
+            if (!user.IsActive)
+                throw new ForbiddenException("Vaš nalog nije aktivan.");
+
+            if (order.Status == OrderStatus.ISPORUČENA || order.Status == OrderStatus.OTKAZANA)
+                throw new BadRequestException("Ova porudžbina ne može biti otkazana.");
+
+            order.Status = OrderStatus.OTKAZANA;
+            order.CancelledAt = DateTime.UtcNow;
+            order.CancellationReason = dto.Reason;
+
+            await _orderRepository.UpdateAsync(order);
         }
 
         public async Task<PaginatedOrderHistoryResponseDto> GetUserOrderHistoryAsync(int userId, string? statusFilter, int page, int pageSize)

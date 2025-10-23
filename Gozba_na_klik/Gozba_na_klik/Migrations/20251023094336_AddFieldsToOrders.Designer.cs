@@ -3,6 +3,7 @@ using System;
 using Gozba_na_klik.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Gozba_na_klik.Migrations
 {
     [DbContext(typeof(GozbaNaKlikDbContext))]
-    partial class GozbaNaKlikDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251023094336_AddFieldsToOrders")]
+    partial class AddFieldsToOrders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -179,8 +182,6 @@ namespace Gozba_na_klik.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Addresses");
                 });
@@ -686,7 +687,6 @@ namespace Gozba_na_klik.Migrations
                         .HasColumnType("numeric");
 
                     b.Property<int?>("EstimatedPreparationMinutes")
-                    b.Property<int?>("DeliveryPersonId")
                         .HasColumnType("integer");
 
                     b.Property<bool>("HasAllergenWarning")
@@ -880,12 +880,6 @@ namespace Gozba_na_klik.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ActiveOrderId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("DefaultAddressId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
@@ -912,11 +906,6 @@ namespace Gozba_na_klik.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ActiveOrderId")
-                        .IsUnique();
-
-                    b.HasIndex("DefaultAddressId");
 
                     b.HasIndex("RestaurantId");
 
@@ -1173,17 +1162,6 @@ namespace Gozba_na_klik.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Gozba_na_klik.Models.Address", b =>
-                {
-                    b.HasOne("Gozba_na_klik.Models.User", "User")
-                        .WithMany("Addresses")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Gozba_na_klik.Models.ClosedDate", b =>
                 {
                     b.HasOne("Gozba_na_klik.Models.Restaurant", "Restaurant")
@@ -1286,24 +1264,10 @@ namespace Gozba_na_klik.Migrations
 
             modelBuilder.Entity("Gozba_na_klik.Models.User", b =>
                 {
-                    b.HasOne("Gozba_na_klik.Models.Orders.Order", "ActiveOrder")
-                        .WithOne("DeliveryPerson")
-                        .HasForeignKey("Gozba_na_klik.Models.User", "ActiveOrderId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("Gozba_na_klik.Models.Address", "DefaultAddress")
-                        .WithMany()
-                        .HasForeignKey("DefaultAddressId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("Gozba_na_klik.Models.Restaurant", "Restaurant")
                         .WithMany("Employees")
                         .HasForeignKey("RestaurantId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("ActiveOrder");
-
-                    b.Navigation("DefaultAddress");
 
                     b.Navigation("Restaurant");
                 });
@@ -1350,8 +1314,6 @@ namespace Gozba_na_klik.Migrations
 
             modelBuilder.Entity("Gozba_na_klik.Models.Orders.Order", b =>
                 {
-                    b.Navigation("DeliveryPerson");
-
                     b.Navigation("Items");
                 });
 
@@ -1368,8 +1330,6 @@ namespace Gozba_na_klik.Migrations
 
             modelBuilder.Entity("Gozba_na_klik.Models.User", b =>
                 {
-                    b.Navigation("Addresses");
-
                     b.Navigation("UserAlergens");
                 });
 #pragma warning restore 612, 618

@@ -135,24 +135,15 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.Hours, opt => opt.MapFrom(src => Math.Round((src.EndTime - src.StartTime).TotalHours, 2)));
 
             /// ---------- Order ----------
-        CreateMap<Order, OrderResponseDto>()
-            .ForMember(dest => dest.RestaurantName,
-                opt => opt.MapFrom(src => src.Restaurant != null ? src.Restaurant.Name : ""))
-            .ForMember(dest => dest.DeliveryAddress,
-                opt => opt.MapFrom(src =>
-                    src.Address != null
-                        ? $"{src.Address.Street}, {src.Address.City}, {src.Address.PostalCode}"
-                        : ""))
-            .ForMember(dest => dest.Items,
-                opt => opt.MapFrom(src => src.Items));
+            CreateMap<Order, OrderResponseDto>()
+                .ForMember(dest => dest.RestaurantName, opt => opt.MapFrom(src => src.Restaurant != null ? src.Restaurant.Name : ""))
+                .ForMember(dest => dest.DeliveryAddress, opt => opt.MapFrom(src => src.Address != null ? $"{src.Address.Street}, {src.Address.City}, {src.Address.PostalCode}" : ""))
+                .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
 
             CreateMap<OrderItem, OrderItemResponseDto>()
-                .ForMember(dest => dest.MealName,
-                    opt => opt.MapFrom(src => src.Meal != null ? src.Meal.Name : "Unknown"))
-                .ForMember(dest => dest.MealImagePath,
-                    opt => opt.MapFrom(src => src.Meal != null ? src.Meal.ImagePath : null))
-                .ForMember(dest => dest.SelectedAddons,
-                    opt => opt.MapFrom(src => JsonHelper.DeserializeStringList(src.SelectedAddons)));
+                .ForMember(dest => dest.MealName, opt => opt.MapFrom(src => src.Meal != null ? src.Meal.Name : "Unknown"))
+                .ForMember(dest => dest.MealImagePath, opt => opt.MapFrom(src => src.Meal != null ? src.Meal.ImagePath : null))
+                .ForMember(dest => dest.SelectedAddons, opt => opt.MapFrom(src => JsonHelper.DeserializeStringList(src.SelectedAddons)));
 
             // Glavni mapping: Order → CourierActiveOrderDto
             CreateMap<Order, CourierActiveOrderDto>()
