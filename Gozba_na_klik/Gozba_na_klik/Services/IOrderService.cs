@@ -6,5 +6,9 @@ namespace Gozba_na_klik.Services
     {
         Task<OrderPreviewDto> GetOrderPreviewAsync(int userId, int restaurantId, CreateOrderDto dto);
         Task<OrderResponseDto> CreateOrderAsync(int userId, int restaurantId, CreateOrderDto dto);
+        Task<OrderDetailsDto> GetOrderByIdAsync(int userId, int orderId);
+        Task<List<RestaurantOrderDto>> GetRestaurantOrdersAsync(int userId, int restaurantId, string? status = null);
+        Task AcceptOrderAsync(int userId, int orderId, AcceptOrderDto dto);
+        Task CancelOrderAsync(int userId, int orderId, CancelOrderDto dto);
     }
 }

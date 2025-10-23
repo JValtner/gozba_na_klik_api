@@ -7,5 +7,7 @@ namespace Gozba_na_klik.Models
         Task<Order?> GetByIdAsync(int orderId);
         Task<Order> AddAsync(Order order);
         Task<bool> ExistsAsync(int orderId);
+        Task<List<Order>> GetRestaurantOrdersAsync(int restaurantId, string? status = null);
+        Task UpdateAsync(Order order);
     }
 }
