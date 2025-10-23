@@ -45,7 +45,7 @@ namespace Gozba_na_klik.Repositories
                 .Include(order => order.Items)
                 .Include(order => order.User)
                 .Include(order => order.Address)
-                .Where(order => order.Status == "PREUZIMANJE U TOKU" && order.DeliveryPersonId == courierId)
+                .Where(order => order.DeliveryPersonId == courierId && order.Status != "PRIHVAĆENA")
                 .FirstOrDefaultAsync();
         }
 
