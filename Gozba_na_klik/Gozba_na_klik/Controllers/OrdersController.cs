@@ -86,10 +86,10 @@ namespace Gozba_na_klik.Controllers
             _logger.LogInformation("PUT request to cancel order {OrderId}", orderId);
             await _orderService.CancelOrderAsync(userId, orderId, dto);
             return Ok(new { message = "Porudžbina otkazana." });
-
+        }
         // GET: api/orders/user/{userId}
         [HttpGet("user/{userId}")]
-        public async Task<ActionResult<PaginatedOrderHistoryResponseDto>> GetUserOrderHistory(
+            public async Task<ActionResult<PaginatedOrderHistoryResponseDto>> GetUserOrderHistory(
             int userId,
             [FromHeader(Name = "X-User-Id")] int requestingUserId,
             [FromQuery] string? statusFilter = null,
