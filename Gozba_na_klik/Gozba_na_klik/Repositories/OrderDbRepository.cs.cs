@@ -36,6 +36,19 @@ namespace Gozba_na_klik.Repositories
                 .ToListAsync();
         }
 
+        // Sve dostave sa statusom PREUZIMANJE U TOKU
+        // BITNO OVO SE AKTIVIRA OD FRONTA NA 10 SEK
+        public async Task<Order?> GetCourierOrderInPickupAsync(int courierId)
+        {
+            return await _context.Orders
+                .Include(order => order.Restaurant)
+                .Include(order => order.Items)
+                .Include(order => order.User)
+                .Include(order => order.Address)
+                .Where(order => order.Status == "PREUZIMANJE U TOKU" && order.DeliveryPersonId == courierId)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<Order> AddAsync(Order order)
         {
             _context.ChangeTracker.Clear();
@@ -57,8 +70,8 @@ namespace Gozba_na_klik.Repositories
             return createdOrder;
         }
 
-        // Dodeli dostavljaca dostave
-        public async Task<Order?> AssignCourierToOrder(Order order, User courier)
+        // Dodeli dostavi dostavljaca
+        public async Task<Order?> AssignCourierToOrderAsync(Order order, User courier)
         {
             order.DeliveryPersonId = courier.Id;
             order.Status = "PREUZIMANJE U TOKU";
@@ -67,6 +80,13 @@ namespace Gozba_na_klik.Repositories
             return order;
         }
 
+        // Promeni status dostave:
+        public async Task<Order?> UpdateOrderStatusAsync(Order order)
+        {
+            _context.Orders.Update(order);
+            await _context.SaveChangesAsync();
+            return order;
+        }
         public async Task<bool> ExistsAsync(int orderId)
         {
             return await _context.Orders.AnyAsync(o => o.Id == orderId);

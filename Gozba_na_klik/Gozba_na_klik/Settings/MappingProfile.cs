@@ -154,6 +154,25 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.SelectedAddons,
                     opt => opt.MapFrom(src => JsonHelper.DeserializeStringList(src.SelectedAddons)));
 
+            // Glavni mapping: Order → CourierActiveOrderDto
+            CreateMap<Order, CourierActiveOrderDto>()
+                .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Buyer, opt => opt.MapFrom(src => src.User))
+                .ForMember(dest => dest.Restaurant, opt => opt.MapFrom(src => src.Restaurant))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
+                .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
+
+                    // Podmape (ugnježdene DTO klase)
+                    CreateMap<User, CourierOrderUserDto>();
+                    CreateMap<Restaurant, CourierOrderRestaurantDto>();
+                    CreateMap<Address, CourierOrderAddressDto>();
+                    CreateMap<OrderItem, CourierOrderItemDto>();
+
+            // Ako koristiš i status DTO (za PUT odgovore)
+            CreateMap<Order, OrderStatusDto>()
+                .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
+
             // ---------- Order History ----------
             CreateMap<Order, OrderHistoryResponseDto>()
                 .ForMember(dest => dest.RestaurantName,

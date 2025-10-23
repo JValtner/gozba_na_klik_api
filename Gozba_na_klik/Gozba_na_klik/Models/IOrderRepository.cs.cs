@@ -6,8 +6,10 @@ namespace Gozba_na_klik.Models
     {
         Task<Order?> GetByIdAsync(int orderId);
         Task<List<Order>> GetAllAcceptedOrdersAsync();
+        Task<Order> GetCourierOrderInPickupAsync(int courierId);
         Task<Order> AddAsync(Order order);
-        Task<Order?> AssignCourierToOrder(Order order, User courier);
+        Task<Order?> AssignCourierToOrderAsync(Order order, User courier);
+        Task<Order?> UpdateOrderStatusAsync(Order order);
         Task<bool> ExistsAsync(int orderId);
         Task<(List<Order> Orders, int TotalCount)> GetOrdersByUserIdAsync(int userId, string? statusFilter, int page, int pageSize);
     }

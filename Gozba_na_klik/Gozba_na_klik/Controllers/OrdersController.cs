@@ -1,6 +1,5 @@
 ﻿using Gozba_na_klik.DTOs.Orders;
 using Gozba_na_klik.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gozba_na_klik.Controllers
@@ -69,6 +68,39 @@ namespace Gozba_na_klik.Controllers
 
             var result = await _orderService.GetUserOrderHistoryAsync(userId, statusFilter, page, pageSize);
             return Ok(result);
+        }
+
+        // GET: api/orders/courier/{id}/active-pickup
+        [HttpGet("courier/{courierId}/active-pickup")]
+        public async Task<ActionResult<CourierActiveOrderDto>> GetCourierOrderInPickupAsync(int courierId)
+        {
+            _logger.LogInformation("GET zahtev za proveru da li je kuriru dodeljena dostava");
+            var order = await _orderService.GetCourierOrderInPickupAsync(courierId);
+            if (order == null)
+                return NotFound();
+            return Ok(order);
+        }
+
+        // PUT: api/orders/{orderId}/status/to-in-delivery
+        [HttpPut("{orderId}/status/to-in-delivery")]
+        public async Task<ActionResult<OrderStatusDto>> UpdateOrderToInDeliveryAsync(int orderId)
+        {
+            _logger.LogInformation("PUT zahtev za promenu statusa narudzbine u 'DOSTAVA U TOKU'");
+            var order = await _orderService.UpdateOrderToInDeliveryAsync(orderId);
+            if (order == null)
+                return NotFound();
+            return Ok(order);
+        }
+
+        // PUT: api/orders/{orderId}/status/to-delivered
+        [HttpPut("{orderId}/status/to-delivered")]
+        public async Task<ActionResult<OrderStatusDto>> UpdateOrderToDeliveredAsync(int orderId)
+        {
+            _logger.LogInformation("PUT zahtev za promenu statusa narudzbine u 'ZAVRSENO'");
+            var order = await _orderService.UpdateOrderToDeliveredAsync(orderId);
+            if (order == null)
+                return NotFound();
+            return Ok(order);
         }
     }
 }
