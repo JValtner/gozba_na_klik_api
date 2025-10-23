@@ -103,20 +103,20 @@ public class RestaurantDbRepository : IRestaurantRepository
         if (!string.IsNullOrEmpty(filter.Address))
             query = query.Where(r => r.Address != null && r.Address.ToLower().Contains(filter.Address.ToLower()));
 
-        if (filter.CurrentDate.HasValue)
-        {
-            var currentDate = DateTime.SpecifyKind(filter.CurrentDate.Value, DateTimeKind.Utc);
-            var currentDay = currentDate.DayOfWeek;
-            var currentTime = currentDate.TimeOfDay;
+        //if (filter.CurrentDate.HasValue)
+        //{
+        //    var currentDate = DateTime.SpecifyKind(filter.CurrentDate.Value, DateTimeKind.Utc);
+        //    var currentDay = currentDate.DayOfWeek;
+        //    var currentTime = currentDate.TimeOfDay;
 
-            query = query.Where(r =>
-                !r.ClosedDates.Any(cd =>
-                    DateTime.SpecifyKind(cd.Date, DateTimeKind.Utc).Date == currentDate.Date) &&
-                r.WorkSchedules.Any(ws =>
-                    ws.DayOfWeek == currentDay &&
-                    ws.OpenTime <= currentTime &&
-                    ws.CloseTime >= currentTime));
-        }
+        //    query = query.Where(r =>
+        //        !r.ClosedDates.Any(cd =>
+        //            DateTime.SpecifyKind(cd.Date, DateTimeKind.Utc).Date == currentDate.Date) &&
+        //        r.WorkSchedules.Any(ws =>
+        //            ws.DayOfWeek == currentDay &&
+        //            ws.OpenTime <= currentTime &&
+        //            ws.CloseTime >= currentTime));
+        //}
 
         return query;
     }
