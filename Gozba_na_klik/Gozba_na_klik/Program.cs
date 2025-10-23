@@ -4,6 +4,7 @@ using Gozba_na_klik.Models;
 using Gozba_na_klik.Repositories;
 using Gozba_na_klik.Services;
 using Gozba_na_klik.Services.AddressServices;
+using Gozba_na_klik.Services.OrderAutoAssignerServices;
 using Gozba_na_klik.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -12,12 +13,6 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
-        options.JsonSerializerOptions.WriteIndented = true;
-    });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -42,20 +37,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// PostgreSQL
-builder.Services.AddDbContext<GozbaNaKlikDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("FrontendPolicy", policy =>
-    {
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
 
 // AutoMapper (scan all assemblies)
 builder.Services.AddAutoMapper(cfg => {cfg.AddProfile<MappingProfile>();
@@ -88,7 +70,13 @@ builder.Services.AddScoped<IAlergenService, AlergenService>();
 builder.Services.AddScoped<IAddressRepository, AddressDbRepository>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 
+builder.Services.AddScoped<IReviewsRepository, ReviewsDbRepository>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+
 builder.Services.AddScoped<IFileService, FileService>();
+
+builder.Services.AddScoped<IOrderAutoAssignerService, OrderAutoAssignerService>();
+builder.Services.AddHostedService<OrderAutoAssignerBackgroundService>();
 
 // Configure PostgreSQL database connection
 builder.Services.AddDbContext<GozbaNaKlikDbContext>(options =>
@@ -123,6 +111,7 @@ var logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 builder.Logging.AddSerilog(logger);
 
 var app = builder.Build();

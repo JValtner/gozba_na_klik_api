@@ -1,4 +1,4 @@
-﻿using Gozba_na_klik.Models;
+using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -28,6 +28,7 @@ namespace Gozba_na_klik.Repositories
                 .FirstOrDefaultAsync(o => o.Id == orderId);
         }
 
+        // ✅ Kreiranje porudžbine (tvoja verzija)
         public async Task<Order> AddAsync(Order order)
         {
             _context.ChangeTracker.Clear();
@@ -63,6 +64,7 @@ namespace Gozba_na_klik.Repositories
             return await _context.Orders.AnyAsync(o => o.Id == orderId);
         }
 
+        // ✅ Lista porudžbina restorana
         public async Task<List<Order>> GetRestaurantOrdersAsync(int restaurantId, string? status = null)
         {
             var query = _context.Orders
@@ -83,10 +85,90 @@ namespace Gozba_na_klik.Repositories
                 .ToListAsync();
         }
 
+        // ✅ Ažuriranje porudžbine
         public async Task UpdateAsync(Order order)
         {
             _context.Orders.Update(order);
             await _context.SaveChangesAsync();
+        }
+
+        // ✅ Sve PRIHVAĆENE porudžbine bez dostavljača
+        public async Task<List<Order>> GetAllAcceptedOrdersAsync()
+        {
+            return await _context.Orders
+                .Include(order => order.User)
+                .Include(order => order.Restaurant)
+                .Include(order => order.Address)
+                .Include(order => order.Items)
+                .Where(order => order.Status == "PRIHVAĆENA" && order.DeliveryPersonId == null)
+                .ToListAsync();
+        }
+
+        // ✅ Porudžbina trenutno u toku preuzimanja za određenog kurira
+        public async Task<Order?> GetCourierOrderInPickupAsync(int courierId)
+        {
+            return await _context.Orders
+                .Include(order => order.Restaurant)
+                .Include(order => order.Items)
+                .Include(order => order.User)
+                .Include(order => order.Address)
+                .Where(order => order.DeliveryPersonId == courierId && order.Status != "PRIHVAĆENA")
+                .FirstOrDefaultAsync();
+        }
+
+        // ✅ Dodeli dostavljača porudžbini
+        public async Task<Order?> AssignCourierToOrderAsync(Order order, User courier)
+        {
+            order.DeliveryPersonId = courier.Id;
+            order.Status = "PREUZIMANJE U TOKU";
+            await _context.SaveChangesAsync();
+            return order;
+        }
+
+        // ✅ Promeni status porudžbine
+        public async Task<Order?> UpdateOrderStatusAsync(Order order)
+        {
+            _context.Orders.Update(order);
+            await _context.SaveChangesAsync();
+            return order;
+        }
+
+        // ✅ Dohvatanje porudžbina po korisniku
+        public async Task<(List<Order> Orders, int TotalCount)> GetOrdersByUserIdAsync(int userId, string? statusFilter, int page, int pageSize)
+        {
+            var query = _context.Orders
+                .Include(o => o.Restaurant)
+                .Include(o => o.Address)
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Meal)
+                .Where(o => o.UserId == userId);
+
+            if (!string.IsNullOrEmpty(statusFilter))
+            {
+                if (statusFilter.ToUpper() == "ACTIVE")
+                {
+                    query = query.Where(o => o.Status != OrderStatus.ISPORUČENA && o.Status != OrderStatus.OTKAZANA);
+                }
+                else if (statusFilter.ToUpper() == "ARCHIVED")
+                {
+                    query = query.Where(o => o.Status == OrderStatus.ISPORUČENA || o.Status == OrderStatus.OTKAZANA);
+                }
+                else
+                {
+                    query = query.Where(o => o.Status == statusFilter);
+                }
+            }
+
+            query = query.OrderByDescending(o => o.OrderDate);
+
+            var totalCount = await query.CountAsync();
+
+            var orders = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (orders, totalCount);
         }
     }
 }

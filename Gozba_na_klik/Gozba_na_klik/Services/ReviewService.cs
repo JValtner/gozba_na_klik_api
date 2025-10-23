@@ -1,5 +1,4 @@
 using Gozba_na_klik.Models;
-using Gozba_na_klik.DTOs.Review;
 
 public class ReviewService : IReviewService
 {
@@ -15,7 +14,7 @@ public class ReviewService : IReviewService
     public async Task<bool> CreateReviewAsync(CreateReviewDto dto)
     {
         var order = await _context.Orders.FindAsync(dto.OrderId);
-        if (order == null || order.Status != "ZAVRŠENO")
+        if (order == null || order.Status != "ZAVRÅ ENO")
             return false;
 
         if (await _repository.ReviewExistsForOrderAsync(dto.OrderId))
@@ -25,7 +24,6 @@ public class ReviewService : IReviewService
         {
             OrderId = dto.OrderId,
             RestaurantId = order.RestaurantId,
-            CourierId = order.CourierId,
             RestaurantRating = dto.RestaurantRating,
             RestaurantComment = dto.RestaurantComment,
             RestaurantPhotoUrl = dto.RestaurantPhoto != null ? await SavePhotoAsync(dto.RestaurantPhoto) : null,

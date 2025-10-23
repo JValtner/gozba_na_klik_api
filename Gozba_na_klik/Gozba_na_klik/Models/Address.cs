@@ -5,7 +5,10 @@ namespace Gozba_na_klik.Models
 	public class Address
 	{
 		public int Id { get; set; }
+
+		// User
 		public int UserId { get; set; }
+		public User User { get; set; }
 
 		public string Label { get; set; } = "";
 		public string Street { get; set; } = "";

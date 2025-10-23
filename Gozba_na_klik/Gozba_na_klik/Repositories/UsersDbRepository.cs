@@ -1,5 +1,6 @@
 ﻿using System;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.Models.Orders;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gozba_na_klik.Repositories
@@ -35,6 +36,26 @@ namespace Gozba_na_klik.Repositories
                     .ThenInclude(ua => ua.Alergen)
                 .FirstOrDefaultAsync(u => u.Id == userId);
         }
+
+        // Dobavljanje slobodnih dostavljaca (trenutno bez dostave)
+        public async Task<List<User>> GetAllAvailableCouriersAsync()
+        {
+            var now = DateTime.Now;
+            var currentDay = now.DayOfWeek;
+            var currentTime = now.TimeOfDay;
+
+            return await _context.Users
+                .Where(user => user.Role == "DeliveryPerson" && user.ActiveOrderId == null)
+                .Where(u => _context.DeliveryPersonSchedules.Any(s =>
+                    s.DeliveryPersonId == u.Id &&
+                    s.IsActive &&
+                    s.DayOfWeek == currentDay &&
+                    s.StartTime <= currentTime &&
+                    s.EndTime >= currentTime
+                ))
+                .ToListAsync();
+        }
+
         public async Task<bool> ExistsAsync(int id)
         {
             return await _context.Users.AnyAsync(u => u.Id == id);
@@ -66,6 +87,23 @@ namespace Gozba_na_klik.Repositories
             await _context.SaveChangesAsync();
             return user;
         }
+        // Dodeli dostavu dostavljacu
+        public async Task<User?> AssignOrderToCourierAsync(Order order, User courier)
+        {
+            int orderId = order.Id;
+            courier.ActiveOrderId = orderId;
+
+            await _context.SaveChangesAsync();
+            return courier;
+        }
+        // Skini dostavu sa dostavljaca
+        public async Task<User?> ReleaseOrderFromCourierAsync(User courier)
+        {
+            courier.ActiveOrderId = null;
+            await _context.SaveChangesAsync();
+            return courier;
+        }
+
         public async Task<bool> DeleteAsync(int id)
         {
             User user = await _context.Users.FindAsync(id);

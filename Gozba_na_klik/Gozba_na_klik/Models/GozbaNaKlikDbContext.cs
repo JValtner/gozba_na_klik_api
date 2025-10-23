@@ -1,4 +1,5 @@
 ﻿using Gozba_na_klik.Models.Orders;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gozba_na_klik.Models
@@ -292,6 +293,28 @@ namespace Gozba_na_klik.Models
                 .WithMany()
                 .HasForeignKey(oi => oi.MealId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // 1:1 veza imzedju User i Order
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.ActiveOrder)
+                .WithOne(o => o.DeliveryPerson)
+                .HasForeignKey<User>(u => u.ActiveOrderId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // 1:N: User : Addresses
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Addresses)
+                .WithOne(a => a.User)
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // 1:1: User : DefaultAddress
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.DefaultAddress)
+                .WithMany() // bez obrnute veze
+                .HasForeignKey(u => u.DefaultAddressId)
+                .OnDelete(DeleteBehavior.SetNull);
+
         }
     }
 }

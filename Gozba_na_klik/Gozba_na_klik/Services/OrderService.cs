@@ -15,6 +15,10 @@ namespace Gozba_na_klik.Services
         private readonly IUsersRepository _userRepository;
         private readonly IRestaurantRepository _restaurantRepository;
         private readonly GozbaNaKlikDbContext _context;
+        private readonly IMealsRepository _mealsRepository;
+        private readonly IMealAddonsRepository _addonRepository;
+        private readonly IAddressRepository _addressRepository;
+        private readonly IUsersRepository _usersRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<OrderService> _logger;
 
@@ -23,6 +27,10 @@ namespace Gozba_na_klik.Services
             IUsersRepository userRepository,
             IRestaurantRepository restaurantRepository,
             GozbaNaKlikDbContext context,
+            IMealsRepository mealsRepository,
+            IMealAddonsRepository addonRepository,
+            IAddressRepository addressRepository,
+            IUsersRepository usersRepository,
             IMapper mapper,
             ILogger<OrderService> logger)
         {
@@ -30,6 +38,10 @@ namespace Gozba_na_klik.Services
             _userRepository = userRepository;
             _restaurantRepository = restaurantRepository;
             _context = context;
+            _mealsRepository = mealsRepository;
+            _addonRepository = addonRepository;
+            _addressRepository = addressRepository;
+            _usersRepository = usersRepository;
             _mapper = mapper;
             _logger = logger;
         }
@@ -409,5 +421,83 @@ namespace Gozba_na_klik.Services
 
             await _orderRepository.UpdateAsync(order);
         }
+
+        public async Task<PaginatedOrderHistoryResponseDto> GetUserOrderHistoryAsync(int userId, string? statusFilter, int page, int pageSize)
+        {
+            _logger.LogInformation("Getting order history for user {UserId} with filter {StatusFilter}, page {Page}, pageSize {PageSize}",
+                userId, statusFilter, page, pageSize);
+
+            var (orders, totalCount) = await _orderRepository.GetOrdersByUserIdAsync(userId, statusFilter, page, pageSize);
+
+            var orderDtos = _mapper.Map<List<OrderHistoryResponseDto>>(orders);
+
+            return new PaginatedOrderHistoryResponseDto
+            {
+                Orders = orderDtos,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
+        //  DA LI IMA DODELJENA DOSTAVA?
+        // Dohvati dostavu koja ima dostavljaca i u preuzimanju
+        public async Task<CourierActiveOrderDto?> GetCourierOrderInPickupAsync(int courierId)
+        {
+            var order = await _orderRepository.GetCourierOrderInPickupAsync(courierId);
+            if (order == null) return null;
+
+            return _mapper.Map<CourierActiveOrderDto>(order);
+        }
+
+
+        // DOSTAVA U TOKU 
+        // Dodeli dostavi status "DOSTAVA U TOKU"
+        public async Task<OrderStatusDto?> UpdateOrderToInDeliveryAsync(int orderId)
+        {
+            _logger.LogInformation("Trazim dostavu po id iz repoa");
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            if (order == null)
+            {
+                return null;
+            }
+            order.Status = "DOSTAVA U TOKU";
+            _logger.LogInformation("Menjam status dostave u DOSTAVA U TOKU");
+            var updatedOrder = await _orderRepository.UpdateOrderStatusAsync(order);
+
+            return _mapper.Map<OrderStatusDto>(updatedOrder);
+        }
+
+        // DOSTAVA SE ZAVRSAVA
+        // Dodeli dostavu status "ZAVRSENO"
+        public async Task<OrderStatusDto?> UpdateOrderToDeliveredAsync(int orderId)
+        {
+            _logger.LogInformation("Trazim dostavu po id iz repoa");
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            if (order == null)
+            {
+                return null;
+            }
+
+            var courierId = order.DeliveryPersonId;
+
+            _logger.LogInformation("Menjam status dostave u ZAVRŠENO");
+            order.Status = "ZAVRŠENO";
+            order.DeliveryPersonId = null;
+            var updatedOrder = await _orderRepository.UpdateOrderStatusAsync(order);
+
+            if (courierId.HasValue)
+            {
+                var user = await _usersRepository.GetByIdAsync(courierId.Value);
+                if (user != null)
+                {
+                    _logger.LogInformation("Skidam dostavu sa dostavljaca");
+                    await _usersRepository.ReleaseOrderFromCourierAsync(user);
+                }
+            }
+
+            return _mapper.Map<OrderStatusDto>(updatedOrder);
+        }
+
     }
 }
