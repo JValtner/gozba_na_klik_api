@@ -88,11 +88,18 @@ namespace Gozba_na_klik.Repositories
             return user;
         }
         // Dodeli dostavu dostavljacu
-        public async Task<User?> AssignOrderToCourier(Order order, User courier)
+        public async Task<User?> AssignOrderToCourierAsync(Order order, User courier)
         {
             int orderId = order.Id;
             courier.ActiveOrderId = orderId;
 
+            await _context.SaveChangesAsync();
+            return courier;
+        }
+        // Skini dostavu sa dostavljaca
+        public async Task<User?> ReleaseOrderFromCourierAsync(User courier)
+        {
+            courier.ActiveOrderId = null;
             await _context.SaveChangesAsync();
             return courier;
         }

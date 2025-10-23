@@ -16,6 +16,7 @@ namespace Gozba_na_klik.Services
         private readonly IMealsRepository _mealsRepository;
         private readonly IMealAddonsRepository _addonRepository;
         private readonly IAddressRepository _addressRepository;
+        private readonly IUsersRepository _usersRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<OrderService> _logger;
         private const decimal DELIVERY_FEE = 200m;
@@ -26,6 +27,7 @@ namespace Gozba_na_klik.Services
             IMealsRepository mealsRepository,
             IMealAddonsRepository addonRepository,
             IAddressRepository addressRepository,
+            IUsersRepository usersRepository,
             IMapper mapper,
             ILogger<OrderService> logger)
         {
@@ -34,6 +36,7 @@ namespace Gozba_na_klik.Services
             _mealsRepository = mealsRepository;
             _addonRepository = addonRepository;
             _addressRepository = addressRepository;
+            _usersRepository = usersRepository;
             _mapper = mapper;
             _logger = logger;
         }
@@ -288,6 +291,60 @@ namespace Gozba_na_klik.Services
                 Page = page,
                 PageSize = pageSize
             };
+        }
+
+        //  DA LI IMA DODELJENA DOSTAVA?
+        // Dohvati dostavu koja ima dostavljaca i u preuzimanju
+        public async Task<Order?> GetCourierOrderInPickupAsync(int courierId)
+        {
+            return await _orderRepository.GetCourierOrderInPickupAsync(courierId);
+        }
+
+
+        // DOSTAVA U TOKU 
+        // Dodeli dostavi status "DOSTAVA U TOKU"
+        public async Task<Order?> UpdateOrderToInDeliveryAsync(int orderId)
+        {
+            _logger.LogInformation("Trazim dostavu po id iz repoa");
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            if (order == null)
+            {
+                return null;
+            }
+            order.Status = "DOSTAVA U TOKU";
+            _logger.LogInformation("Menjam status dostave u DOSTAVA U TOKU");
+            return await _orderRepository.UpdateOrderStatusAsync(order);
+        }
+
+        // DOSTAVA SE ZAVRSAVA
+        // Dodeli dostavu status "ZAVRSENO"
+        public async Task<Order?> UpdateOrderToDeliveredAsync(int orderId)
+        {
+            _logger.LogInformation("Trazim dostavu po id iz repoa");
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            if (order == null)
+            {
+                return null;
+            }
+
+            var courierId = order.DeliveryPersonId;
+
+            _logger.LogInformation("Menjam status dostave u ZAVRŠENO");
+            order.Status = "ZAVRŠENO";
+            order.DeliveryPersonId = null;
+            await _orderRepository.UpdateOrderStatusAsync(order);
+
+            if (courierId.HasValue)
+            {
+                var user = await _usersRepository.GetByIdAsync(courierId.Value);
+                if (user != null)
+                {
+                    _logger.LogInformation("Skidam dostavu sa dostavljaca");
+                    await _usersRepository.ReleaseOrderFromCourierAsync(user);
+                }
+            }
+
+            return order;
         }
 
     }

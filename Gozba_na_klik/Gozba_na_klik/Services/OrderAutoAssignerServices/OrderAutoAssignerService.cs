@@ -45,8 +45,8 @@ namespace Gozba_na_klik.Services.OrderAutoAssignerServices
                         var order = ordersOnWait[i];
                         var courier = availableCouriers[i];
 
-                        await _orderRepository.AssignCourierToOrder(order, courier);
-                        await _usersRepository.AssignOrderToCourier(order, courier);
+                        await _orderRepository.AssignCourierToOrderAsync(order, courier);
+                        await _usersRepository.AssignOrderToCourierAsync(order, courier);
 
                         _logger.LogInformation($"Porudzbina {order.Id} dodeljena kuriru {courier.Id}.");
                     }
