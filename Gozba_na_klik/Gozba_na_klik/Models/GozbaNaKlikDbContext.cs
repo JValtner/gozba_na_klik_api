@@ -105,7 +105,14 @@ namespace Gozba_na_klik.Models
                 new User { Id = 12, Username = "Ana_employee", Password = "pass_ae", Email = "ana.employee@example.com", Role = "RestaurantEmployee", RestaurantId = 2, UserImage = null, IsActive = true },
                 new User { Id = 13, Username = "Jovan_delivery", Password = "pass_jd", Email = "jovan.delivery@example.com", Role = "DeliveryPerson", RestaurantId = 2, UserImage = null, IsActive = true },
                 new User { Id = 14, Username = "Nikola_employee", Password = "pass_ne", Email = "nikola.employee@example.com", Role = "RestaurantEmployee", RestaurantId = 3, UserImage = null, IsActive = true },
-                new User { Id = 15, Username = "Sara_employee", Password = "pass_se", Email = "sara.employee@example.com", Role = "RestaurantEmployee", RestaurantId = 1, UserImage = null, IsActive = false } // ← suspendovan
+                new User { Id = 15, Username = "Sara_employee", Password = "pass_se", Email = "sara.employee@example.com", Role = "RestaurantEmployee", RestaurantId = 1, UserImage = null, IsActive = false }, // ← suspendovan
+                
+                // --- Client Users  ---
+                new User { Id = 16, Username = "marko_client", Password = "pass123", Email = "marko.client@example.com", Role = "Client", UserImage = null, IsActive = true },
+                new User { Id = 17, Username = "ana_client", Password = "pass123", Email = "ana.client@example.com", Role = "Client", UserImage = null, IsActive = true },
+                new User { Id = 18, Username = "petar_client", Password = "pass123", Email = "petar.client@example.com", Role = "Client", UserImage = null, IsActive = true },
+                new User { Id = 19, Username = "marija_client", Password = "pass123", Email = "marija.client@example.com", Role = "Client", UserImage = null, IsActive = true },
+                new User { Id = 20, Username = "nikola_client", Password = "pass123", Email = "nikola.client@example.com", Role = "Client", UserImage = null, IsActive = true }
             );
 
             // --- Restaurants ---
