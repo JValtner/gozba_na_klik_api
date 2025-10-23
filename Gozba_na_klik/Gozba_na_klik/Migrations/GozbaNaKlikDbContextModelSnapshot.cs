@@ -685,7 +685,7 @@ namespace Gozba_na_klik.Migrations
                     b.Property<decimal>("DeliveryFee")
                         .HasColumnType("numeric");
 
-                    b.Property<int?>("EstimatedPreparationMinutes")
+                    b.Property<int?>("EstimatedPreparationMinutes");
                     b.Property<int?>("DeliveryPersonId")
                         .HasColumnType("integer");
 

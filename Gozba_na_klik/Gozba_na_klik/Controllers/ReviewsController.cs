@@ -1,6 +1,7 @@
 using Gozba_na_klik.Models;
 using Microsoft.AspNetCore.Mvc;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.DTOs.Review;
 
 namespace Gozba_na_klik.Controllers
 {
@@ -15,13 +16,13 @@ namespace Gozba_na_klik.Controllers
             _service = service;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateReview([FromForm] CreateReviewDto dto)
-        {
-            var success = await _service.CreateReviewAsync(dto);
-            if (!success)
-                return BadRequest("Order not found, not completed, or already reviewed.");
-            return Ok();
-        }
+        //[HttpPost]
+        //public async Task<IActionResult> CreateReview([FromForm] CreateReviewDto dto)
+        //{
+        //    var success = await _service.CreateReviewAsync(dto);
+        //    if (!success)
+        //        return BadRequest("Order not found, not completed, or already reviewed.");
+        //    return Ok();
+        //}
     }
 }
