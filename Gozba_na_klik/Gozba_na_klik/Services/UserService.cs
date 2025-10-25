@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
+using Gozba_na_klik.Exceptions;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.Models.Orders;
 namespace Gozba_na_klik.Services
 {
     public class UserService : IUserService
@@ -9,12 +11,14 @@ namespace Gozba_na_klik.Services
         private readonly IUsersRepository _userRepository;
         private readonly IFileService _fileService;
         private readonly IMapper _mapper;
+        private readonly ILogger<UserService> _logger;
 
-        public UserService(IUsersRepository userRepository, IFileService fileService, IMapper mapper)
+        public UserService(IUsersRepository userRepository, IFileService fileService, IMapper mapper, ILogger<UserService> logger)
         {
             _userRepository = userRepository;
             _fileService = fileService;
             _mapper = mapper;
+            _logger = logger;
         }
         // Fallback image path (relative)
         private const string DefaultProfileImagePath = "/assets/profileImg/default_profile.png";
@@ -146,6 +150,36 @@ namespace Gozba_na_klik.Services
                 user.IsActive = true;
                 await _userRepository.UpdateAsync(user);
             }
+        }
+
+        // FIND ACTIVE FREE COURIER
+        public async Task<List<User>> GetAllAvailableCouriersAsync()
+        {
+            return await _userRepository.GetAllAvailableCouriersAsync();
+        }
+
+        // ASSIGN ORDER TO COURIER
+        public async Task AssignOrderToCourierAsync(int courierId, int orderId)
+        {
+            var existingCourier = await _userRepository.GetByIdAsync(courierId);
+            if (existingCourier == null)
+                throw new NotFoundException(courierId);
+
+            _logger.LogInformation($"Kuriru sa ID-em {courierId} dodeljujem dostavu ID {orderId}.");
+            existingCourier.ActiveOrderId = orderId;
+            await _userRepository.UpdateAsync(existingCourier);
+        }
+
+        // REALEASE ORDER FROM COURIER
+        public async Task ReleaseOrderFromCourierAsync(int courierId)
+        {
+            var existingCourier = await _userRepository.GetByIdAsync(courierId);
+            if (existingCourier == null)
+                throw new NotFoundException(courierId);
+
+            _logger.LogInformation($"Kuriru sa ID-em {courierId} skidam dostavu ID {existingCourier.ActiveOrderId}.");
+            existingCourier.ActiveOrderId = null;
+            await _userRepository.UpdateAsync(existingCourier);
         }
     }
 }

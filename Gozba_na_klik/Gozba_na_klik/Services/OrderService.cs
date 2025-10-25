@@ -3,7 +3,6 @@ using Gozba_na_klik.DTOs.Orders;
 using Gozba_na_klik.Exceptions;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
-using Gozba_na_klik.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
@@ -12,36 +11,18 @@ namespace Gozba_na_klik.Services
     public class OrderService : IOrderService
     {
         private readonly IOrderRepository _orderRepository;
-        private readonly IUsersRepository _userRepository;
-        private readonly IRestaurantRepository _restaurantRepository;
         private readonly GozbaNaKlikDbContext _context;
-        private readonly IMealsRepository _mealsRepository;
-        private readonly IMealAddonsRepository _addonRepository;
-        private readonly IAddressRepository _addressRepository;
-        private readonly IUsersRepository _usersRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<OrderService> _logger;
 
         public OrderService(
             IOrderRepository orderRepository,
-            IUsersRepository userRepository,
-            IRestaurantRepository restaurantRepository,
             GozbaNaKlikDbContext context,
-            IMealsRepository mealsRepository,
-            IMealAddonsRepository addonRepository,
-            IAddressRepository addressRepository,
-            IUsersRepository usersRepository,
             IMapper mapper,
             ILogger<OrderService> logger)
         {
             _orderRepository = orderRepository;
-            _userRepository = userRepository;
-            _restaurantRepository = restaurantRepository;
             _context = context;
-            _mealsRepository = mealsRepository;
-            _addonRepository = addonRepository;
-            _addressRepository = addressRepository;
-            _usersRepository = usersRepository;
             _mapper = mapper;
             _logger = logger;
         }
@@ -439,33 +420,48 @@ namespace Gozba_na_klik.Services
                 PageSize = pageSize
             };
         }
+        // 1 DOHVATI SVE PRIHVACENE
+        public async Task<List<Order>> GetAllAcceptedOrdersAsync()
+        {
+            return await _orderRepository.GetAllAcceptedOrdersAsync();
+        }
+
+        // DODELI DOSTAVU DOSTAVLJACU
+        public async Task AssignCourierToOrderAsync(int orderId, int courierId)
+        {
+            var existingOrder = await _orderRepository.GetByIdAsync(orderId);
+            if (existingOrder == null)
+                throw new NotFoundException($"Porudzbina sa ID-em {orderId} nije pronadjena.");
+
+            _logger.LogInformation("Menjam status dostave iz 'PRIHVACENA' u 'PREUZIMANJE U TOKU'.");
+            existingOrder.DeliveryPersonId = courierId;
+            existingOrder.Status = "PREUZIMANJE U TOKU";
+            await _orderRepository.UpdateAsync(existingOrder);
+        }
 
         //  DA LI IMA DODELJENA DOSTAVA?
         // Dohvati dostavu koja ima dostavljaca i u preuzimanju
         public async Task<CourierActiveOrderDto?> GetCourierOrderInPickupAsync(int courierId)
         {
             var order = await _orderRepository.GetCourierOrderInPickupAsync(courierId);
-            if (order == null) return null;
-
+            if (order == null)
+                throw new NotFoundException($"Kurir sa ID-em {courierId} nema aktivnu porudzbinu.");
             return _mapper.Map<CourierActiveOrderDto>(order);
         }
-
 
         // DOSTAVA U TOKU 
         // Dodeli dostavi status "DOSTAVA U TOKU"
         public async Task<OrderStatusDto?> UpdateOrderToInDeliveryAsync(int orderId)
         {
-            _logger.LogInformation("Trazim dostavu po id iz repoa");
             var order = await _orderRepository.GetByIdAsync(orderId);
             if (order == null)
-            {
-                return null;
-            }
-            order.Status = "DOSTAVA U TOKU";
-            _logger.LogInformation("Menjam status dostave u DOSTAVA U TOKU");
-            var updatedOrder = await _orderRepository.UpdateOrderStatusAsync(order);
+                throw new NotFoundException($"Porudzbina sa ID-em {orderId} nije pronadjena.");
 
-            return _mapper.Map<OrderStatusDto>(updatedOrder);
+            _logger.LogInformation("Menjam status dostave iz 'PREUZIMANJE U TOKU' u 'DOSTAVA U TOKU'.");
+            order.Status = "DOSTAVA U TOKU";
+            await _orderRepository.UpdateAsync(order);
+
+            return _mapper.Map<OrderStatusDto>(order);
         }
 
         // DOSTAVA SE ZAVRSAVA
@@ -475,28 +471,26 @@ namespace Gozba_na_klik.Services
             _logger.LogInformation("Trazim dostavu po id iz repoa");
             var order = await _orderRepository.GetByIdAsync(orderId);
             if (order == null)
-            {
-                return null;
-            }
-
-            var courierId = order.DeliveryPersonId;
+                throw new NotFoundException($"Porudzbina sa ID-em {orderId} nije pronadjena.");
 
             _logger.LogInformation("Menjam status dostave u ZAVRŠENO");
             order.Status = "ZAVRŠENO";
+            var courierId = order.DeliveryPersonId;
             order.DeliveryPersonId = null;
-            var updatedOrder = await _orderRepository.UpdateOrderStatusAsync(order);
+            await _orderRepository.UpdateAsync(order);
 
             if (courierId.HasValue)
             {
-                var user = await _usersRepository.GetByIdAsync(courierId.Value);
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == courierId.Value);
                 if (user != null)
                 {
                     _logger.LogInformation("Skidam dostavu sa dostavljaca");
-                    await _usersRepository.ReleaseOrderFromCourierAsync(user);
+                    user.ActiveOrderId = null;
+                    await _context.SaveChangesAsync();
                 }
             }
 
-            return _mapper.Map<OrderStatusDto>(updatedOrder);
+            return _mapper.Map<OrderStatusDto>(order);
         }
 
     }
