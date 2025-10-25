@@ -12,8 +12,6 @@ namespace Gozba_na_klik.Models
         Task<User> AddAsync(User user);
         Task<User> UpdateAsync(User user);
         Task<User?> UpdateUserAlergensAsync(int userId, List<int> alergenIds);
-        Task<User?> AssignOrderToCourierAsync(Order order, User courier);
-        Task<User?> ReleaseOrderFromCourierAsync(User courier);
         Task<bool> DeleteAsync(int userId);
         Task<bool> ExistsAsync(int userId);
     }

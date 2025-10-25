@@ -11,8 +11,6 @@ namespace Gozba_na_klik.Models
         Task UpdateAsync(Order order);
         Task<List<Order>> GetAllAcceptedOrdersAsync();
         Task<Order?> GetCourierOrderInPickupAsync(int courierId);
-        Task<Order?> AssignCourierToOrderAsync(Order order, User courier);
-        Task<Order?> UpdateOrderStatusAsync(Order order);
         Task<(List<Order> Orders, int TotalCount)> GetOrdersByUserIdAsync(
             int userId, string? statusFilter, int page, int pageSize
         );

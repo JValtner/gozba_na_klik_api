@@ -20,5 +20,10 @@ namespace Gozba_na_klik.Services
         Task<User> UpdateUserAsync(int id, UpdateUserDto dto, IFormFile? userimage);
         Task<ResponseUserAlergenDto?> UpdateUserAlergensAsync(int userId, RequestUpdateAlergenByUserDto dto);
         Task DeleteUserAsync(int id);
+
+        // DOSTAVA
+        Task<List<User>> GetAllAvailableCouriersAsync();
+        Task AssignOrderToCourierAsync(int courierId, int orderId);
+        Task ReleaseOrderFromCourierAsync(int courierId);
     }
 }
