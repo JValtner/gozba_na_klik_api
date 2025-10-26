@@ -19,7 +19,7 @@ namespace Gozba_na_klik.Repositories
         public async Task<Order?> GetByIdAsync(int orderId)
         {
             return await _context.Orders
-                .AsNoTracking()
+                //.AsNoTracking()
                 .Include(o => o.User)
                 .Include(o => o.Restaurant)
                 .Include(o => o.Address)
@@ -96,7 +96,6 @@ namespace Gozba_na_klik.Repositories
         public async Task<List<Order>> GetAllAcceptedOrdersAsync()
         {
             return await _context.Orders
-                .AsNoTracking()
                 .Include(order => order.User)
                 .Include(order => order.Restaurant)
                 .Include(order => order.Address)
