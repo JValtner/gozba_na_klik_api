@@ -120,10 +120,7 @@ namespace Gozba_na_klik.Controllers
         public async Task<ActionResult<CourierActiveOrderDto>> GetCourierOrderInPickupAsync(int courierId)
         {
             _logger.LogInformation("GET zahtev za proveru da li je kuriru dodeljena dostava");
-            var order = await _orderService.GetCourierOrderInPickupAsync(courierId);
-            if (order == null)
-                return NotFound();
-            return Ok(order);
+            return Ok(await _orderService.GetCourierOrderInPickupAsync(courierId));
         }
 
         // PUT: api/orders/{orderId}/status/to-in-delivery
@@ -131,10 +128,7 @@ namespace Gozba_na_klik.Controllers
         public async Task<ActionResult<OrderStatusDto>> UpdateOrderToInDeliveryAsync(int orderId)
         {
             _logger.LogInformation("PUT zahtev za promenu statusa narudzbine u 'DOSTAVA U TOKU'");
-            var order = await _orderService.UpdateOrderToInDeliveryAsync(orderId);
-            if (order == null)
-                return NotFound();
-            return Ok(order);
+            return Ok(await _orderService.UpdateOrderToInDeliveryAsync(orderId));
         }
 
         // PUT: api/orders/{orderId}/status/to-delivered
@@ -142,10 +136,7 @@ namespace Gozba_na_klik.Controllers
         public async Task<ActionResult<OrderStatusDto>> UpdateOrderToDeliveredAsync(int orderId)
         {
             _logger.LogInformation("PUT zahtev za promenu statusa narudzbine u 'ZAVRSENO'");
-            var order = await _orderService.UpdateOrderToDeliveredAsync(orderId);
-            if (order == null)
-                return NotFound();
-            return Ok(order);
+            return Ok(await _orderService.UpdateOrderToDeliveredAsync(orderId));
         }
     }
 }

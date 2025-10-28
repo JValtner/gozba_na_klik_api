@@ -19,7 +19,7 @@ namespace Gozba_na_klik.Repositories
         public async Task<Order?> GetByIdAsync(int orderId)
         {
             return await _context.Orders
-                .AsNoTracking()
+                //.AsNoTracking()
                 .Include(o => o.User)
                 .Include(o => o.Restaurant)
                 .Include(o => o.Address)
@@ -108,29 +108,13 @@ namespace Gozba_na_klik.Repositories
         public async Task<Order?> GetCourierOrderInPickupAsync(int courierId)
         {
             return await _context.Orders
+                .AsNoTracking()
                 .Include(order => order.Restaurant)
                 .Include(order => order.Items)
                 .Include(order => order.User)
                 .Include(order => order.Address)
                 .Where(order => order.DeliveryPersonId == courierId && order.Status != "PRIHVAĆENA")
                 .FirstOrDefaultAsync();
-        }
-
-        // ✅ Dodeli dostavljača porudžbini
-        public async Task<Order?> AssignCourierToOrderAsync(Order order, User courier)
-        {
-            order.DeliveryPersonId = courier.Id;
-            order.Status = "PREUZIMANJE U TOKU";
-            await _context.SaveChangesAsync();
-            return order;
-        }
-
-        // ✅ Promeni status porudžbine
-        public async Task<Order?> UpdateOrderStatusAsync(Order order)
-        {
-            _context.Orders.Update(order);
-            await _context.SaveChangesAsync();
-            return order;
         }
 
         // ✅ Dohvatanje porudžbina po korisniku

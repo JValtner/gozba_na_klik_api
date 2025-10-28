@@ -1,4 +1,6 @@
-﻿using Gozba_na_klik.DTOs.Orders;
+﻿using System.Threading.Tasks;
+using Gozba_na_klik.DTOs.Orders;
+using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
 
 namespace Gozba_na_klik.Services
@@ -20,6 +22,8 @@ namespace Gozba_na_klik.Services
             int userId, string? statusFilter, int page, int pageSize);
 
         // Kurir
+        Task<List<Order>> GetAllAcceptedOrdersAsync();
+        Task AssignCourierToOrderAsync(int orderId, int courierId);
         Task<CourierActiveOrderDto?> GetCourierOrderInPickupAsync(int courierId);
         Task<OrderStatusDto?> UpdateOrderToInDeliveryAsync(int orderId);
         Task<OrderStatusDto?> UpdateOrderToDeliveredAsync(int orderId);
