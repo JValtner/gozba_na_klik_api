@@ -476,7 +476,6 @@ namespace Gozba_na_klik.Services
             _logger.LogInformation("Menjam status dostave u ZAVRŠENO");
             order.Status = "ZAVRŠENO";
             var courierId = order.DeliveryPersonId;
-            order.DeliveryPersonId = null;
             await _orderRepository.UpdateAsync(order);
 
             if (courierId.HasValue)
