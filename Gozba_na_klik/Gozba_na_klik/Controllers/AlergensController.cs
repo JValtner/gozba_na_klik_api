@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Services;
-using Gozba_na_klik.DTOs.Response;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Gozba_na_klik.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    
     public class AlergensController : ControllerBase
     {
         private readonly IAlergenService _alergenService;
@@ -18,6 +20,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // GET: api/alergens
+        [Authorize(Policy = "PublicPolicy")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ResponseAlergenDto>>> GetAllAsync()
         {
@@ -27,6 +30,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // GET: api/alergens/all (Koristi DTO koji sadrzi samo ID i naziv)
+        [Authorize(Policy = "PublicPolicy")]
         [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<ResponseAlergenBasicDto>>> GetAllAlergensAsync()
         {
@@ -35,7 +39,9 @@ namespace Gozba_na_klik.Controllers
             return Ok(alergens);
         }
 
+
         // GET: api/alergens/meal/5
+        [Authorize(Policy = "PublicPolicy")]
         [HttpGet("meal/{mealId:int}")]
         public async Task<ActionResult<IEnumerable<ResponseAlergenDto>>> GetByMealIdAsync(int mealId)
         {
@@ -45,6 +51,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // POST: api/alergens/{mealId}/{alergenId}
+        [Authorize(Policy = "RestaurantOwnerPolicy")]
         [HttpPost("{mealId:int}/{alergenId:int}")]
         public async Task<ActionResult<ResponseAlergenDto>> AddToMealAsync(int mealId, int alergenId)
         {
@@ -54,6 +61,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // DELETE: api/alergens/{mealId}/{alergenId}
+        [Authorize(Policy = "RestaurantOwnerPolicy")]
         [HttpDelete("{mealId:int}/{alergenId:int}")]
         public async Task<ActionResult<ResponseAlergenDto>> RemoveFromMealAsync(int mealId, int alergenId)
         {

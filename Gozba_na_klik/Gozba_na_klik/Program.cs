@@ -1,49 +1,135 @@
-﻿using System;
-using AutoMapper;
+﻿using Gozba_na_klik.Data;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Repositories;
+using System.Security.Claims;
+using System.Text;
 using Gozba_na_klik.Services;
 using Gozba_na_klik.Services.AddressServices;
 using Gozba_na_klik.Services.OrderAutoAssignerServices;
 using Gozba_na_klik.Settings;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ---------------------------
+// Serilog logger
+// ---------------------------
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .CreateLogger();
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddSerilog(logger);
+
+// ---------------------------
+// PostgreSQL & DbContext
+// ---------------------------
+builder.Services.AddDbContext<GozbaNaKlikDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// ---------------------------
+// Identity setup
+// ---------------------------
+builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Gozba_na_klik", Version = "v1" });
-    c.AddSecurityDefinition("XUserId", new OpenApiSecurityScheme
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 10;
+})
+.AddEntityFrameworkStores<GozbaNaKlikDbContext>()
+.AddDefaultTokenProviders();
+// Autentification JWT
+
+builder.Services.AddAuthentication(options =>
+{ // Naglašavamo da koristimo JWT
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        Description = "Temporary auth via X-User-Id header (e.g. 1)",
-        Name = "X-User-Id",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey
-    });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "XUserId" }
-            },
-            Array.Empty<string>()
-        }
-    });
+        ValidateLifetime = true, // Validacija da li je token istekao
+
+        ValidateIssuer = true,   // Validacija URL-a aplikacije koja izdaje token
+        ValidIssuer = builder.Configuration["Jwt:Issuer"], // URL aplikacije koja izdaje token (čita se iz appsettings.json)
+
+        ValidateAudience = true, // Validacija URL-a aplikacije koja koristi token
+        ValidAudience = builder.Configuration["Jwt:Audience"], // URL aplikacije koja koristi token (čita se iz appsettings.json)
+
+        ValidateIssuerSigningKey = true, // Validacija ključa za potpisivanje tokena (koji se koristi i pri proveri potpisa)
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])), //Ključ za proveru tokena (čita se iz appsettings.json)
+
+        RoleClaimType = ClaimTypes.Role // Potrebno za kontrolu pristupa, što ćemo videti kasnije
+    };
+});
+// Optional: cookie auth
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/api/account/login";
+    options.AccessDeniedPath = "/api/account/accessdenied";
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("PublicPolicy", policy => 
+        policy.RequireAssertion(_ => true));
+
+    options.AddPolicy("RegisteredPolicy", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("RestaurantOwner") || context.User.IsInRole("User") || context.User.IsInRole("Admin") || context.User.IsInRole("RestaurantEmployee") || context.User.IsInRole("DeliveryPerson")
+        ));
+
+    options.AddPolicy("AdminPolicy", policy =>
+        policy.RequireRole("Admin"));
+
+    options.AddPolicy("RestaurantOwnerPolicy", policy =>
+        policy.RequireRole("RestaurantOwner"));
+
+    options.AddPolicy("OwnerOrUserPolicy", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("RestaurantOwner") || context.User.IsInRole("User")
+        ));
+
+    options.AddPolicy("OwnerOrAdminPolicy", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("RestaurantOwner") || context.User.IsInRole("Admin")
+        ));
+
+    options.AddPolicy("EmployeePolicy", policy =>
+        policy.RequireRole("RestaurantEmployee"));
+
+    options.AddPolicy("EmployeeOrAdminPolicy", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("Employee") || context.User.IsInRole("Admin")
+        ));
+
+    options.AddPolicy("DeliveryPerson", policy =>
+        policy.RequireRole("DeliveryPerson"));
+
+    options.AddPolicy("UserPolicy", policy =>
+        policy.RequireRole("User"));
 });
 
 
+// ---------------------------
+// AutoMapper
+// ---------------------------
+builder.Services.AddAutoMapper(cfg => { cfg.AddProfile<MappingProfile>(); });
 
-// AutoMapper (scan all assemblies)
-builder.Services.AddAutoMapper(cfg => {cfg.AddProfile<MappingProfile>();
-});
-
-// Register repositories and services
+// ---------------------------
+// Repositories & Services
+// ---------------------------
 builder.Services.AddScoped<IOrderRepository, OrderDbRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 
@@ -78,11 +164,9 @@ builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IOrderAutoAssignerService, OrderAutoAssignerService>();
 builder.Services.AddHostedService<OrderAutoAssignerBackgroundService>();
 
-// Configure PostgreSQL database connection
-builder.Services.AddDbContext<GozbaNaKlikDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// Configure CORS
+// ---------------------------
+// CORS
+// ---------------------------
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>
@@ -93,7 +177,9 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Controllers with JSON options
+// ---------------------------
+// Controllers & JSON options
+// ---------------------------
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -101,24 +187,52 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.WriteIndented = true;
     });
 
+// ---------------------------
+// Swagger
+// ---------------------------
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Building Example API", Version = "v1" });
+
+    // Definisanje JWT Bearer autentifikacije
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Insert JWT token"
+    });
+
+    // Primena Bearer autentifikacije
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+  {
+    {
+      new OpenApiSecurityScheme
+      {
+        Reference = new OpenApiReference
+        {
+          Type = ReferenceType.SecurityScheme,
+          Id = "Bearer"
+        }
+      },
+      Array.Empty<string>()
+    }
+  });
+});
+
+
+// ---------------------------
 // Exception handling middleware
+// ---------------------------
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
-
-// Serilog logger
-var logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
-    .Enrich.FromLogContext()
-    .CreateLogger();
-
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-builder.Logging.AddSerilog(logger);
 
 var app = builder.Build();
 
 // Middleware pipeline
 app.UseMiddleware<ExceptionHandlingMiddleware>();
-
 
 // Static files: /assets
 var assetsPath = Path.Combine(builder.Environment.ContentRootPath, "assets");
@@ -136,13 +250,27 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Enable CORS
+// HTTPS & CORS
 app.UseHttpsRedirection();
-
 app.UseCors("FrontendPolicy");
 
+app.UseAuthentication(); // <--- Identity
 app.UseAuthorization();
 
 app.MapControllers();
+
+// ---------------------------
+// Seed Identity Roles & Users
+// ---------------------------
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<GozbaNaKlikDbContext>();
+    var userManager = services.GetRequiredService<UserManager<User>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole<int>>>();
+
+    await DataSeeder.SeedAsync(context, userManager, roleManager);
+}
+
 
 app.Run();

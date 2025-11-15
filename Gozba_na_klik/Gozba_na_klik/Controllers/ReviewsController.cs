@@ -1,12 +1,14 @@
-using Gozba_na_klik.Models;
-using Microsoft.AspNetCore.Mvc;
-using Gozba_na_klik.Models;
 using Gozba_na_klik.DTOs.Review;
+using Gozba_na_klik.Models;
+using Gozba_na_klik.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Gozba_na_klik.Controllers
 {
     [ApiController]
     [Route("api/reviews")]
+    [Authorize(Policy = "UserPolicy")]
     public class ReviewsController : ControllerBase
     {
         private readonly IReviewService _service;

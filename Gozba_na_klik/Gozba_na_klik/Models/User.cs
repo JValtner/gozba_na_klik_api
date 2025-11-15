@@ -1,27 +1,25 @@
-﻿using Gozba_na_klik.Models;
+﻿using Microsoft.AspNetCore.Identity;
 using Gozba_na_klik.Models.Orders;
 
 namespace Gozba_na_klik.Models
 {
-    public class User
+    public class User : IdentityUser<int> // Use int if your current Id is int
     {
-        public int Id { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
-        public string Email { get; set; }
-        public string Role { get; set; } // ULOGE IZ BAZE => "User", "Admin", "RestaurantOwner", "RestaurantEmployee", "DeliveryPerson"
+        // IdentityUser already includes:
+        // Id, UserName, PasswordHash, Email, PhoneNumber, EmailConfirmed, etc.
+        // Role to be handled through identity framework
         public string? UserImage { get; set; }
 
         // Adresa
         public int? DefaultAddressId { get; set; }
-        public Address? DefaultAddress { get; set; } // Ovo je default address
+        public Address? DefaultAddress { get; set; }
         public List<Address> Addresses { get; set; } = new();
 
-        public bool IsActive { get; set; } = true; // Da li je zaposlen aktivan/suspendovan
+        public bool IsActive { get; set; } = true;
         public int? RestaurantId { get; set; }
         public Restaurant? Restaurant { get; set; }
         public List<UserAlergen> UserAlergens { get; set; } = new();
-        
+
         // Dostava
         public int? ActiveOrderId { get; set; }
         public Order? ActiveOrder { get; set; }

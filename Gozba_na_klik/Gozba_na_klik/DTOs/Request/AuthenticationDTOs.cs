@@ -6,11 +6,21 @@
         public string Password { get; set; }
     }
 
-    public class LoginResponse
+    public class RegistrationDto
+    {
+        
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string Username { get; set; }
+    }
+    public class ProfileDto
     {
         public int Id { get; set; }
         public string Username { get; set; }
         public string Email { get; set; }
-        public string Role { get; set; }
+        public string UserImage { get; set; }
+        
     }
+
+
 }
