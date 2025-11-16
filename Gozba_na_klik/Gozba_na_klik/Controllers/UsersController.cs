@@ -1,7 +1,9 @@
 ﻿using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Services;
+using Gozba_na_klik.Services.EmailServices;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -15,11 +17,15 @@ namespace Gozba_na_klik.Controllers
     {
         private readonly IUserService _userService;
         private readonly IFileService _fileService;
+        private readonly UserManager<User> _userManager;
+        private readonly IEmailService _emailService;
 
-        public UsersController(IUserService userService, IFileService fileService)
+        public UsersController(IUserService userService, IFileService fileService, UserManager<User> userManager, IEmailService emailService)
         {
             _userService = userService;
             _fileService = fileService;
+            _userManager = userManager;
+            _emailService = emailService;
         }
 
         // GET: api/users
@@ -132,11 +138,20 @@ namespace Gozba_na_klik.Controllers
             var token = await _userService.Login(data);
             return Ok(token);
         }
+
         [Authorize(Policy = "RegisteredPolicy")]
         [HttpGet("profile")]
         public async Task<IActionResult> Profile()
         {
             return Ok(await _userService.GetProfile(User));
+        }
+
+        [AllowAnonymous]
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmailAsync([FromQuery] int userId, [FromQuery] string token)
+        {
+            await _emailService.ConfirmEmailAsync(userId, token);
+            return Ok("Email confirmed successfully");
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper;
@@ -6,7 +7,9 @@ using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Exceptions;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.Services.EmailServices;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Gozba_na_klik.Services
@@ -20,6 +23,7 @@ namespace Gozba_na_klik.Services
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole<int>> _roleManager;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
         private const string DefaultProfileImagePath = "/assets/profileImg/default_profile.png";
 
@@ -30,7 +34,8 @@ namespace Gozba_na_klik.Services
             ILogger<UserService> logger,
             UserManager<User> userManager,
             RoleManager<IdentityRole<int>> roleManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IEmailService emailService)
         {
             _userRepository = userRepository;
             _fileService = fileService;
@@ -39,6 +44,7 @@ namespace Gozba_na_klik.Services
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()
@@ -74,6 +80,25 @@ namespace Gozba_na_klik.Services
                 string errorMessage = string.Join("; ", roleResult.Errors.Select(e => e.Description));
                 throw new BadRequestException(errorMessage);
             }
+
+            // Generate email confirmation token
+            var encodedToken = WebUtility.UrlEncode(await _userManager.GenerateEmailConfirmationTokenAsync(user));
+            // Build confirmation link
+            var ApiUrl = _configuration["ApiUrl"];
+            var confirmationLink = $"{ApiUrl}/api/Users/confirm-email?userId={user.Id}&token={encodedToken}";
+
+            // Try sending email, but don't fail registration if it throws
+            try
+            {
+                await _emailService.SendEmailAsync(user.Email, "Confirm your account",
+                    $"Click here to confirm your account: {confirmationLink}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send confirmation email to {Email}", user.Email);
+                // Optionally: return a flag in the DTO so frontend knows email failed
+            }
+
 
             // Map back to ProfileDto
             return _mapper.Map<ProfileDto>(user);

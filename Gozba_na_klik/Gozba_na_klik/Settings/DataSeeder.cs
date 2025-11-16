@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Gozba_na_klik.Data
 {
+
     public static class DataSeeder
     {
         public static async Task SeedAsync(
