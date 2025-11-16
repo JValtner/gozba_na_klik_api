@@ -257,13 +257,13 @@ namespace Gozba_na_klik.Services
             return newInvoice;
         }
 
-        public async Task<InvoiceDto?> GetInvoiceByOrderIdAsync(int orderId)
+        public async Task<InvoiceDto?> FindInvoiceByOrderIdAsync(int orderId)
         {
             _logger.LogInformation("Internal request for invoice by order ID {OrderId}", orderId);
             return await _invoiceRepository.GetInvoiceByOrderIdAsync(orderId);
         }
 
-        public async Task<InvoiceDto?> GetInvoiceByIdAsync(string invoiceId)
+        public async Task<InvoiceDto?> FindInvoiceByIdAsync(string invoiceId)
         {
             _logger.LogInformation("Internal request for invoice by ID {InvoiceId}", invoiceId);
             return await _invoiceRepository.GetInvoiceByIdAsync(invoiceId);

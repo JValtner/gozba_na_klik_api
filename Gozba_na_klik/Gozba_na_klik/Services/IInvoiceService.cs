@@ -10,8 +10,8 @@ namespace Gozba_na_klik.Services
         Task<InvoiceDto> GetInvoiceByOrderIdAsync(int orderId, int userId);
         Task<InvoiceDto> GetInvoiceByIdAsync(string invoiceId, int userId);
         Task<InvoiceDto> RegenerateInvoiceAsync(int orderId, int userId);
-        Task<InvoiceDto?> GetInvoiceByOrderIdAsync(int orderId);
-        Task<InvoiceDto?> GetInvoiceByIdAsync(string invoiceId);
+        Task<InvoiceDto?> FindInvoiceByOrderIdAsync(int orderId);
+        Task<InvoiceDto?> FindInvoiceByIdAsync(string invoiceId);
         Task<byte[]> GenerateInvoicePdfBytesAsync(int orderId, int userId);
         Task<byte[]> GenerateInvoicePdfBytesByIdAsync(string invoiceId, int userId);
         string GenerateInvoiceId();
