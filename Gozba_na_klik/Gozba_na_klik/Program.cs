@@ -9,6 +9,7 @@ using Gozba_na_klik.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
+using MongoDB.Driver;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -73,6 +74,12 @@ builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IReviewsRepository, ReviewsDbRepository>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 
+builder.Services.AddScoped<IPdfService, PdfService>();
+
+// Invoice services - MongoDB
+builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+
 builder.Services.AddScoped<IFileService, FileService>();
 
 builder.Services.AddScoped<IOrderAutoAssignerService, OrderAutoAssignerService>();
@@ -81,6 +88,21 @@ builder.Services.AddHostedService<OrderAutoAssignerBackgroundService>();
 // Configure PostgreSQL database connection
 builder.Services.AddDbContext<GozbaNaKlikDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Configure MongoDb
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("MongoDb")
+        ?? "mongodb://localhost:27017";
+    return new MongoClient(connectionString);
+});
+
+builder.Services.AddScoped<IMongoDatabase>(sp =>
+{
+    var client = sp.GetRequiredService<IMongoClient>();
+    var databaseName = builder.Configuration["MongoDb:DatabaseName"] ?? "gozba_na_klik_invoices";
+    return client.GetDatabase(databaseName);
+});
 
 // Configure CORS
 builder.Services.AddCors(options =>

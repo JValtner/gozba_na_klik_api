@@ -14,17 +14,20 @@ namespace Gozba_na_klik.Services
         private readonly GozbaNaKlikDbContext _context;
         private readonly IMapper _mapper;
         private readonly ILogger<OrderService> _logger;
+        private readonly IInvoiceService _invoiceService;
 
         public OrderService(
             IOrderRepository orderRepository,
             GozbaNaKlikDbContext context,
             IMapper mapper,
-            ILogger<OrderService> logger)
+            ILogger<OrderService> logger,
+            IInvoiceService invoiceService)
         {
             _orderRepository = orderRepository;
             _context = context;
             _mapper = mapper;
             _logger = logger;
+            _invoiceService = invoiceService;
         }
 
         public async Task<OrderPreviewDto> GetOrderPreviewAsync(int userId, int restaurantId, CreateOrderDto dto)
@@ -478,6 +481,19 @@ namespace Gozba_na_klik.Services
             var courierId = order.DeliveryPersonId;
             await _orderRepository.UpdateAsync(order);
 
+            // Kreiranje Invoice-a
+            try
+            {
+                _logger.LogInformation("Starting automatic invoice generation for completed order {OrderId}", orderId);
+                var invoice = await _invoiceService.GenerateInvoiceAsync(order);
+                await _invoiceService.SaveInvoiceAsync(invoice);
+                _logger.LogInformation("Invoice {InvoiceId} automatically created for order {OrderId}", invoice.InvoiceId, orderId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to generate invoice for order {OrderId}. Order completed successfully, but invoice creation failed.", orderId);
+            }
+
             if (courierId.HasValue)
             {
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == courierId.Value);
@@ -491,6 +507,5 @@ namespace Gozba_na_klik.Services
 
             return _mapper.Map<OrderStatusDto>(order);
         }
-
     }
 }

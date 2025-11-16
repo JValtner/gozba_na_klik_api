@@ -11,16 +11,13 @@ namespace Gozba_na_klik.Services
         Task<OrderPreviewDto> GetOrderPreviewAsync(int userId, int restaurantId, CreateOrderDto dto);
         Task<OrderResponseDto> CreateOrderAsync(int userId, int restaurantId, CreateOrderDto dto);
         Task<OrderDetailsDto> GetOrderByIdAsync(int userId, int orderId);
+        Task<PaginatedOrderHistoryResponseDto> GetUserOrderHistoryAsync(
+            int userId, string? statusFilter, int page, int pageSize);
 
         // Restoran
         Task<List<RestaurantOrderDto>> GetRestaurantOrdersAsync(int userId, int restaurantId, string? status = null);
         Task AcceptOrderAsync(int userId, int orderId, AcceptOrderDto dto);
         Task CancelOrderAsync(int userId, int orderId, CancelOrderDto dto);
-
-        // Kupac
-        Task<PaginatedOrderHistoryResponseDto> GetUserOrderHistoryAsync(
-            int userId, string? statusFilter, int page, int pageSize);
-
         // Kurir
         Task<List<Order>> GetAllAcceptedOrdersAsync();
         Task AssignCourierToOrderAsync(int orderId, int courierId);
