@@ -65,8 +65,8 @@ namespace Gozba_na_klik.Services
                 Customer = new CustomerInfoDto
                 {
                     Id = fullOrder.User.Id,
-                    Username = fullOrder.User.Username,
-                    Email = fullOrder.User.Email
+                    Username = fullOrder.User.UserName ?? string.Empty,
+                    Email = fullOrder.User.Email ?? string.Empty
                 },
                 Restaurant = new RestaurantInfoDto
                 {
@@ -287,10 +287,10 @@ namespace Gozba_na_klik.Services
 
                 if (user == null) return false;
 
-                bool isAdmin = (user.Username ?? "").Contains("admin", StringComparison.OrdinalIgnoreCase);
+                bool isAdmin = (user.UserName ?? "").Contains("admin", StringComparison.OrdinalIgnoreCase);
 
                 _logger.LogInformation("Admin check for user {UserId} ({Username}): {IsAdmin}",
-                userId, user.Username, isAdmin);
+                userId, user.UserName, isAdmin);
 
                 return isAdmin;
             }
