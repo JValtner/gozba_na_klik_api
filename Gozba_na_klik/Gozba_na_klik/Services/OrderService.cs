@@ -3,6 +3,7 @@ using Gozba_na_klik.DTOs.Orders;
 using Gozba_na_klik.Exceptions;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
@@ -15,19 +16,22 @@ namespace Gozba_na_klik.Services
         private readonly IMapper _mapper;
         private readonly ILogger<OrderService> _logger;
         private readonly IInvoiceService _invoiceService;
+        private readonly UserManager<User> _userManager;
 
         public OrderService(
             IOrderRepository orderRepository,
             GozbaNaKlikDbContext context,
             IMapper mapper,
             ILogger<OrderService> logger,
-            IInvoiceService invoiceService)
+            IInvoiceService invoiceService,
+            UserManager<User> userManager)
         {
             _orderRepository = orderRepository;
             _context = context;
             _mapper = mapper;
             _logger = logger;
             _invoiceService = invoiceService;
+            _userManager = userManager;
         }
 
         public async Task<OrderPreviewDto> GetOrderPreviewAsync(int userId, int restaurantId, CreateOrderDto dto)
@@ -309,7 +313,7 @@ namespace Gozba_na_klik.Services
                 Id = order.Id,
                 Status = order.Status,
                 OrderDate = order.OrderDate,
-                CustomerName = order.User?.Username ?? "N/A",
+                CustomerName = order.User?.UserName ?? "N/A",
                 CustomerEmail = order.User?.Email,
                 DeliveryAddress = order.Address != null
                     ? $"{order.Address.Street}, {order.Address.City}"
@@ -341,18 +345,20 @@ namespace Gozba_na_klik.Services
             if (order == null)
                 throw new NotFoundException($"Porudžbina sa ID {orderId} nije pronađena.");
 
-
-            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
-            var restaurant = await _context.Restaurants.AsNoTracking().FirstOrDefaultAsync(r => r.Id == order.RestaurantId);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var restaurant = await _context.Restaurants.FirstOrDefaultAsync(r => r.Id == order.RestaurantId);
 
             if (user == null)
                 throw new NotFoundException("Korisnik nije pronađen.");
-
             if (restaurant == null)
                 throw new NotFoundException("Restoran nije pronađen.");
 
+            // ✅ Fetch role from Identity
+            var roles = await _userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault();
+
             bool isOwner = restaurant.OwnerId == user.Id;
-            bool isEmployee = user.RestaurantId == restaurant.Id && user.Role == "RestaurantEmployee";
+            bool isEmployee = user.RestaurantId == restaurant.Id && role == "RestaurantEmployee";
 
             if (!isOwner && !isEmployee)
                 throw new ForbiddenException("Nemate pristup ovoj porudžbini.");
@@ -378,17 +384,20 @@ namespace Gozba_na_klik.Services
             if (order == null)
                 throw new NotFoundException($"Porudžbina sa ID {orderId} nije pronađena.");
 
-            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
-            var restaurant = await _context.Restaurants.AsNoTracking().FirstOrDefaultAsync(r => r.Id == order.RestaurantId);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var restaurant = await _context.Restaurants.FirstOrDefaultAsync(r => r.Id == order.RestaurantId);
 
             if (user == null)
                 throw new NotFoundException("Korisnik nije pronađen.");
-
             if (restaurant == null)
                 throw new NotFoundException("Restoran nije pronađen.");
 
+            // ✅ Fetch role from Identity
+            var roles = await _userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault();
+
             bool isOwner = restaurant.OwnerId == user.Id;
-            bool isEmployee = user.RestaurantId == restaurant.Id && user.Role == "RestaurantEmployee";
+            bool isEmployee = user.RestaurantId == restaurant.Id && role == "RestaurantEmployee";
 
             if (!isOwner && !isEmployee)
                 throw new ForbiddenException("Nemate pristup ovoj porudžbini.");

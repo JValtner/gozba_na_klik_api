@@ -1,9 +1,11 @@
 ﻿using System.Security.Claims;
 using System.Text;
+using Gozba_na_klik.Data;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Repositories;
 using Gozba_na_klik.Services;
 using Gozba_na_klik.Services.AddressServices;
+using Gozba_na_klik.Services.EmailServices;
 using Gozba_na_klik.Services.OrderAutoAssignerServices;
 using Gozba_na_klik.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -35,6 +37,11 @@ builder.Logging.AddSerilog(logger);
 builder.Services.AddDbContext<GozbaNaKlikDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// ---------------------------
+// SMTP
+// ---------------------------
+builder.Services.Configure<SmtpSettings>(
+    builder.Configuration.GetSection("SmtpSettings"));
 
 // ---------------------------
 // Identity setup
@@ -176,6 +183,7 @@ builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IOrderAutoAssignerService, OrderAutoAssignerService>();
 builder.Services.AddHostedService<OrderAutoAssignerBackgroundService>();
 
+builder.Services.AddTransient<IEmailService, SmtpEmailService>();
 
 // ---------------------------
 // Configure MongoDb
@@ -288,5 +296,21 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// ---------------------------
+// Seed Identity Roles & Users
+// ---------------------------
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole<int>>>();
+    var startupLogger = services.GetRequiredService<ILogger<Program>>();
+
+    await DataSeeder.SeedAsync(
+        services.GetRequiredService<GozbaNaKlikDbContext>(),
+        services.GetRequiredService<UserManager<User>>(),
+        roleManager);
+
+    await RoleValidator.ValidateRolesAsync(roleManager, startupLogger);
+}
 
 app.Run();

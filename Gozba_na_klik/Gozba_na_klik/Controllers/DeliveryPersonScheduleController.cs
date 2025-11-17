@@ -1,5 +1,6 @@
 ﻿using Gozba_na_klik.DTOs.DeliveryPersonSchedule;
 using Gozba_na_klik.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gozba_na_klik.Controllers
@@ -19,6 +20,7 @@ namespace Gozba_na_klik.Controllers
             _logger = logger;
         }
 
+        [Authorize(Policy = "DeliveryPerson")]
         [HttpGet]
         public async Task<ActionResult<WeeklyScheduleDto>> GetWeeklySchedule(int deliveryPersonId)
         {
@@ -27,6 +29,7 @@ namespace Gozba_na_klik.Controllers
             return Ok(result);
         }
 
+        [Authorize(Policy = "DeliveryPerson")]
         [HttpPost]
         public async Task<ActionResult<DeliveryScheduleDto>> CreateSchedule(
             int deliveryPersonId,
@@ -37,6 +40,7 @@ namespace Gozba_na_klik.Controllers
             return CreatedAtAction(nameof(GetWeeklySchedule), new { deliveryPersonId }, result);
         }
 
+        [Authorize(Policy = "DeliveryPerson")]
         [HttpPut("{scheduleId}")]
         public async Task<ActionResult<DeliveryScheduleDto>> UpdateSchedule(
             int deliveryPersonId,
@@ -49,6 +53,7 @@ namespace Gozba_na_klik.Controllers
             return Ok(result);
         }
 
+        [Authorize(Policy = "DeliveryPerson")]
         [HttpDelete("{scheduleId}")]
         public async Task<ActionResult> DeleteSchedule(int deliveryPersonId, int scheduleId)
         {
