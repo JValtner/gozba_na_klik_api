@@ -32,7 +32,7 @@ namespace Gozba_na_klik.Services
             _logger.LogInformation("Fetching weekly schedule for delivery person {DeliveryPersonId}", deliveryPersonId);
 
             var user = await _userRepo.GetByIdAsync(deliveryPersonId);
-            if (user == null || user.Role != "DeliveryPerson")
+            if (user == null)
             {
                 _logger.LogWarning("Delivery person {DeliveryPersonId} not found", deliveryPersonId);
                 throw new NotFoundException($"Kurir sa ID {deliveryPersonId} nije pronađen.");
@@ -59,7 +59,7 @@ namespace Gozba_na_klik.Services
                 deliveryPersonId, dto.DayOfWeek);
 
             var user = await _userRepo.GetByIdAsync(deliveryPersonId);
-            if (user == null || user.Role != "DeliveryPerson")
+            if (user == null)
             {
                 _logger.LogWarning("Delivery person {DeliveryPersonId} not found", deliveryPersonId);
                 throw new NotFoundException($"Kurir sa ID {deliveryPersonId} nije pronađen.");

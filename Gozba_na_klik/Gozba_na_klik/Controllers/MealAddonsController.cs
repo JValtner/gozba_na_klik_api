@@ -3,12 +3,14 @@ using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gozba_na_klik.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    
     public class MealAddonsController : ControllerBase
     {
         private readonly IMealAddonService _mealAddonService;
@@ -26,6 +28,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // GET: api/mealaddons/meal/5
+        [Authorize(Policy = "PublicPolicy")]
         [HttpGet("meal/{mealId}")]
         public async Task<ActionResult<IEnumerable<ResponseAddonDTO>>> GetByMealIdAsync(int mealId)
         {
@@ -35,6 +38,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // ---------- GET: api/mealaddons/{id} ----------
+        [Authorize(Policy = "PublicPolicy")]
         [HttpGet("{id}")]
         public async Task<ActionResult<ResponseAddonDTO>> GetByIdAsync(int id)
         {
@@ -47,6 +51,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // ---------- POST: api/mealaddons ----------
+        [Authorize(Policy = "RestaurantOwnerPolicy")]
         [HttpPost]
         public async Task<ActionResult<ResponseAddonDTO>> CreateAsync([FromBody] RequestAddonDto request)
         {
@@ -62,6 +67,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // ---------- PUT: api/mealaddons/{addonId}/activate ----------
+        [Authorize(Policy = "OwnerOrUserPolicy")]
         [HttpPut("{addonId}/activate")]
         public async Task<IActionResult> ActivateChosenAddon(int addonId)
         {
@@ -71,6 +77,7 @@ namespace Gozba_na_klik.Controllers
 
 
         // ---------- DELETE: api/mealaddons/{id} ----------
+        [Authorize(Policy = "RestaurantOwnerPolicy")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync(int id)
         {

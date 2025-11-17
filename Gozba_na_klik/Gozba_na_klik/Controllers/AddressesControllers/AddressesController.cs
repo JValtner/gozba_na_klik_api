@@ -1,13 +1,15 @@
-﻿using Gozba_na_klik.DTOs.Addresses;
+﻿using AutoMapper;
+using Gozba_na_klik.DTOs.Addresses;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Services.AddressServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using AutoMapper;
 
 namespace Gozba_na_klik.Controllers
 {
     [ApiController]
     [Route("api/addresses")]
+    [Authorize(Policy = "UserPolicy")]
     public class AddressesController : ControllerBase
     {
         private readonly IAddressService _addressService;

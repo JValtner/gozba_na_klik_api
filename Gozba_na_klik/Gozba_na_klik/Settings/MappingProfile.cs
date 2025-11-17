@@ -10,6 +10,7 @@ using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
 using Gozba_na_klik.Utils;
 using System.Text.Json;
+using System.Linq;
 
 namespace Gozba_na_klik.Settings
 {
@@ -18,24 +19,37 @@ namespace Gozba_na_klik.Settings
         public MappingProfile()
         {
             // ---------- User ----------
+            CreateMap<RegistrationDto, User>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())          
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Username))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+            .ForMember(dest => dest.UserImage, opt => opt.Ignore())  
+            .ForMember(dest => dest.PasswordHash, opt => opt.Ignore()); 
+
+            // --- User -> ProfileDto ---
+            CreateMap<User, ProfileDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src =>src.Id))
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.UserName))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+                .ForMember(dest => dest.UserImage, opt => opt.MapFrom(src => src.UserImage));
             CreateMap<RequestUpdateUserByAdminDto, User>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
 
             CreateMap<RequestUpdateAlergenByUserDto, User>()
-                 .ForMember(dest => dest.Id, opt => opt.Ignore())
-                 .AfterMap((dto, user) =>
-                 {
-                     user.UserAlergens.Clear();
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .AfterMap((dto, user) =>
+                {
+                    user.UserAlergens.Clear();
 
-                     foreach (var alergenId in dto.AlergensIds)
-                     {
-                         user.UserAlergens.Add(new UserAlergen
-                         {
-                             UserId = user.Id,
-                             AlergenId = alergenId
-                         });
-                     }
-                 });
+                    foreach (var alergenId in dto.AlergensIds)
+                    {
+                        user.UserAlergens.Add(new UserAlergen
+                        {
+                            UserId = user.Id,
+                            AlergenId = alergenId
+                        });
+                    }
+                });
 
             // ---------- Restaurant ----------
             CreateMap<RequestCreateRestaurantByAdminDto, Restaurant>()
@@ -55,18 +69,11 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.IsActive, opt => opt.Ignore());
 
             CreateMap<Address, AddressListItemDto>();
+
+            // ---------- Restaurant → DTO ----------
             CreateMap<Restaurant, ResponseRestaurantDTO>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
-                .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => src.PhotoUrl))
-                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
-                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
-                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Phone))
-                .ForMember(dest => dest.Menu, opt => opt.MapFrom(src => src.Menu))
-                .ForMember(dest => dest.WorkSchedule, opt => opt.MapFrom(src => src.WorkSchedules))
-                .ForMember(dest => dest.isOpen, opt => opt.Ignore()) // 👈 Explicitly ignore
-                .ForMember(dest => dest.ClosedDates, opt => opt.MapFrom(src => src.ClosedDates))
-                .ReverseMap(); 
+                .ForMember(dest => dest.isOpen, opt => opt.Ignore()) // custom logic
+                .ReverseMap();
 
             // ---------- Meal ----------
             CreateMap<RequestMealDto, Meal>()
@@ -93,38 +100,32 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.Meals, opt => opt.Ignore());
 
             CreateMap<Alergen, ResponseAlergenDto>();
-
             CreateMap<Alergen, ResponseAlergenBasicDto>();
 
-            // Mapiranje pojedinačnog alergena iz UserAlergen
+            // Map UserAlergen → ResponseAlergenBasicDto
             CreateMap<UserAlergen, ResponseAlergenBasicDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Alergen.Id))
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Alergen.Name));
 
-            // Mapiranje korisnika sa listom alergena
+            // User → ResponseUserAlergenDto
             CreateMap<User, ResponseUserAlergenDto>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-            .ForMember(dest => dest.Alergens, opt => opt.MapFrom(src => src.UserAlergens.Select(ua => ua.Alergen)));
+                .ForMember(dest => dest.Alergens, opt => opt.MapFrom(src => src.UserAlergens.Select(ua => ua.Alergen)));
 
-
-
-            // ---------- Employee (User) ----------
+            // ---------- Employee ----------
             CreateMap<User, EmployeeListItemDto>();
 
-            // RegisterEmployeeDto → User (za kreiranje)
             CreateMap<RegisterEmployeeDto, User>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.RestaurantId, opt => opt.Ignore())
                 .ForMember(dest => dest.IsActive, opt => opt.Ignore())
                 .ForMember(dest => dest.UserImage, opt => opt.Ignore());
 
-            // UpdateEmployeeDto → User (za update)
             CreateMap<UpdateEmployeeDto, User>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.RestaurantId, opt => opt.Ignore())
                 .ForMember(dest => dest.IsActive, opt => opt.Ignore())
-                .ForMember(dest => dest.UserImage, opt => opt.Ignore())
-                .ForMember(dest => dest.Password, opt => opt.Condition(src => !string.IsNullOrEmpty(src.Password)));
+                .ForMember(dest => dest.UserImage, opt => opt.Ignore());
+            // ✅ Removed mapping for Password
 
             // ---------- DeliveryPersonSchedule ----------
             CreateMap<DeliveryPersonSchedule, DeliveryScheduleDto>()
@@ -134,7 +135,7 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.EndTime.ToString(@"hh\:mm")))
                 .ForMember(dest => dest.Hours, opt => opt.MapFrom(src => Math.Round((src.EndTime - src.StartTime).TotalHours, 2)));
 
-            /// ---------- Order ----------
+            // ---------- Orders ----------
             CreateMap<Order, OrderResponseDto>()
                 .ForMember(dest => dest.RestaurantName, opt => opt.MapFrom(src => src.Restaurant != null ? src.Restaurant.Name : ""))
                 .ForMember(dest => dest.DeliveryAddress, opt => opt.MapFrom(src => src.Address != null ? $"{src.Address.Street}, {src.Address.City}, {src.Address.PostalCode}" : ""))
@@ -145,7 +146,6 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.MealImagePath, opt => opt.MapFrom(src => src.Meal != null ? src.Meal.ImagePath : null))
                 .ForMember(dest => dest.SelectedAddons, opt => opt.MapFrom(src => JsonHelper.DeserializeStringList(src.SelectedAddons)));
 
-            // Glavni mapping: Order → CourierActiveOrderDto
             CreateMap<Order, CourierActiveOrderDto>()
                 .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Buyer, opt => opt.MapFrom(src => src.User))
@@ -153,29 +153,19 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
 
-                    // Podmape (ugnježdene DTO klase)
-                    CreateMap<User, CourierOrderUserDto>();
-                    CreateMap<Restaurant, CourierOrderRestaurantDto>();
-                    CreateMap<Address, CourierOrderAddressDto>();
-                    CreateMap<OrderItem, CourierOrderItemDto>();
+            CreateMap<User, CourierOrderUserDto>();
+            CreateMap<Restaurant, CourierOrderRestaurantDto>();
+            CreateMap<Address, CourierOrderAddressDto>();
+            CreateMap<OrderItem, CourierOrderItemDto>();
 
-            // Ako koristiš i status DTO (za PUT odgovore)
             CreateMap<Order, OrderStatusDto>()
                 .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
 
-            // ---------- Order History ----------
             CreateMap<Order, OrderHistoryResponseDto>()
-                .ForMember(dest => dest.RestaurantName,
-                    opt => opt.MapFrom(src => src.Restaurant != null ? src.Restaurant.Name : "Nepoznat restoran"))
-                .ForMember(dest => dest.DeliveryAddress,
-                    opt => opt.MapFrom(src =>
-                        src.Address != null
-                            ? $"{src.Address.Street}, {src.Address.City}"
-                            : "Adresa nije dostupna"))
-                .ForMember(dest => dest.Items,
-                    opt => opt.MapFrom(src => src.Items));
-
+                .ForMember(dest => dest.RestaurantName, opt => opt.MapFrom(src => src.Restaurant != null ? src.Restaurant.Name : "Nepoznat restoran"))
+                .ForMember(dest => dest.DeliveryAddress, opt => opt.MapFrom(src => src.Address != null ? $"{src.Address.Street}, {src.Address.City}" : "Adresa nije dostupna"))
+                .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
         }
     }
 }

@@ -14,5 +14,6 @@ namespace Gozba_na_klik.Models
         Task<User?> UpdateUserAlergensAsync(int userId, List<int> alergenIds);
         Task<bool> DeleteAsync(int userId);
         Task<bool> ExistsAsync(int userId);
+        Task<string?> GetUserRoleAsync(int userId);
     }
 }

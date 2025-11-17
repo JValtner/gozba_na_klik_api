@@ -1,7 +1,9 @@
-﻿using System.Threading.Tasks;
-using Gozba_na_klik.DTOs.Request;
+﻿using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Services;
+using Gozba_na_klik.Services.EmailServices;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -10,18 +12,24 @@ namespace Gozba_na_klik.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
         private readonly IFileService _fileService;
+        private readonly UserManager<User> _userManager;
+        private readonly IEmailService _emailService;
 
-        public UsersController(IUserService userService, IFileService fileService)
+        public UsersController(IUserService userService, IFileService fileService, UserManager<User> userManager, IEmailService emailService)
         {
             _userService = userService;
             _fileService = fileService;
+            _userManager = userManager;
+            _emailService = emailService;
         }
 
         // GET: api/users
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
         public async Task<IActionResult> GetAllAsync()
         {
@@ -29,6 +37,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // GET api/users/restaurant-owners
+        [Authorize(Policy = "OwnerOrAdminPolicy")]
         [HttpGet("restaurant-owners")]
         public async Task<IActionResult> GetAllOwnersAsync()
         {
@@ -56,14 +65,17 @@ namespace Gozba_na_klik.Controllers
         }
 
         // POST api/users
+        [Authorize(Policy = "PublicPolicy")]
         [HttpPost]
-        public async Task<IActionResult> PostAsync(User user)
+        public async Task<IActionResult> PostAsync(RegistrationDto registrationData)
         {
-            User new_user = await _userService.CreateUserAsync(user);
-            return Ok(new_user);
+            ProfileDto profile = await _userService.RegisterAsync(registrationData);
+            //Za sada vraca samo ok s obzirom da treba da se uradi validacija preko email!!!
+            return Ok("User registered successfully");
         }
 
         // PUT api/users/5/alergens   (User dodaje sebi alergene)
+        [Authorize(Policy = "PublicPolicy")]
         [HttpPut("{id}/alergens")]
         public async Task<IActionResult> PutUserAlergens(int id, [FromBody] RequestUpdateAlergenByUserDto dto)
         {
@@ -75,6 +87,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // ADMIN PUT api/users/5/admin-users
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPut("{id}/admin-users")]
         public async Task<IActionResult> PutByAdminAsync(int id, [FromBody] RequestUpdateUserByAdminDto dto)
         {
@@ -87,6 +100,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // PUT api/users/5
+        [Authorize(Policy = "RegisteredPolicy")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAsync(int id, [FromForm] UpdateUserDto dto, IFormFile? userimage)
         {
@@ -100,6 +114,7 @@ namespace Gozba_na_klik.Controllers
 
 
         // DELETE api/users/5
+        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
@@ -112,44 +127,31 @@ namespace Gozba_na_klik.Controllers
             return NoContent();
         }
 
+        [Authorize(Policy = "PublicPolicy")]
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
+        public async Task<IActionResult> Login(LoginRequest data)
         {
-            // Validacija input parametara
-            if (string.IsNullOrWhiteSpace(loginRequest?.Username) || string.IsNullOrWhiteSpace(loginRequest?.Password))
+            if (!ModelState.IsValid)
             {
-                return BadRequest(new { message = "Korisničko ime i lozinka su obavezni" });
+                return BadRequest(ModelState);
             }
+            var token = await _userService.Login(data);
+            return Ok(token);
+        }
 
-            try
-            {
-                // Dobij sve korisnike iz baze
-                var allUsers = await _userService.GetAllUsersAsync();
+        [Authorize(Policy = "RegisteredPolicy")]
+        [HttpGet("profile")]
+        public async Task<IActionResult> Profile()
+        {
+            return Ok(await _userService.GetProfile(User));
+        }
 
-                // Pronadji korisnika po username-u
-                var user = allUsers.FirstOrDefault(u => u.Username.ToLower() == loginRequest.Username.ToLower());
-
-                // Proveri da li korisnik postoji i da li se lozinka poklapa
-                if (user == null || user.Password != loginRequest.Password)
-                {
-                    return Unauthorized(new { message = "Neispravno korisničko ime ili lozinka" });
-                }
-
-                // Kreiraj response objekat (bez lozinke)
-                var loginResponse = new LoginResponse
-                {
-                    Id = user.Id,
-                    Username = user.Username,
-                    Email = user.Email,
-                    Role = user.Role
-                };
-
-                return Ok(loginResponse);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Greška na serveru", details = ex.Message });
-            }
+        [AllowAnonymous]
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmailAsync([FromQuery] int userId, [FromQuery] string token)
+        {
+            await _emailService.ConfirmEmailAsync(userId, token);
+            return Ok("Email confirmed successfully");
         }
     }
 }
