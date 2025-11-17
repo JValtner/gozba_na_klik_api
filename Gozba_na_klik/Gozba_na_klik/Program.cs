@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MongoDB.Driver;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -55,8 +56,10 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 })
 .AddEntityFrameworkStores<GozbaNaKlikDbContext>()
 .AddDefaultTokenProviders();
-// Autentification JWT
 
+// ---------------------------
+// Authentication JWT
+// ---------------------------
 builder.Services.AddAuthentication(options =>
 { // Naglašavamo da koristimo JWT
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -80,6 +83,7 @@ builder.Services.AddAuthentication(options =>
         RoleClaimType = ClaimTypes.Role // Potrebno za kontrolu pristupa, što ćemo videti kasnije
     };
 });
+
 // Optional: cookie auth
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -87,6 +91,9 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/api/account/accessdenied";
 });
 
+// ---------------------------
+// Authorization Policies
+// ---------------------------
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("PublicPolicy", policy => 
@@ -128,7 +135,6 @@ builder.Services.AddAuthorization(options =>
         policy.RequireRole("User"));
 });
 
-
 // ---------------------------
 // AutoMapper
 // ---------------------------
@@ -166,6 +172,12 @@ builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IReviewsRepository, ReviewsDbRepository>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 
+builder.Services.AddScoped<IPdfService, PdfService>();
+
+// Invoice services - MongoDB
+builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+
 builder.Services.AddScoped<IFileService, FileService>();
 
 builder.Services.AddScoped<IOrderAutoAssignerService, OrderAutoAssignerService>();
@@ -173,6 +185,22 @@ builder.Services.AddHostedService<OrderAutoAssignerBackgroundService>();
 
 builder.Services.AddTransient<IEmailService, SmtpEmailService>();
 
+// ---------------------------
+// Configure MongoDb
+// ---------------------------
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("MongoDb")
+        ?? "mongodb://localhost:27017";
+    return new MongoClient(connectionString);
+});
+
+builder.Services.AddScoped<IMongoDatabase>(sp =>
+{
+    var client = sp.GetRequiredService<IMongoClient>();
+    var databaseName = builder.Configuration["MongoDb:DatabaseName"] ?? "gozba_na_klik_invoices";
+    return client.GetDatabase(databaseName);
+});
 
 // ---------------------------
 // CORS
@@ -233,7 +261,6 @@ builder.Services.AddSwaggerGen(c =>
   });
 });
 
-
 // ---------------------------
 // Exception handling middleware
 // ---------------------------
@@ -285,7 +312,5 @@ using (var scope = app.Services.CreateScope())
 
     await RoleValidator.ValidateRolesAsync(roleManager, startupLogger);
 }
-
-
 
 app.Run();
