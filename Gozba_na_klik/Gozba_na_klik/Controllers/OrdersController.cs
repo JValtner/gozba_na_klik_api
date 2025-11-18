@@ -138,5 +138,7 @@ namespace Gozba_na_klik.Controllers
             _logger.LogInformation("PUT zahtev za promenu statusa narudzbine u 'ZAVRSENO'");
             return Ok(await _orderService.UpdateOrderToDeliveredAsync(orderId));
         }
+
+        // GET: api/orders/user/my-active-order
     }
 }
