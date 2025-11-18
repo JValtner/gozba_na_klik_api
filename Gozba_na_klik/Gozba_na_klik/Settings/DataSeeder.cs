@@ -53,7 +53,7 @@ namespace Gozba_na_klik.Data
                         SecurityStamp = Guid.NewGuid().ToString()
                     };
 
-                    var result = await userManager.CreateAsync(user, "Pass@123");
+                    var result = await userManager.CreateAsync(user, "Pass@12345");
                     if (result.Succeeded)
                         await userManager.AddToRoleAsync(user, u.Role);
                 }
@@ -131,7 +131,7 @@ namespace Gozba_na_klik.Data
                         SecurityStamp = Guid.NewGuid().ToString()
                     };
 
-                    var result = await userManager.CreateAsync(user, "Pass@123");
+                    var result = await userManager.CreateAsync(user, "Pass@12345");
                     if (result.Succeeded)
                         await userManager.AddToRoleAsync(user, u.Role);
                 }
