@@ -65,8 +65,8 @@ namespace gozba_na_klik_Tests.Services
 
             var users = new List<User>
             {
-                new User { Id = 10, Username = "emp1", Email = "e1@test.com", Password = "pass", Role = "RestaurantEmployee", RestaurantId = restaurantId },
-                new User { Id = 11, Username = "emp2", Email = "e2@test.com", Password = "pass", Role = "DeliveryPerson", RestaurantId = restaurantId }
+                new User { Id = 10, UserName = "emp1", Email = "e1@test.com", PasswordHash = "hash", RestaurantId = restaurantId },
+                new User { Id = 11, UserName = "emp2", Email = "e2@test.com", PasswordHash = "hash", RestaurantId = restaurantId }
             };
 
             var dtos = new List<EmployeeListItemDto>
@@ -125,7 +125,7 @@ namespace gozba_na_klik_Tests.Services
 
             var existingUsers = new List<User>
             {
-                new User { Id = 100, Email = "existing@test.com", Username = "existing", Password = "pass", Role = "RestaurantEmployee" }
+                new User { Id = 100, UserName = "existing", Email = "existing@test.com", PasswordHash = "hash" }
             };
 
             _restaurantRepoMock.Setup(r => r.GetByIdAsync(restaurantId)).ReturnsAsync(restaurant);
@@ -145,8 +145,24 @@ namespace gozba_na_klik_Tests.Services
             var dto = new RegisterEmployeeDto { Username = "newuser", Email = "new@test.com", Password = "pass", Role = "RestaurantEmployee" };
             var restaurant = new Restaurant { Id = restaurantId, Name = "Test", OwnerId = ownerId };
 
-            var newUser = new User { Id = 100, Username = dto.Username, Email = dto.Email, Password = dto.Password, Role = dto.Role, RestaurantId = restaurantId, IsActive = true };
-            var resultDto = new EmployeeListItemDto { Id = 100, Username = dto.Username, Email = dto.Email, Role = dto.Role, IsActive = true };
+            var newUser = new User
+            {
+                Id = 100,
+                UserName = dto.Username,
+                Email = dto.Email,
+                PasswordHash = "hash", // mocked, identity handles hashing in real scenario
+                RestaurantId = restaurantId,
+                IsActive = true
+            };
+
+            var resultDto = new EmployeeListItemDto
+            {
+                Id = 100,
+                Username = dto.Username,
+                Email = dto.Email,
+                Role = dto.Role,
+                IsActive = true
+            };
 
             _restaurantRepoMock.Setup(r => r.GetByIdAsync(restaurantId)).ReturnsAsync(restaurant);
             _userRepoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<User>());

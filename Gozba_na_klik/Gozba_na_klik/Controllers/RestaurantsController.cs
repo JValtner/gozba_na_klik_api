@@ -3,14 +3,17 @@ using Gozba_na_klik.DTOs;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Enums;
+using Gozba_na_klik.Exceptions;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gozba_na_klik.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
     public class RestaurantsController : ControllerBase
     {
         private readonly IRestaurantService _restaurantService;
@@ -26,6 +29,7 @@ namespace Gozba_na_klik.Controllers
 
         // GET: api/restaurants
         // Prikaz svih restorana (admin upotreba)
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
         public async Task<IActionResult> GetAllAsync()
         {
@@ -35,6 +39,7 @@ namespace Gozba_na_klik.Controllers
 
         // GET: api/restaurants/{id}
         // Detalji jednog restorana po identifikatoru
+        [Authorize(Policy = "OwnerOrAdminPolicy")]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetOneAsync(int id)
         {
@@ -48,6 +53,7 @@ namespace Gozba_na_klik.Controllers
 
         // POST: api/restaurants
         // Kreiranje novog restorana (admin)
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost]
         public async Task<IActionResult> PostByAdminAsync([FromBody] RequestCreateRestaurantByAdminDto dto)
         {
@@ -61,6 +67,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         //PUT: api/restaurants/:{id}/admin-edit
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPut("{id}/admin-edit")]
         public async Task<IActionResult> UpdateByAdminAsync(int id, [FromBody] RequestUpdateRestaurantByAdminDto dto)
         {
@@ -69,31 +76,28 @@ namespace Gozba_na_klik.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _restaurantService.UpdateRestaurantByAdminAsync(id,dto);
+            var result = await _restaurantService.UpdateRestaurantByAdminAsync(id, dto);
             return Ok(result);
         }
 
         // GET: api/restaurants/my
         // Prikaz samo restorana koji pripadaju prijavljenom vlasniku (AC #1)
-        [HttpGet("my")]
-        public async Task<IActionResult> GetMyRestaurantsAsync(
-            [FromHeader(Name = "X-User-Id")] int? userId)
+        [Authorize(Policy = "OwnerOrAdminPolicy")]
+        [HttpGet("{userid}/my")]
+        public async Task<IActionResult> GetMyRestaurantsAsync(int userId)
         {
             // Provera hedera
-            if (userId == null || userId <= 0)
+            if (userId <= 0)
             {
-                return Unauthorized(new { message = "Nedostaje ili je neispravan X-User-Id header." });
+                throw new NotFoundException($"User with ${userId} not found`");
             }
 
-            User? user = await _userService.GetUserByIdAsync(userId.Value);
+            User? user = await _userService.GetUserByIdAsync(userId);
             if (user == null)
             {
-                return Unauthorized();
+                throw new NotFoundException($"User with ${user.Id} not found`");
             }
-            if (!string.Equals(user.Role, "RestaurantOwner", StringComparison.OrdinalIgnoreCase))
-            {
-                return Forbid();
-            }
+            
 
             IEnumerable<Restaurant> restaurants = await _restaurantService.GetRestaurantsByOwnerAsync(user.Id);
 
@@ -110,7 +114,7 @@ namespace Gozba_na_klik.Controllers
 
             return Ok(list);
         }
-
+        [Authorize(Policy = "PublicPolicy")]
         [HttpGet("filterSortPage")]
         public async Task<IActionResult> GetFilteredSortedPagedAsync(
         [FromQuery] RestaurantFilter filter,
@@ -124,6 +128,7 @@ namespace Gozba_na_klik.Controllers
 
         // PUT: api/restaurants/{id}
         // Izmena osnovnih podataka restorana uz proveru vlasništva (AC #2 i #3)
+        [Authorize(Policy = "OwnerOrAdminPolicy")]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateAsync(
     int id,
@@ -133,18 +138,15 @@ namespace Gozba_na_klik.Controllers
             // Provera hedera
             if (userId == null || userId <= 0)
             {
-                return Unauthorized(new { message = "Nedostaje ili je neispravan X-User-Id header." });
+                throw new NotFoundException($"User with ${userId} not found`");
             }
 
             User? user = await _userService.GetUserByIdAsync(userId.Value);
             if (user == null)
             {
-                return Unauthorized();
+                throw new NotFoundException($"User with ${user.Id} not found`");
             }
-            if (!string.Equals(user.Role, "RestaurantOwner", StringComparison.OrdinalIgnoreCase))
-            {
-                return Forbid();
-            }
+            
 
             Restaurant? entity = await _restaurantService.GetRestaurantByIdAsync(id);
             if (entity == null)
@@ -203,6 +205,7 @@ namespace Gozba_na_klik.Controllers
 
 
         // DELETE: api/restaurants/{id}
+        [Authorize(Policy ="AdminPolicy")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
@@ -214,6 +217,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // POST: api/restaurants/{id}/workschedules
+        [Authorize(Policy = "OwnerOrAdminPolicy")]
         [HttpPut("{id}/workschedules")]
         public async Task<IActionResult> UpdateWorkSchedulesAsync(int id, [FromBody] List<WorkScheduleDto> scheduleDtos)
         {
@@ -236,6 +240,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // POST: api/restaurants/{id}/closeddates
+        [Authorize(Policy = "OwnerOrAdminPolicy")]
         [HttpPost("{id}/closeddates")]
         public async Task<IActionResult> AddClosedDateAsync(int id, [FromBody] ClosedDate date)
         {
@@ -245,6 +250,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // DELETE: api/restaurants/{id}/closeddates/{dateId}
+        [Authorize(Policy = "OwnerOrAdminPolicy")]
         [HttpDelete("{id}/closeddates/{dateId}")]
         public async Task<IActionResult> RemoveClosedDateAsync(int id, int dateId)
         {
@@ -252,6 +258,7 @@ namespace Gozba_na_klik.Controllers
             return NoContent();
         }
         // GET /api/publishers/sortTypes
+        [Authorize(Policy = "PublicPolicy")]
         [HttpGet("sortTypes")]
         public async Task<IActionResult> GetSortTypes()
         {

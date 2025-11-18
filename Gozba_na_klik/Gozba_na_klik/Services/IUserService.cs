@@ -1,4 +1,4 @@
-﻿using Gozba_na_klik.DTOs;
+﻿using System.Security.Claims;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Models;
@@ -7,23 +7,24 @@ namespace Gozba_na_klik.Services
 {
     public interface IUserService
     {
-        Task<IEnumerable<User>> GetAllUsersAsync();
-        Task<User?> GetUserByIdAsync(int userId);
-        Task<ResponseUserAlergenDto?> GetUserWithAlergensAsync(int userId);
-        Task<IEnumerable<User>> GetAllRestaurantOnwersAsync();
-        Task<bool> UserExistsAsync(int userId);
-        Task<User> CreateUserAsync(User user);
-
-        // ADMIN 
-        Task<User> UpdateUserByAdminAsync(int id, RequestUpdateUserByAdminDto dto);
-
-        Task<User> UpdateUserAsync(int id, UpdateUserDto dto, IFormFile? userimage);
-        Task<ResponseUserAlergenDto?> UpdateUserAlergensAsync(int userId, RequestUpdateAlergenByUserDto dto);
-        Task DeleteUserAsync(int id);
-
-        // DOSTAVA
-        Task<List<User>> GetAllAvailableCouriersAsync();
+        Task<string> Login(LoginRequest data);
+        Task<ProfileDto> GetProfile(ClaimsPrincipal userPrincipal);
+        Task <ProfileDto>RegisterAsync(RegistrationDto data);
+        Task ActivateEmployeeAsync(int employeeId);
         Task AssignOrderToCourierAsync(int courierId, int orderId);
+        Task<bool> DeleteUserAsync(int id);
+        Task<List<User>> GetAllAvailableCouriersAsync();
+        Task<IEnumerable<User>> GetAllRestaurantOnwersAsync();
+        Task<IEnumerable<User>> GetAllUsersAsync();
+        Task<IEnumerable<User>> GetEmployeesByRestaurantAsync(int restaurantId);
+        Task<User?> GetUserByIdAsync(int id);
+        Task<string?> GetUserRoleAsync(int userId);
+        Task<ResponseUserAlergenDto?> GetUserWithAlergensAsync(int userId);
         Task ReleaseOrderFromCourierAsync(int courierId);
+        Task SuspendEmployeeAsync(int employeeId);
+        Task<ResponseUserAlergenDto?> UpdateUserAlergensAsync(int userId, RequestUpdateAlergenByUserDto dto);
+        Task<User?> UpdateUserAsync(int id, UpdateUserDto dto, IFormFile? userimage);
+        Task<User?> UpdateUserByAdminAsync(int id, RequestUpdateUserByAdminDto dto);
+        Task<bool> UserExistsAsync(int userId);
     }
 }

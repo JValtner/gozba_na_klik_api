@@ -1,12 +1,14 @@
 ﻿using Gozba_na_klik.DTOs;
 using Gozba_na_klik.DTOs.Employee;
 using Gozba_na_klik.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gozba_na_klik.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "EmployeeOrAdminPolicy")]
     public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;
@@ -29,11 +31,10 @@ namespace Gozba_na_klik.Controllers
             return Ok(employees);
         }
 
-        // POST: api/employee/restaurant/{restaurantId}
+        // POST: api/employee/restaurant/{restaurantId}&ownerId ={ownerId}
         [HttpPost("restaurant/{restaurantId}")]
         public async Task<ActionResult<EmployeeListItemDto>> RegisterEmployee(
-            int restaurantId,
-            [FromHeader(Name = "X-User-Id")] int ownerId,
+            int restaurantId,[FromQuery] int ownerId,
             [FromBody] RegisterEmployeeDto dto)
         {
             _logger.LogInformation("Registering employee for restaurant {RestaurantId}", restaurantId);

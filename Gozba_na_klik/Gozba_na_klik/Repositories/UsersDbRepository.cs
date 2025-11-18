@@ -1,6 +1,7 @@
 ﻿using System;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gozba_na_klik.Repositories
@@ -8,10 +9,12 @@ namespace Gozba_na_klik.Repositories
     public class UsersDbRepository: IUsersRepository
     {
         private GozbaNaKlikDbContext _context;
+        private UserManager<User> _userManager;
 
-        public UsersDbRepository(GozbaNaKlikDbContext context)
+        public UsersDbRepository(GozbaNaKlikDbContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
         public async Task<IEnumerable<User>> GetAllAsync()
         {
@@ -20,9 +23,8 @@ namespace Gozba_na_klik.Repositories
         // Vlasnici restorana
         public async Task<IEnumerable<User>> GetAllRestaurantOwnersAsync()
         {
-            return await _context.Users
-                .Where(u => u.Role == "RestaurantOwner")
-                .ToListAsync();
+            var users = await _userManager.GetUsersInRoleAsync("RestaurantOwner");
+            return users;
         }
         public async Task<User?> GetByIdAsync(int id)
         {
@@ -40,20 +42,25 @@ namespace Gozba_na_klik.Repositories
         // Dobavljanje slobodnih dostavljaca (trenutno bez dostave)
         public async Task<List<User>> GetAllAvailableCouriersAsync()
         {
+            var allCouriers = await _userManager.GetUsersInRoleAsync("DeliveryPerson");
+
             var now = DateTime.Now;
             var currentDay = now.DayOfWeek;
             var currentTime = now.TimeOfDay;
 
-            return await _context.Users
-                .Where(user => user.Role == "DeliveryPerson" && user.ActiveOrderId == null)
-                .Where(u => _context.DeliveryPersonSchedules.Any(s =>
-                    s.DeliveryPersonId == u.Id &&
+            // Filter active and scheduled couriers
+            var availableCouriers = allCouriers
+                .Where(c => c.ActiveOrderId == null)
+                .Where(c => _context.DeliveryPersonSchedules.Any(s =>
+                    s.DeliveryPersonId == c.Id &&
                     s.IsActive &&
                     s.DayOfWeek == currentDay &&
                     s.StartTime <= currentTime &&
                     s.EndTime >= currentTime
                 ))
-                .ToListAsync();
+                .ToList();
+
+            return availableCouriers;
         }
 
         public async Task<bool> ExistsAsync(int id)
@@ -99,6 +106,15 @@ namespace Gozba_na_klik.Repositories
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             return true;
+        }
+        public async Task<string?> GetUserRoleAsync(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                return null;
+
+            var roles = await _userManager.GetRolesAsync(user);
+            return roles.FirstOrDefault(); // assuming 1 role per user
         }
     }
 }

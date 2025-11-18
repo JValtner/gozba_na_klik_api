@@ -1,9 +1,10 @@
-﻿using Gozba_na_klik.Utils;
-using Gozba_na_klik.DTOs.Request;
+﻿using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Enums;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Services;
+using Gozba_na_klik.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gozba_na_klik.Controllers
@@ -21,6 +22,7 @@ namespace Gozba_na_klik.Controllers
             _fileService = fileService;
         }
 
+        [Authorize(Policy = "PublicPolicy")]
         [HttpGet]
         public async Task<IActionResult> GetAllAsync()
         {
@@ -28,6 +30,7 @@ namespace Gozba_na_klik.Controllers
             return Ok(result);
         }
         // GET: api/meals/restaurant/3
+        [Authorize(Policy = "PublicPolicy")]
         [HttpGet("restaurant/{restaurantId}")]
         public async Task<ActionResult<IEnumerable<ResponseMealDto>>> GetMealsByRestaurant(int restaurantId)
         {
@@ -36,6 +39,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // GET: api/meals/5
+        [Authorize(Policy = "PublicPolicy")]
         [HttpGet("{id}")]
         public async Task<ActionResult<ResponseMealDto>> GetOneAsync(int id)
         {
@@ -45,6 +49,7 @@ namespace Gozba_na_klik.Controllers
             return Ok(meal);
         }
         // GET: api/meals/paged
+        [Authorize(Policy = "PublicPolicy")]
         [HttpGet("filterSortPage")]
         public async Task<ActionResult<PaginatedList<ResponseMealDto>>> GetFilteredSortedPagedAsync(
         [FromQuery] MealFilter filter,
@@ -57,6 +62,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // POST: api/meals
+        [Authorize(Policy = "RestaurantOwnerPolicy")]
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromForm] RequestMealDto dto, IFormFile? mealImage)
         {
@@ -81,6 +87,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // PUT: api/meals/5
+        [Authorize(Policy = "RestaurantOwnerPolicy")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAsync(int id, [FromForm] RequestMealDto dto, IFormFile? mealImage)
         {
@@ -104,6 +111,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // DELETE: api/meals/5
+        [Authorize(Policy = "RestaurantOwnerPolicy")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
@@ -111,6 +119,7 @@ namespace Gozba_na_klik.Controllers
             return NoContent();
         }
         // GET /api/publishers/sortTypes
+        [Authorize(Policy = "PublicPolicy")]
         [HttpGet("sortTypes")]
         public async Task<IActionResult> GetSortTypes()
         {
