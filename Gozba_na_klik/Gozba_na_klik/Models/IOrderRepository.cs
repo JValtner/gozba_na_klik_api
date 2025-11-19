@@ -14,5 +14,6 @@ namespace Gozba_na_klik.Models
         Task<(List<Order> Orders, int TotalCount)> GetOrdersByUserIdAsync(
             int userId, string? statusFilter, int page, int pageSize
         );
+        Task<Order?> GetActiveOrderStatusAsync(int userId);
     }
 }
