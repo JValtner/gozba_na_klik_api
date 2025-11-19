@@ -31,7 +31,6 @@
   <ItemGroup>
     <Folder Include="assets\profileImg\" />
     <Folder Include="Logs\" />
-    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

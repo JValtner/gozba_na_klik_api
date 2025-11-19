@@ -1,7 +1,9 @@
-﻿using Gozba_na_klik.Models;
+﻿using System.Linq;
+using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Gozba_na_klik.Data
 {
@@ -11,7 +13,8 @@ namespace Gozba_na_klik.Data
         public static async Task SeedAsync(
             GozbaNaKlikDbContext context,
             UserManager<User> userManager,
-            RoleManager<IdentityRole<int>> roleManager)
+            RoleManager<IdentityRole<int>> roleManager,
+            ILogger logger = null)
         {
             // --- 1. Roles ---
             string[] roles = { "Admin", "RestaurantOwner", "RestaurantEmployee", "DeliveryPerson", "User" };
@@ -43,7 +46,8 @@ namespace Gozba_na_klik.Data
 
             foreach (var u in basicUsers)
             {
-                if (await userManager.FindByNameAsync(u.UserName) == null)
+                var existingUser = await userManager.FindByNameAsync(u.UserName);
+                if (existingUser == null)
                 {
                     var user = new User
                     {
@@ -53,18 +57,71 @@ namespace Gozba_na_klik.Data
                         SecurityStamp = Guid.NewGuid().ToString()
                     };
 
+                    // Password must be at least 10 characters (as per Program.cs configuration)
                     var result = await userManager.CreateAsync(user, "Pass@12345");
                     if (result.Succeeded)
+                    {
                         await userManager.AddToRoleAsync(user, u.Role);
+                        logger?.LogInformation("Successfully created user: {UserName}", u.UserName);
+                    }
+                    else
+                    {
+                        var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                        logger?.LogError("Failed to create user {UserName}. Errors: {Errors}", u.UserName, errors);
+                        throw new InvalidOperationException($"Failed to create user '{u.UserName}'. Errors: {errors}");
+                    }
+                }
+                else
+                {
+                    // User already exists - update password to ensure it matches seed password
+                    logger?.LogInformation("User {UserName} already exists. Updating password...", u.UserName);
+                    var token = await userManager.GeneratePasswordResetTokenAsync(existingUser);
+                    var resetResult = await userManager.ResetPasswordAsync(existingUser, token, "Pass@12345");
+                    if (resetResult.Succeeded)
+                    {
+                        logger?.LogInformation("Successfully updated password for user: {UserName}", u.UserName);
+                    }
+                    else
+                    {
+                        var errors = string.Join(", ", resetResult.Errors.Select(e => e.Description));
+                        logger?.LogWarning("Failed to update password for user {UserName}. Errors: {Errors}", u.UserName, errors);
+                    }
+
+                    // Ensure user has the correct role
+                    var userRoles = await userManager.GetRolesAsync(existingUser);
+                    if (!userRoles.Contains(u.Role))
+                    {
+                        await userManager.AddToRoleAsync(existingUser, u.Role);
+                        logger?.LogInformation("Added role {Role} to user {UserName}", u.Role, u.UserName);
+                    }
                 }
             }
 
             // --- 3. Restaurants ---
             if (!await context.Restaurants.AnyAsync())
             {
+                // Find owners - they should exist after the previous step
                 var milanOwner = await userManager.FindByNameAsync("Milan_owner");
                 var anaOwner = await userManager.FindByNameAsync("Ana_owner");
                 var ivanOwner = await userManager.FindByNameAsync("Ivan_owner");
+
+                if (milanOwner == null)
+                {
+                    logger?.LogError("User 'Milan_owner' was not found in database. Cannot create restaurants.");
+                    throw new InvalidOperationException("User 'Milan_owner' was not found. Make sure the user was created successfully in step 2.");
+                }
+                if (anaOwner == null)
+                {
+                    logger?.LogError("User 'Ana_owner' was not found in database. Cannot create restaurants.");
+                    throw new InvalidOperationException("User 'Ana_owner' was not found. Make sure the user was created successfully in step 2.");
+                }
+                if (ivanOwner == null)
+                {
+                    logger?.LogError("User 'Ivan_owner' was not found in database. Cannot create restaurants.");
+                    throw new InvalidOperationException("User 'Ivan_owner' was not found. Make sure the user was created successfully in step 2.");
+                }
+
+                logger?.LogInformation("Found all required owners. Creating restaurants...");
 
                 var restaurants = new[]
                 {
@@ -117,9 +174,13 @@ namespace Gozba_na_klik.Data
 
             foreach (var u in dependentUsers)
             {
-                if (await userManager.FindByNameAsync(u.UserName) == null)
+                var existingUser = await userManager.FindByNameAsync(u.UserName);
+                if (existingUser == null)
                 {
                     var owner = await userManager.FindByNameAsync(u.OwnerName);
+                    if (owner == null)
+                        throw new InvalidOperationException($"Owner '{u.OwnerName}' was not found. Make sure the owner was created successfully.");
+
                     var restaurant = await context.Restaurants.FirstOrDefaultAsync(r => r.OwnerId == owner.Id);
 
                     var user = new User
@@ -131,9 +192,43 @@ namespace Gozba_na_klik.Data
                         SecurityStamp = Guid.NewGuid().ToString()
                     };
 
+                    // Password must be at least 10 characters (as per Program.cs configuration)
                     var result = await userManager.CreateAsync(user, "Pass@12345");
                     if (result.Succeeded)
+                    {
                         await userManager.AddToRoleAsync(user, u.Role);
+                        logger?.LogInformation("Successfully created user: {UserName}", u.UserName);
+                    }
+                    else
+                    {
+                        var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                        logger?.LogError("Failed to create user {UserName}. Errors: {Errors}", u.UserName, errors);
+                        throw new InvalidOperationException($"Failed to create user '{u.UserName}'. Errors: {errors}");
+                    }
+                }
+                else
+                {
+                    // User already exists - update password to ensure it matches seed password
+                    logger?.LogInformation("User {UserName} already exists. Updating password...", u.UserName);
+                    var token = await userManager.GeneratePasswordResetTokenAsync(existingUser);
+                    var resetResult = await userManager.ResetPasswordAsync(existingUser, token, "Pass@12345");
+                    if (resetResult.Succeeded)
+                    {
+                        logger?.LogInformation("Successfully updated password for user: {UserName}", u.UserName);
+                    }
+                    else
+                    {
+                        var errors = string.Join(", ", resetResult.Errors.Select(e => e.Description));
+                        logger?.LogWarning("Failed to update password for user {UserName}. Errors: {Errors}", u.UserName, errors);
+                    }
+
+                    // Ensure user has the correct role
+                    var userRoles = await userManager.GetRolesAsync(existingUser);
+                    if (!userRoles.Contains(u.Role))
+                    {
+                        await userManager.AddToRoleAsync(existingUser, u.Role);
+                        logger?.LogInformation("Added role {Role} to user {UserName}", u.Role, u.UserName);
+                    }
                 }
             }
 
