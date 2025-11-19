@@ -26,8 +26,10 @@ namespace Gozba_na_klik.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
-
-            modelBuilder.Entity<User>(b => b.ToTable("Users"));
+            modelBuilder.Entity<User>()
+                .ToTable("Users")
+                .HasIndex(u => u.NormalizedEmail)
+                .IsUnique();
 
             // Map Identity tables
             modelBuilder.Entity<IdentityRole<int>>(b => b.ToTable("Roles"));
@@ -38,7 +40,6 @@ namespace Gozba_na_klik.Models
             modelBuilder.Entity<IdentityRoleClaim<int>>(b => b.ToTable("RoleClaims"));
 
             base.OnModelCreating(modelBuilder);
-
             // --- UserAlergens many-to-many ---
             modelBuilder.Entity<UserAlergen>()
                 .HasOne(ua => ua.User)

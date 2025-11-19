@@ -68,41 +68,33 @@ namespace Gozba_na_klik.Services
 
             var result = await _userManager.CreateAsync(user, data.Password);
             if (!result.Succeeded)
-            {
-                string errorMessage = string.Join("; ", result.Errors.Select(e => e.Description));
-                throw new BadRequestException(errorMessage);
-            }
+                throw new BadRequestException(string.Join("; ", result.Errors.Select(e => e.Description)));
 
-            // Assign default role "Buyer"
-            var roleResult = await _userManager.AddToRoleAsync(user, "User");
-            if (!roleResult.Succeeded)
-            {
-                string errorMessage = string.Join("; ", roleResult.Errors.Select(e => e.Description));
-                throw new BadRequestException(errorMessage);
-            }
+            // Assign default role User
+            var roleRes = await _userManager.AddToRoleAsync(user, "User");
+            if (!roleRes.Succeeded)
+                throw new BadRequestException(string.Join("; ", roleRes.Errors.Select(e => e.Description)));
 
-            // Generate email confirmation token
-            var encodedToken = WebUtility.UrlEncode(await _userManager.GenerateEmailConfirmationTokenAsync(user));
-            // Build confirmation link
-            var ApiUrl = _configuration["ApiUrl"];
-            var confirmationLink = $"{ApiUrl}/api/Users/confirm-email?userId={user.Id}&token={encodedToken}";
+            // Generate token
+            var rawToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodedToken = Uri.EscapeDataString(rawToken); // safer than WebUtility
 
-            // Try sending email, but don't fail registration if it throws
+            var apiUrl = _configuration["ApiUrl"];
+            var confirmationLink = $"{apiUrl}/api/Users/confirm-email?userId={user.Id}&token={encodedToken}";
+
             try
             {
                 await _emailService.SendEmailAsync(user.Email, "Confirm your account",
-                    $"Click here to confirm your account: {confirmationLink}");
+                    $"Click here to confirm your account: <a href='{confirmationLink}'>Confirm Email</a>");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to send confirmation email to {Email}", user.Email);
-                // Optionally: return a flag in the DTO so frontend knows email failed
             }
 
-
-            // Map back to ProfileDto
             return _mapper.Map<ProfileDto>(user);
         }
+
         public async Task<string> Login(LoginRequest data)
         {
             var user = await _userManager.FindByNameAsync(data.Username);
@@ -142,7 +134,55 @@ namespace Gozba_na_klik.Services
 
             return _mapper.Map<ProfileDto>(user);
         }
+        public async Task RequestPasswordResetAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email)
+                ?? throw new NotFoundException($"User with email '{email}' not found.");
 
+            var rawToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var encodedToken = WebUtility.UrlEncode(rawToken);
+
+            _logger.LogInformation("[RESET] Raw token generated: {RawToken}", rawToken);
+            _logger.LogInformation("[RESET] Encoded token for email link: {EncodedToken}", encodedToken);
+
+            var FrontendUrl = _configuration["FrontendUrl"];
+            var link = $"{FrontendUrl}/reset-password?userId={user.Id}&token={encodedToken}";
+
+            var body = $@"
+<p>Hello {user.UserName},</p>
+<p>You requested a password reset. Click the link below to set a new password:</p>
+<p><a href='{link}'>Reset Password</a></p>
+<p>If you didn’t request this, you can ignore this email.</p>";
+
+            string subject = $"Reset password {user.UserName}";
+            await _emailService.SendEmailAsync(email, subject, body);
+        }
+
+        public async Task<IdentityResult> ResetPasswordAsync(ResetPasswordDto data)
+        {
+            var user = await _userManager.FindByIdAsync(data.UserId.ToString());
+            if (user == null)
+                throw new NotFoundException($"User with id '{data.UserId}' not found.");
+
+            _logger.LogInformation("[RESET] Token received from client: {Token}", data.Token);
+
+            // Fix + decode
+            var decodedToken = Uri.UnescapeDataString(data.Token).Replace(" ", "+");
+
+            _logger.LogInformation("[RESET] Token normalized: {DecodedToken}", decodedToken);
+
+            var result = await _userManager.ResetPasswordAsync(user, decodedToken, data.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                _logger.LogError("[RESET] Reset failed: {Errors}", errors);
+                throw new BadRequestException(errors);
+            }
+
+            _logger.LogInformation("[RESET] Password reset succeeded");
+            return result;
+        }
 
         private async Task<string> GenerateJwt(User user)
         {

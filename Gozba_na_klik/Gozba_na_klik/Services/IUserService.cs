@@ -2,6 +2,7 @@
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace Gozba_na_klik.Services
 {
@@ -10,6 +11,8 @@ namespace Gozba_na_klik.Services
         Task<string> Login(LoginRequest data);
         Task<ProfileDto> GetProfile(ClaimsPrincipal userPrincipal);
         Task <ProfileDto>RegisterAsync(RegistrationDto data);
+        Task RequestPasswordResetAsync(string email);
+        Task<IdentityResult> ResetPasswordAsync(ResetPasswordDto data);
         Task ActivateEmployeeAsync(int employeeId);
         Task AssignOrderToCourierAsync(int courierId, int orderId);
         Task<bool> DeleteUserAsync(int id);
