@@ -22,12 +22,13 @@ namespace Gozba_na_klik.Services.AddressServices
             _mapper = mapper;
         }
 
-        public Task<List<Address>> GetMyAsync(int userId)
+        public async Task<List<AddressListItemDto>> GetMyAsync(int userId)
         {
-            return _repo.GetMyAsync(userId);
+            var addresses = await _repo.GetMyAsync(userId);
+            return _mapper.Map<List<AddressListItemDto>>(addresses);
         }
 
-        public async Task<Address> CreateAsync(int userId, AddressCreateDto dto)
+        public async Task<AddressListItemDto> CreateAsync(int userId, AddressCreateDto dto)
         {
             Address address = _mapper.Map<Address>(dto);
             address.UserId = userId;
@@ -49,10 +50,10 @@ namespace Gozba_na_klik.Services.AddressServices
 
             await _repo.AddAsync(address);
             await _repo.SaveAsync();
-            return address;
+            return _mapper.Map<AddressListItemDto>(address);
         }
 
-        public async Task<Address> UpdateAsync(int userId, int id, AddressUpdateDto dto)
+        public async Task UpdateAsync(int userId, int id, AddressUpdateDto dto)
         {
             Address? existing = await _repo.GetByIdAsync(id);
             if (existing == null)
@@ -88,7 +89,6 @@ namespace Gozba_na_klik.Services.AddressServices
 
             await _repo.UpdateAsync(existing);
             await _repo.SaveAsync();
-            return existing;
         }
 
         public async Task SetDefaultAsync(int userId, int id)

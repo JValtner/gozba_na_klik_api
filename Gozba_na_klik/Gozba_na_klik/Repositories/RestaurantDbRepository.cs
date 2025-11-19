@@ -29,10 +29,10 @@ public class RestaurantDbRepository : IRestaurantRepository
     {
         return await _context.Restaurants
                 //.Include(r => r.Owner)
-                //.Include(r => r.Menu)
-                //    .ThenInclude(m => m.Addons)
-                //.Include(r => r.Menu)
-                //    .ThenInclude(m => m.Alergens)
+                .Include(r => r.Menu)
+                    .ThenInclude(m => m.Addons)
+                .Include(r => r.Menu)
+                    .ThenInclude(m => m.Alergens)
                 .Include(r => r.WorkSchedules)
                 .Include(r => r.ClosedDates)
                 .FirstOrDefaultAsync(r => r.Id == id);

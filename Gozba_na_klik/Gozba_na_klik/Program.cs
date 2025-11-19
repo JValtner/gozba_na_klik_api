@@ -91,6 +91,45 @@ builder.Services.AddAuthentication(options =>
 
         RoleClaimType = ClaimTypes.Role // Potrebno za kontrolu pristupa, što ćemo videti kasnije
     };
+    
+    // Dozvoli zahtevima bez tokena ili sa nevažećim tokenom da prođu dalje za PublicPolicy endpoint-e
+    options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+    {
+        OnChallenge = context =>
+        {
+            // Proveri da li endpoint koristi PublicPolicy ili AllowAnonymous
+            var endpoint = context.HttpContext.GetEndpoint();
+            if (endpoint != null)
+            {
+                var allowAnonymous = endpoint.Metadata?.GetMetadata<Microsoft.AspNetCore.Authorization.IAllowAnonymous>();
+                var authorizeData = endpoint.Metadata?.GetMetadata<Microsoft.AspNetCore.Authorization.IAuthorizeData>();
+                
+                if (allowAnonymous != null || (authorizeData != null && authorizeData.Policy == "PublicPolicy"))
+                {
+                    context.HandleResponse();
+                    return Task.CompletedTask;
+                }
+            }
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            // Proveri da li endpoint koristi PublicPolicy ili AllowAnonymous
+            var endpoint = context.HttpContext.GetEndpoint();
+            if (endpoint != null)
+            {
+                var allowAnonymous = endpoint.Metadata?.GetMetadata<Microsoft.AspNetCore.Authorization.IAllowAnonymous>();
+                var authorizeData = endpoint.Metadata?.GetMetadata<Microsoft.AspNetCore.Authorization.IAuthorizeData>();
+                
+                if (allowAnonymous != null || (authorizeData != null && authorizeData.Policy == "PublicPolicy"))
+                {
+                    context.NoResult();
+                    return Task.CompletedTask;
+                }
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 // Optional: cookie auth
@@ -297,7 +336,11 @@ if (app.Environment.IsDevelopment())
 }
 
 // HTTPS & CORS
-app.UseHttpsRedirection();
+// Only redirect to HTTPS in production, not in development
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors("FrontendPolicy");
 
 app.UseAuthentication(); // <--- Identity
@@ -317,7 +360,8 @@ using (var scope = app.Services.CreateScope())
     await DataSeeder.SeedAsync(
         services.GetRequiredService<GozbaNaKlikDbContext>(),
         services.GetRequiredService<UserManager<User>>(),
-        roleManager);
+        roleManager,
+        startupLogger);
 
     await RoleValidator.ValidateRolesAsync(roleManager, startupLogger);
 }

@@ -457,7 +457,7 @@ namespace Gozba_na_klik.Services
         {
             var order = await _orderRepository.GetCourierOrderInPickupAsync(courierId);
             if (order == null)
-                throw new NotFoundException($"Kurir sa ID-em {courierId} nema aktivnu porudzbinu.");
+                return null;
             return _mapper.Map<CourierActiveOrderDto>(order);
         }
 

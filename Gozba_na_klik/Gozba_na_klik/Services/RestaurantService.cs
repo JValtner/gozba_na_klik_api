@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Linq;
+using AutoMapper;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Exceptions;
@@ -33,12 +34,50 @@ namespace Gozba_na_klik.Services
             return await _restaurantRepository.GetByIdAsync(id);
         }
 
+        public async Task<Restaurant> GetRestaurantByIdOrThrowAsync(int id)
+        {
+            var restaurant = await _restaurantRepository.GetByIdAsync(id);
+            if (restaurant == null)
+            {
+                throw new NotFoundException($"Restoran sa ID {id} nije pronađen.");
+            }
+            return restaurant;
+        }
+
         public async Task<Restaurant> CreateRestaurantAsync(Restaurant restaurant)
         {
             return await _restaurantRepository.AddAsync(restaurant);
         }
         public async Task<Restaurant> UpdateRestaurantAsync(Restaurant restaurant)
         {
+            return await _restaurantRepository.UpdateAsync(restaurant);
+        }
+
+        public async Task<Restaurant> UpdateRestaurantByOwnerAsync(int id, RestaurantUpdateDto dto, int ownerId)
+        {
+            var restaurant = await GetRestaurantByIdOrThrowAsync(id);
+
+            if (restaurant.OwnerId != ownerId)
+            {
+                throw new UnauthorizedAccessException("Nemate dozvolu da menjate ovaj restoran.");
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.Name) || dto.Name.Length > 150)
+            {
+                throw new BadRequestException("Naziv je obavezan i najviše 150 karaktera.");
+            }
+
+            restaurant.Name = dto.Name?.Trim();
+            restaurant.Address = dto.Address?.Trim();
+            restaurant.Description = dto.Description?.Trim();
+            restaurant.Phone = dto.Phone?.Trim();
+            restaurant.UpdatedAt = DateTime.UtcNow;
+
+            if (!string.IsNullOrEmpty(dto.PhotoUrl))
+            {
+                restaurant.PhotoUrl = dto.PhotoUrl;
+            }
+
             return await _restaurantRepository.UpdateAsync(restaurant);
         }
 
@@ -89,23 +128,87 @@ namespace Gozba_na_klik.Services
             return await _restaurantRepository.GetByOwnerAsync(ownerId);
         }
 
+        public async Task UpdateWorkSchedulesFromDtosAsync(int restaurantId, List<DTOs.WorkScheduleDto> scheduleDtos)
+        {
+            if (scheduleDtos == null || !scheduleDtos.Any())
+            {
+                throw new BadRequestException("Lista radnih vremena ne može biti prazna.");
+            }
+
+            List<WorkSchedule> schedules = new List<WorkSchedule>();
+            foreach (var dto in scheduleDtos)
+            {
+                if (!TimeSpan.TryParse(dto.OpenTime, out TimeSpan openTime))
+                {
+                    throw new BadRequestException($"Nevažeći format vremena za otvaranje: {dto.OpenTime}");
+                }
+
+                if (!TimeSpan.TryParse(dto.CloseTime, out TimeSpan closeTime))
+                {
+                    throw new BadRequestException($"Nevažeći format vremena za zatvaranje: {dto.CloseTime}");
+                }
+
+                if (openTime >= closeTime && closeTime != TimeSpan.Zero)
+                {
+                    throw new BadRequestException($"Vreme otvaranja ({dto.OpenTime}) mora biti pre vremena zatvaranja ({dto.CloseTime}).");
+                }
+
+                schedules.Add(new WorkSchedule
+                {
+                    DayOfWeek = (DayOfWeek)dto.DayOfWeek,
+                    OpenTime = openTime,
+                    CloseTime = closeTime
+                });
+            }
+
+            await UpdateWorkSchedulesAsync(restaurantId, schedules);
+        }
+
         public async Task UpdateWorkSchedulesAsync(int restaurantId, List<WorkSchedule> schedules)
         {
             Restaurant? restaurant = await _context.Restaurants
-                .Include(r => r.WorkSchedules)
                 .FirstOrDefaultAsync(r => r.Id == restaurantId);
 
-            if (restaurant == null) return;
-
-            _context.WorkSchedules.RemoveRange(restaurant.WorkSchedules);
-
-            foreach (WorkSchedule schedule in schedules)
+            if (restaurant == null) 
             {
-                schedule.RestaurantId = restaurantId;
-                _context.WorkSchedules.Add(schedule);
+                throw new NotFoundException($"Restoran sa ID {restaurantId} nije pronađen.");
             }
 
-            await _context.SaveChangesAsync();
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var existingSchedules = await _context.WorkSchedules
+                    .Where(ws => ws.RestaurantId == restaurantId)
+                    .ToListAsync();
+
+                if (existingSchedules.Any())
+                {
+                    _context.WorkSchedules.RemoveRange(existingSchedules);
+                    await _context.SaveChangesAsync();
+                }
+
+                foreach (var scheduleData in schedules)
+                {
+                    var newSchedule = new WorkSchedule
+                    {
+                        RestaurantId = restaurantId,
+                        DayOfWeek = scheduleData.DayOfWeek,
+                        OpenTime = scheduleData.OpenTime,
+                        CloseTime = scheduleData.CloseTime
+                    };
+                    
+                    _context.WorkSchedules.Add(newSchedule);
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating work schedules for restaurant {RestaurantId}", restaurantId);
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public async Task AddClosedDateAsync(int restaurantId, ClosedDate date)
