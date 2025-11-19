@@ -1,4 +1,5 @@
-﻿using Gozba_na_klik.DTOs.Request;
+﻿using Gozba_na_klik.DTOs;
+using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Utils;
@@ -9,6 +10,7 @@ namespace Gozba_na_klik.Services
     {
         Task<IEnumerable<Restaurant>> GetAllRestaurantsAsync();
         Task<Restaurant?> GetRestaurantByIdAsync(int id);
+        Task<Restaurant> GetRestaurantByIdOrThrowAsync(int id);
 
         Task<PaginatedList<ResponseRestaurantDTO>> GetAllFilteredSortedPagedAsync(RestaurantFilter filter, int sortType, int page, int pageSize);
         Task<List<SortTypeOption>> GetSortTypesAsync();
@@ -20,8 +22,10 @@ namespace Gozba_na_klik.Services
         Task<Restaurant> UpdateRestaurantByAdminAsync(int id,RequestUpdateRestaurantByAdminDto dto);
 
         Task<Restaurant> UpdateRestaurantAsync(Restaurant restaurant);
+        Task<Restaurant> UpdateRestaurantByOwnerAsync(int id, RestaurantUpdateDto dto, int ownerId);
         Task DeleteRestaurantAsync(int id);
         Task<IEnumerable<Restaurant>> GetRestaurantsByOwnerAsync(int ownerId);
+        Task UpdateWorkSchedulesFromDtosAsync(int restaurantId, List<WorkScheduleDto> scheduleDtos);
         Task UpdateWorkSchedulesAsync(int restaurantId, List<WorkSchedule> schedules);
         Task AddClosedDateAsync(int restaurantId, ClosedDate date);
         Task RemoveClosedDateAsync(int restaurantId, int dateId);

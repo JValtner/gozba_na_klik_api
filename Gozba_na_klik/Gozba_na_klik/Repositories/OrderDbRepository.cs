@@ -105,6 +105,7 @@ namespace Gozba_na_klik.Repositories
         }
 
         // ✅ Porudžbina trenutno u toku preuzimanja za određenog kurira
+        // Vraća samo aktivne porudžbine (PREUZIMANJE U TOKU ili DOSTAVA U TOKU), ne završene
         public async Task<Order?> GetCourierOrderInPickupAsync(int courierId)
         {
             return await _context.Orders
@@ -113,7 +114,8 @@ namespace Gozba_na_klik.Repositories
                 .Include(order => order.Items)
                 .Include(order => order.User)
                 .Include(order => order.Address)
-                .Where(order => order.DeliveryPersonId == courierId && order.Status != "PRIHVAĆENA")
+                .Where(order => order.DeliveryPersonId == courierId && 
+                    (order.Status == "PREUZIMANJE U TOKU" || order.Status == "DOSTAVA U TOKU"))
                 .FirstOrDefaultAsync();
         }
 
