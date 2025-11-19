@@ -154,5 +154,28 @@ namespace Gozba_na_klik.Repositories
 
             return (orders, totalCount);
         }
+
+        // Dohvatanje aktivne porudzbine za korisnika
+        public async Task<Order?> GetActiveOrderStatusAsync(int userId)
+        {
+            var activeStatuses = new[]
+            {
+                "NA ČEKANJU",
+                "PRIHVAĆENA",
+                "PREUZIMANJE U TOKU",
+                "DOSTAVA U TOKU"
+            };
+
+            return await _context.Orders
+                .Include(order => order.Restaurant)
+                .Include(order => order.Address)
+                .Include(order => order.DeliveryPerson)
+                .Include(order => order.Items)
+                    .ThenInclude(item => item.Meal)
+                .Where(order => order.UserId == userId && activeStatuses.Contains(order.Status))
+                .OrderByDescending(order => order.OrderDate)
+                .FirstOrDefaultAsync();
+        }
+
     }
 }

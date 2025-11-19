@@ -516,5 +516,20 @@ namespace Gozba_na_klik.Services
 
             return _mapper.Map<OrderStatusDto>(order);
         }
+
+        // Dobavi aktivnu dostavu za Korisnika
+        public async Task<OrderStatusResponseDto> GetActiveOrderStatusAsync(int userId)
+        {
+            var activeOrder = await _orderRepository.GetActiveOrderStatusAsync(userId);
+
+            if (activeOrder == null)
+            {
+                _logger.LogInformation("Korisnik pod ID-em {UserId} nema aktivnu porudzbinu.", userId);
+                throw new NotFoundException(userId);
+            }
+
+            return _mapper.Map<OrderStatusResponseDto>(activeOrder);
+        }
+
     }
 }

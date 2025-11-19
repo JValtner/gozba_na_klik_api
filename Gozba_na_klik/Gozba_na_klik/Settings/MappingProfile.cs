@@ -162,6 +162,25 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
 
+            // Order response
+            CreateMap<Order, OrderStatusResponseDto>()
+                .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+                .ForMember(dest => dest.LastUpdated, opt => opt.MapFrom(src => src.AcceptedAt ?? src.CancelledAt ?? src.OrderDate))
+                .ForMember(dest => dest.CustomerAddress, opt => opt.MapFrom(src => src.Address))
+                .ForMember(dest => dest.DeliveryPerson, opt => opt.MapFrom(src => src.DeliveryPerson))
+                .ForMember(dest => dest.Restaurant, opt => opt.MapFrom(src => src.Restaurant))
+                .ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src => src.Items));
+
+                    // Podmape (unutar OrderStatusResponseDto)
+                    CreateMap<User, DeliveryPersonDto>();
+                    CreateMap<Restaurant, RestaurantDto>();
+                    CreateMap<Address, CustomerAddressDto>();
+                    CreateMap<OrderItem, OrderItemDto>()
+                        .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Meal.Name));
+                
+
+            // ---------- Order History ----------
             CreateMap<Order, OrderHistoryResponseDto>()
                 .ForMember(dest => dest.RestaurantName, opt => opt.MapFrom(src => src.Restaurant != null ? src.Restaurant.Name : "Nepoznat restoran"))
                 .ForMember(dest => dest.DeliveryAddress, opt => opt.MapFrom(src => src.Address != null ? $"{src.Address.Street}, {src.Address.City}" : "Adresa nije dostupna"))
