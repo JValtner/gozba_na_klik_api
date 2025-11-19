@@ -1,4 +1,5 @@
-﻿using Gozba_na_klik.DTOs.Orders;
+﻿using System.Security.Claims;
+using Gozba_na_klik.DTOs.Orders;
 using Gozba_na_klik.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -142,5 +143,17 @@ namespace Gozba_na_klik.Controllers
         }
 
         // GET: api/orders/user/my-active-order
+        [Authorize(Policy = "UserPolicy")]
+        [HttpGet("user/my-active-order")]
+        public async Task<ActionResult<OrderStatusResponseDto>> GetOrderStatusAsync()
+        {
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+            {
+                _logger.LogWarning("JWT token ne sadrži validan korisnički ID.");
+                return Unauthorized("User ID not found or invalid in token.");
+            }
+            _logger.LogInformation($"GET zahtev za dobijanje aktivne porudzbine za korisnika sa ID-em: {userId}.");
+            return Ok(await _orderService.GetActiveOrderStatusAsync(userId));
+        }
     }
 }
