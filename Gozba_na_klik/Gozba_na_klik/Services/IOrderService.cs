@@ -11,6 +11,7 @@ namespace Gozba_na_klik.Services
         Task<OrderPreviewDto> GetOrderPreviewAsync(int userId, int restaurantId, CreateOrderDto dto);
         Task<OrderResponseDto> CreateOrderAsync(int userId, int restaurantId, CreateOrderDto dto);
         Task<OrderDetailsDto> GetOrderByIdAsync(int userId, int orderId);
+        Task<OrderStatusResponseDto> GetActiveOrderStatusAsync(int userId);
         Task<PaginatedOrderHistoryResponseDto> GetUserOrderHistoryAsync(
             int userId, string? statusFilter, int page, int pageSize);
 
