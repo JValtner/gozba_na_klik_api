@@ -44,6 +44,25 @@ namespace Gozba_na_klik.Services
             return restaurant;
         }
 
+        public async Task<ResponseRestaurantDTO> GetRestaurantDtoByIdAsync(int id)
+        {
+            var restaurant = await GetRestaurantByIdOrThrowAsync(id);
+            var currentDate = DateTime.UtcNow;
+
+            return new ResponseRestaurantDTO
+            {
+                Id = restaurant.Id,
+                Name = restaurant.Name,
+                PhotoUrl = restaurant.PhotoUrl,
+                Address = restaurant.Address,
+                Description = restaurant.Description,
+                Phone = restaurant.Phone,
+                Menu = restaurant.Menu,
+                ClosedDates = restaurant.ClosedDates,
+                isOpen = IsRestaurantOpen(restaurant, currentDate)
+            };
+        }
+
         public async Task<Restaurant> CreateRestaurantAsync(Restaurant restaurant)
         {
             return await _restaurantRepository.AddAsync(restaurant);
