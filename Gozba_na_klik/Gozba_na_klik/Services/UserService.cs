@@ -110,7 +110,12 @@ namespace Gozba_na_klik.Services
                 string msg = "Password is incorrect.";
                 throw new BadRequestException(msg);
             }
-            // Novina
+            var emailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
+            if (!emailConfirmed)
+            {
+                string msg = "Email is not confirmed. Please confirm your email before logging in.";
+                throw new BadRequestException(msg);
+            }
             var token = await GenerateJwt(user);
             return token;
         }
