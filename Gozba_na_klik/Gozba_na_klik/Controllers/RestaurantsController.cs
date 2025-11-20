@@ -35,7 +35,7 @@ namespace Gozba_na_klik.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetOneAsync(int id)
         {
-            var restaurant = await _restaurantService.GetRestaurantByIdOrThrowAsync(id);
+            var restaurant = await _restaurantService.GetRestaurantDtoByIdAsync(id);
             return Ok(restaurant);
         }
 
