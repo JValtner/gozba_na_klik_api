@@ -1,4 +1,6 @@
-﻿using Gozba_na_klik.DTOs.Request;
+﻿using System.Net;
+using Gozba_na_klik.DTOs.Request;
+using Gozba_na_klik.Exceptions;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Services;
 using Gozba_na_klik.Services.EmailServices;
@@ -10,7 +12,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Gozba_na_klik.Controllers
 {
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
+    [Route("api/users")]
+
     [ApiController]
     
     public class UsersController : ControllerBase
@@ -153,5 +157,43 @@ namespace Gozba_na_klik.Controllers
             await _emailService.ConfirmEmailAsync(userId, token);
             return Ok("Email confirmed successfully");
         }
+
+        [AllowAnonymous]
+        [HttpPost("request-password-reset")]
+        public async Task<IActionResult> RequestPasswordReset([FromBody] RequestPasswordResetDto dto)
+        {
+            await _userService.RequestPasswordResetAsync(dto.Email);
+            return Ok("Password reset link sent.");
+        }
+
+        [AllowAnonymous]
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+        {
+            await _userService.ResetPasswordAsync(dto);
+            return Ok("Password successfully changed");
+        }
+
+        // Temporary diagnostic controller action
+        [AllowAnonymous]
+        [HttpPost("diagnose-reset-token")]
+        public async Task<IActionResult> DiagnoseResetToken([FromBody] int userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null) return NotFound("User not found");
+
+            // Generate token and immediately verify — no email, no transport.
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var verify = await _userManager.ResetPasswordAsync(user, token, "Temp_Test@12345");
+
+            return Ok(new
+            {
+                userId,
+                success = verify.Succeeded,
+                errors = verify.Succeeded ? null : verify.Errors.Select(e => e.Description).ToArray(),
+                tokenSample = token.Substring(0, Math.Min(token.Length, 32)) // just to see shape
+            });
+        }
+
     }
 }

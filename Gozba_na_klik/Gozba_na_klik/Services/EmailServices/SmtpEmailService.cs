@@ -1,10 +1,11 @@
-﻿using Gozba_na_klik.Models;
+﻿using System.Net;
+using Gozba_na_klik.Exceptions;
+using Gozba_na_klik.Models;
 using Gozba_na_klik.Settings;
 using MailKit.Net.Smtp;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using Gozba_na_klik.Exceptions;
-using Microsoft.AspNetCore.Identity;
 
 
 namespace Gozba_na_klik.Services.EmailServices
@@ -30,11 +31,20 @@ namespace Gozba_na_klik.Services.EmailServices
             message.From.Add(new MailboxAddress("Gozba na klik", _settings.From));
             message.To.Add(new MailboxAddress(to, to));
             message.Subject = subject;
-            message.Body = new TextPart("html") { Text = body };
+
+            // DO NOT BASE64 ENCODE HTML — it breaks URLs and tokens
+            var htmlPart = new TextPart("html")
+            {
+                Text = body
+            };
+
+            message.Body = htmlPart;
 
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
         }
+
+
 
         public async Task SendEmailWithAttachmentAsync(string to, string subject, string body, byte[] attachment, string fileName)
         {
@@ -59,17 +69,17 @@ namespace Gozba_na_klik.Services.EmailServices
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)
-            {
                 throw new NotFoundException("User not found");
-            }
-            var result = await _userManager.ConfirmEmailAsync(user, token);
+
+            // Decode URL-safe token
+            var decodedToken = Uri.UnescapeDataString(token).Replace(" ", "+");
+
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
 
             if (!result.Succeeded)
-            {
                 throw new BadRequestException("Invalid token");
-            }
-            return true;
 
+            return true;
         }
 
     }
