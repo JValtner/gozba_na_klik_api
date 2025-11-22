@@ -415,8 +415,21 @@ namespace Gozba_na_klik.Services
             await _orderRepository.UpdateAsync(order);
         }
 
-        public async Task<PaginatedOrderHistoryResponseDto> GetUserOrderHistoryAsync(int userId, string? statusFilter, int page, int pageSize)
+        public async Task<PaginatedOrderHistoryResponseDto> GetUserOrderHistoryAsync(int userId, int requestingUserId, string? statusFilter, int page, int pageSize)
         {
+
+            if (userId != requestingUserId)
+            {
+                _logger.LogWarning("User {RequestingUserId} attempted to access orders of user {UserId}", requestingUserId, userId);
+                throw new ForbiddenException("Možete videti samo svoje porudžbine.");
+            }
+
+            // Validacija: Page i pageSize
+            if (page < 1)
+                page = 1;
+            if (pageSize < 1 || pageSize > 100)
+                pageSize = 10;
+
             _logger.LogInformation("Getting order history for user {UserId} with filter {StatusFilter}, page {Page}, pageSize {PageSize}",
                 userId, statusFilter, page, pageSize);
 
@@ -457,7 +470,9 @@ namespace Gozba_na_klik.Services
         {
             var order = await _orderRepository.GetCourierOrderInPickupAsync(courierId);
             if (order == null)
+            {
                 return null;
+            }
             return _mapper.Map<CourierActiveOrderDto>(order);
         }
 
@@ -494,7 +509,7 @@ namespace Gozba_na_klik.Services
             try
             {
                 _logger.LogInformation("Starting automatic invoice generation for completed order {OrderId}", orderId);
-                var invoice = await _invoiceService.GenerateInvoiceAsync(order);
+                var invoice = await _invoiceService.GenerateInvoiceAsync(orderId);
                 await _invoiceService.SaveInvoiceAsync(invoice);
                 _logger.LogInformation("Invoice {InvoiceId} automatically created for order {OrderId}", invoice.InvoiceId, orderId);
             }

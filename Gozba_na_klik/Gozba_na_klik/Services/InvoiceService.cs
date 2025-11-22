@@ -30,14 +30,9 @@ namespace Gozba_na_klik.Services
             _logger = logger;
         }
 
-        public async Task<InvoiceDto> GenerateInvoiceAsync(Order order)
+        public async Task<InvoiceDto> GenerateInvoiceAsync(int orderId)
         {
-            _logger.LogInformation("Generating invoice for order {OrderId}", order.Id);
-
-            if (order.Status != "ZAVRŠENO")
-            {
-                throw new BadRequestException("Invoice can only be generated for completed orders.");
-            }
+            _logger.LogInformation("Generating invoice for order {OrderId}", orderId);
 
             var fullOrder = await _context.Orders
                 .Include(o => o.User)
@@ -46,11 +41,16 @@ namespace Gozba_na_klik.Services
                 .Include(o => o.Items)
                     .ThenInclude(i => i.Meal)
                         .ThenInclude(m => m.Addons)
-                .FirstOrDefaultAsync(o => o.Id == order.Id);
+                .FirstOrDefaultAsync(o => o.Id == orderId);
 
             if (fullOrder == null)
             {
-                throw new NotFoundException($"Order with ID {order.Id} not found.");
+                throw new NotFoundException($"Order with ID {orderId} not found.");
+            }
+
+            if (fullOrder.Status != "ZAVRŠENO")
+            {
+                throw new BadRequestException("Invoice can only be generated for completed orders.");
             }
 
             var invoiceId = GenerateInvoiceId();
@@ -248,7 +248,7 @@ namespace Gozba_na_klik.Services
                     existingInvoice.InvoiceId, orderId);
             }
 
-            var newInvoice = await GenerateInvoiceAsync(order);
+            var newInvoice = await GenerateInvoiceAsync(orderId);
             await SaveInvoiceAsync(newInvoice);
 
             _logger.LogInformation("Successfully regenerated invoice {InvoiceId} for order {OrderId}",

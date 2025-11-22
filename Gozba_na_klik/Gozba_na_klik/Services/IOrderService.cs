@@ -13,7 +13,7 @@ namespace Gozba_na_klik.Services
         Task<OrderDetailsDto> GetOrderByIdAsync(int userId, int orderId);
         Task<OrderStatusResponseDto> GetActiveOrderStatusAsync(int userId);
         Task<PaginatedOrderHistoryResponseDto> GetUserOrderHistoryAsync(
-            int userId, string? statusFilter, int page, int pageSize);
+            int userId, int requestingUserId, string? statusFilter, int page, int pageSize);
 
         // Restoran
         Task<List<RestaurantOrderDto>> GetRestaurantOrdersAsync(int userId, int restaurantId, string? status = null);
