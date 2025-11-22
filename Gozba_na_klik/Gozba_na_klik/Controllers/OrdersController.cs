@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using Gozba_na_klik.DTOs.Orders;
+﻿using Gozba_na_klik.DTOs.Orders;
 using Gozba_na_klik.Services;
 using Gozba_na_klik.Utils;
 using Microsoft.AspNetCore.Authorization;
@@ -15,7 +14,9 @@ namespace Gozba_na_klik.Controllers
         private readonly IOrderService _orderService;
         private readonly ILogger<OrdersController> _logger;
 
-        public OrdersController(IOrderService orderService, ILogger<OrdersController> logger)
+        public OrdersController(
+            IOrderService orderService,
+            ILogger<OrdersController> logger)
         {
             _orderService = orderService;
             _logger = logger;
@@ -28,7 +29,7 @@ namespace Gozba_na_klik.Controllers
             [FromBody] CreateOrderDto dto)
         {
             var userId = User.GetUserId();
-            _logger.LogInformation("POST request for order preview at restaurant {RestaurantId}", restaurantId);
+            _logger.LogInformation("User {UserId} requesting order preview for restaurant {RestaurantId}", userId, restaurantId);
             var preview = await _orderService.GetOrderPreviewAsync(userId, restaurantId, dto);
             return Ok(preview);
         }
@@ -40,8 +41,9 @@ namespace Gozba_na_klik.Controllers
             [FromBody] CreateOrderDto dto)
         {
             var userId = User.GetUserId();
-            _logger.LogInformation("POST request to create order for restaurant {RestaurantId}", restaurantId);
+            _logger.LogInformation("User {UserId} creating order for restaurant {RestaurantId}", userId, restaurantId);
             var order = await _orderService.CreateOrderAsync(userId, restaurantId, dto);
+            _logger.LogInformation("Order created successfully with ID {OrderId}", order.Id);
             return CreatedAtAction(nameof(CreateOrder), new { orderId = order.Id }, order);
         }
 
@@ -50,7 +52,6 @@ namespace Gozba_na_klik.Controllers
         public async Task<ActionResult<OrderDetailsDto>> GetOrderById(int orderId)
         {
             var userId = User.GetUserId();
-            _logger.LogInformation("GET request for order {OrderId}", orderId);
             var order = await _orderService.GetOrderByIdAsync(userId, orderId);
             return Ok(order);
         }
@@ -62,7 +63,6 @@ namespace Gozba_na_klik.Controllers
             [FromQuery] string? status = null)
         {
             var userId = User.GetUserId();
-            _logger.LogInformation("GET request for restaurant {RestaurantId} orders", restaurantId);
             var orders = await _orderService.GetRestaurantOrdersAsync(userId, restaurantId, status);
             return Ok(orders);
         }
@@ -74,7 +74,6 @@ namespace Gozba_na_klik.Controllers
             [FromBody] AcceptOrderDto dto)
         {
             var userId = User.GetUserId();
-            _logger.LogInformation("PUT request to accept order {OrderId}", orderId);
             await _orderService.AcceptOrderAsync(userId, orderId, dto);
             return Ok(new { message = "Porudžbina prihvaćena." });
         }
@@ -86,35 +85,19 @@ namespace Gozba_na_klik.Controllers
             [FromBody] CancelOrderDto dto)
         {
             var userId = User.GetUserId();
-            _logger.LogInformation("PUT request to cancel order {OrderId}", orderId);
             await _orderService.CancelOrderAsync(userId, orderId, dto);
             return Ok(new { message = "Porudžbina otkazana." });
         }
         // GET: api/orders/user/{userId}
         [HttpGet("user/{userId}")]
-            public async Task<ActionResult<PaginatedOrderHistoryResponseDto>> GetUserOrderHistory(
+        public async Task<ActionResult<PaginatedOrderHistoryResponseDto>> GetUserOrderHistory(
             int userId,
             [FromQuery] string? statusFilter = null,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
             var requestingUserId = User.GetUserId();
-            _logger.LogInformation("GET request for order history of user {UserId} by requesting user {RequestingUserId}",
-                userId, requestingUserId);
-
-            if (userId != requestingUserId)
-            {
-                _logger.LogWarning("User {RequestingUserId} attempted to access orders of user {UserId}",
-                    requestingUserId, userId);
-                return Unauthorized(new { message = "Možete videti samo svoje porudžbine." });
-            }
-
-            if (page < 1)
-                page = 1;
-            if (pageSize < 1 || pageSize > 100)
-                pageSize = 10;
-
-            var result = await _orderService.GetUserOrderHistoryAsync(userId, statusFilter, page, pageSize);
+            var result = await _orderService.GetUserOrderHistoryAsync(userId, requestingUserId, statusFilter, page, pageSize);
             return Ok(result);
         }
 
@@ -122,7 +105,6 @@ namespace Gozba_na_klik.Controllers
         [HttpGet("courier/{courierId}/active-pickup")]
         public async Task<ActionResult<CourierActiveOrderDto>> GetCourierOrderInPickupAsync(int courierId)
         {
-            _logger.LogInformation("GET zahtev za proveru da li je kuriru dodeljena dostava");
             var order = await _orderService.GetCourierOrderInPickupAsync(courierId);
             if (order == null)
                 return NoContent();
@@ -133,7 +115,6 @@ namespace Gozba_na_klik.Controllers
         [HttpPut("{orderId}/status/to-in-delivery")]
         public async Task<ActionResult<OrderStatusDto>> UpdateOrderToInDeliveryAsync(int orderId)
         {
-            _logger.LogInformation("PUT zahtev za promenu statusa narudzbine u 'DOSTAVA U TOKU'");
             return Ok(await _orderService.UpdateOrderToInDeliveryAsync(orderId));
         }
 
@@ -141,7 +122,6 @@ namespace Gozba_na_klik.Controllers
         [HttpPut("{orderId}/status/to-delivered")]
         public async Task<ActionResult<OrderStatusDto>> UpdateOrderToDeliveredAsync(int orderId)
         {
-            _logger.LogInformation("PUT zahtev za promenu statusa narudzbine u 'ZAVRSENO'");
             return Ok(await _orderService.UpdateOrderToDeliveredAsync(orderId));
         }
 
@@ -150,12 +130,7 @@ namespace Gozba_na_klik.Controllers
         [HttpGet("user/my-active-order")]
         public async Task<ActionResult<OrderStatusResponseDto>> GetOrderStatusAsync()
         {
-            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
-            {
-                _logger.LogWarning("JWT token ne sadrži validan korisnički ID.");
-                return Unauthorized("User ID not found or invalid in token.");
-            }
-            _logger.LogInformation($"GET zahtev za dobijanje aktivne porudzbine za korisnika sa ID-em: {userId}.");
+            var userId = User.GetUserId();
             return Ok(await _orderService.GetActiveOrderStatusAsync(userId));
         }
     }

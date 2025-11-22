@@ -11,6 +11,7 @@ namespace Gozba_na_klik.Services
         Task<IEnumerable<Restaurant>> GetAllRestaurantsAsync();
         Task<Restaurant?> GetRestaurantByIdAsync(int id);
         Task<Restaurant> GetRestaurantByIdOrThrowAsync(int id);
+        Task<ResponseRestaurantDTO> GetRestaurantDtoByIdAsync(int id);
 
         Task<PaginatedList<ResponseRestaurantDTO>> GetAllFilteredSortedPagedAsync(RestaurantFilter filter, int sortType, int page, int pageSize);
         Task<List<SortTypeOption>> GetSortTypesAsync();

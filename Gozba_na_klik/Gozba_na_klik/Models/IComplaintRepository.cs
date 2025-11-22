@@ -8,10 +8,10 @@ namespace Gozba_na_klik.Models
     {
         Task<ComplaintResponseDto> InsertComplaintAsync(CreateComplaintDto dto, int userId, int restaurantId);
         Task<bool> ComplaintExistsForOrderAsync(int orderId);
-        Task<List<ComplaintResponseDto>> GetComplaintsByRestaurantIdAsync(int restaurantId);
-        Task<List<ComplaintResponseDto>> GetComplaintsByRestaurantIdsAsync(List<int> restaurantIds);
         Task<bool> HasComplaintForOrderAsync(int orderId, int userId);
         Task<ComplaintResponseDto> GetComplaintByOrderIdAndUserIdAsync(int orderId, int userId);
+        Task<(List<ComplaintResponseDto> complaints, int totalCount)> GetAllComplaintsLast30DaysAsync(int page, int pageSize);
+        Task<ComplaintResponseDto> GetComplaintByIdAsync(string complaintId);
     }
 }
 

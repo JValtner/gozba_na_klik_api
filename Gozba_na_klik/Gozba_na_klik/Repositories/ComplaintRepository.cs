@@ -5,6 +5,8 @@ using Gozba_na_klik.DTOs.Complaints;
 using Gozba_na_klik.Models;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Gozba_na_klik.Repositories
 {
@@ -12,13 +14,28 @@ namespace Gozba_na_klik.Repositories
     {
         private readonly IMongoCollection<ComplaintDocument> _complaints;
         private readonly ILogger<ComplaintRepository> _logger;
+        private readonly IMongoDatabase _database;
 
         public ComplaintRepository(IMongoDatabase database, ILogger<ComplaintRepository> logger)
         {
+            _database = database;
             _complaints = database.GetCollection<ComplaintDocument>("complaints");
             _logger = logger;
-
-            CreateIndexes();
+            _logger.LogInformation("ComplaintRepository initialized successfully");
+        }
+        
+        private async Task<bool> IsMongoDbAvailableAsync()
+        {
+            try
+            {
+                using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+                await _database.RunCommandAsync<BsonDocument>(new BsonDocument("ping", 1), cancellationToken: cts.Token);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task<ComplaintResponseDto> InsertComplaintAsync(CreateComplaintDto dto, int userId, int restaurantId)
@@ -72,81 +89,52 @@ namespace Gozba_na_klik.Repositories
             }
         }
 
-        public async Task<List<ComplaintResponseDto>> GetComplaintsByRestaurantIdAsync(int restaurantId)
-        {
-            try
-            {
-                var filter = Builders<ComplaintDocument>.Filter.Eq(x => x.RestaurantId, restaurantId);
-                var complaints = await _complaints.Find(filter)
-                    .SortByDescending(x => x.CreatedAt)
-                    .ToListAsync();
-
-                var result = complaints.Select(c => new ComplaintResponseDto
-                {
-                    Id = c.Id.ToString(),
-                    OrderId = c.OrderId,
-                    UserId = c.UserId,
-                    RestaurantId = c.RestaurantId,
-                    Message = c.Message,
-                    CreatedAt = c.CreatedAt
-                }).ToList();
-
-                _logger.LogInformation("Retrieved {Count} complaints for restaurant {RestaurantId}", result.Count, restaurantId);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving complaints for restaurant ID {RestaurantId}", restaurantId);
-                throw;
-            }
-        }
-
         public async Task<bool> HasComplaintForOrderAsync(int orderId, int userId)
         {
+            // Quick check if MongoDB is available - if not, return false immediately
+            if (!await IsMongoDbAvailableAsync())
+            {
+                _logger.LogWarning("MongoDB not available - returning false for order {OrderId}, user {UserId}", orderId, userId);
+                return false;
+            }
+            
             try
             {
+                _logger.LogInformation("Checking complaint existence for order {OrderId} by user {UserId}", orderId, userId);
+                
                 var filter = Builders<ComplaintDocument>.Filter.And(
                     Builders<ComplaintDocument>.Filter.Eq(x => x.OrderId, orderId),
                     Builders<ComplaintDocument>.Filter.Eq(x => x.UserId, userId)
                 );
-                var count = await _complaints.CountDocumentsAsync(filter);
+                
+                using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+                var result = await _complaints.Find(filter)
+                    .Limit(1)
+                    .FirstOrDefaultAsync(cts.Token);
 
-                _logger.LogInformation("Complaint check for order {OrderId} by user {UserId}: {Exists}", orderId, userId, count > 0);
-                return count > 0;
+                var exists = result != null;
+                _logger.LogInformation("Complaint check for order {OrderId} by user {UserId}: {Exists}", orderId, userId, exists);
+                return exists;
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("MongoDB timeout - returning false for order {OrderId}, user {UserId}", orderId, userId);
+                return false;
+            }
+            catch (TimeoutException)
+            {
+                _logger.LogWarning("MongoDB timeout - returning false for order {OrderId}, user {UserId}", orderId, userId);
+                return false;
+            }
+            catch (MongoException ex)
+            {
+                _logger.LogWarning(ex, "MongoDB unavailable - returning false for order {OrderId}, user {UserId}", orderId, userId);
+                return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error checking complaint for order {OrderId} by user {UserId}", orderId, userId);
-                throw;
-            }
-        }
-
-        public async Task<List<ComplaintResponseDto>> GetComplaintsByRestaurantIdsAsync(List<int> restaurantIds)
-        {
-            try
-            {
-                var filter = Builders<ComplaintDocument>.Filter.In(x => x.RestaurantId, restaurantIds);
-                var complaints = await _complaints.Find(filter)
-                    .SortByDescending(x => x.CreatedAt)
-                    .ToListAsync();
-
-                var result = complaints.Select(c => new ComplaintResponseDto
-                {
-                    Id = c.Id.ToString(),
-                    OrderId = c.OrderId,
-                    UserId = c.UserId,
-                    RestaurantId = c.RestaurantId,
-                    Message = c.Message,
-                    CreatedAt = c.CreatedAt
-                }).ToList();
-
-                _logger.LogInformation("Retrieved {Count} complaints for {RestaurantCount} restaurants", result.Count, restaurantIds.Count);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving complaints for restaurant IDs");
-                throw;
+                _logger.LogWarning(ex, "Error checking complaint - returning false for order {OrderId}, user {UserId}", orderId, userId);
+                return false;
             }
         }
 
@@ -185,7 +173,84 @@ namespace Gozba_na_klik.Repositories
             }
         }
 
-        private void CreateIndexes()
+        public async Task<(List<ComplaintResponseDto> complaints, int totalCount)> GetAllComplaintsLast30DaysAsync(int page, int pageSize)
+        {
+            try
+            {
+                var thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
+                var filter = Builders<ComplaintDocument>.Filter.Gte(x => x.CreatedAt, thirtyDaysAgo);
+                
+                // Get total count
+                var totalCount = (int)await _complaints.CountDocumentsAsync(filter);
+                
+                // Get paginated results
+                var complaints = await _complaints.Find(filter)
+                    .SortByDescending(x => x.CreatedAt)
+                    .Skip((page - 1) * pageSize)
+                    .Limit(pageSize)
+                    .ToListAsync();
+
+                var result = complaints.Select(c => new ComplaintResponseDto
+                {
+                    Id = c.Id.ToString(),
+                    OrderId = c.OrderId,
+                    UserId = c.UserId,
+                    RestaurantId = c.RestaurantId,
+                    Message = c.Message,
+                    CreatedAt = c.CreatedAt
+                }).ToList();
+
+                _logger.LogInformation("Retrieved {Count} complaints from last 30 days (page {Page}, pageSize {PageSize}, total {TotalCount})", 
+                    result.Count, page, pageSize, totalCount);
+                return (result, totalCount);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving complaints from last 30 days");
+                throw;
+            }
+        }
+
+        public async Task<ComplaintResponseDto> GetComplaintByIdAsync(string complaintId)
+        {
+            try
+            {
+                if (!ObjectId.TryParse(complaintId, out var objectId))
+                {
+                    _logger.LogWarning("Invalid complaint ID format: {ComplaintId}", complaintId);
+                    return null;
+                }
+
+                var filter = Builders<ComplaintDocument>.Filter.Eq(x => x.Id, objectId);
+                var complaint = await _complaints.Find(filter).FirstOrDefaultAsync();
+
+                if (complaint == null)
+                {
+                    _logger.LogInformation("Complaint with ID {ComplaintId} not found", complaintId);
+                    return null;
+                }
+
+                var result = new ComplaintResponseDto
+                {
+                    Id = complaint.Id.ToString(),
+                    OrderId = complaint.OrderId,
+                    UserId = complaint.UserId,
+                    RestaurantId = complaint.RestaurantId,
+                    Message = complaint.Message,
+                    CreatedAt = complaint.CreatedAt
+                };
+
+                _logger.LogInformation("Retrieved complaint with ID {ComplaintId}", complaintId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving complaint with ID {ComplaintId}", complaintId);
+                throw;
+            }
+        }
+
+        private async Task CreateIndexesAsync()
         {
             try
             {
@@ -198,7 +263,7 @@ namespace Gozba_na_klik.Repositories
                 var createdAtIndex = new CreateIndexModel<ComplaintDocument>(
                     Builders<ComplaintDocument>.IndexKeys.Descending(x => x.CreatedAt));
 
-                _complaints.Indexes.CreateMany(new[] { orderIdIndex, userIdIndex, createdAtIndex });
+                await _complaints.Indexes.CreateManyAsync(new[] { orderIdIndex, userIdIndex, createdAtIndex });
                 _logger.LogInformation("MongoDB indexes created for complaints collection");
             }
             catch (Exception ex)
