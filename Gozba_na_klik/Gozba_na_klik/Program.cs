@@ -9,6 +9,7 @@ using Gozba_na_klik.Services.EmailServices;
 using Gozba_na_klik.Services.OrderAutoAssignerServices;
 using Gozba_na_klik.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -56,6 +57,14 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 })
 .AddEntityFrameworkStores<GozbaNaKlikDbContext>()
 .AddDefaultTokenProviders();
+
+// ---------------------------
+// Add data protection
+// ---------------------------
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "Keys")))
+    .SetApplicationName("GozbaNaKlik"); // consistent app name
+
 
 // ---------------------------
 // Authentication JWT

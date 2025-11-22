@@ -46,17 +46,22 @@ namespace Gozba_na_klik.Services
 
         public async Task<ResponseRestaurantDTO> GetRestaurantDtoByIdAsync(int id)
         {
-            var restaurant = await _restaurantRepository.GetByIdAsync(id);
-            if (restaurant == null)
-            {
-                throw new NotFoundException($"Restoran sa ID {id} nije pronađen.");
-            }
 
-            var currentDate = DateTime.Now;
-            var dto = _mapper.Map<ResponseRestaurantDTO>(restaurant);
-            dto.isOpen = IsRestaurantOpen(restaurant, currentDate);
-            
-            return dto;
+            var restaurant = await GetRestaurantByIdOrThrowAsync(id);
+            var currentDate = DateTime.UtcNow;
+
+            return new ResponseRestaurantDTO
+            {
+                Id = restaurant.Id,
+                Name = restaurant.Name,
+                PhotoUrl = restaurant.PhotoUrl,
+                Address = restaurant.Address,
+                Description = restaurant.Description,
+                Phone = restaurant.Phone,
+                Menu = restaurant.Menu,
+                ClosedDates = restaurant.ClosedDates,
+                isOpen = IsRestaurantOpen(restaurant, currentDate)
+            };
         }
 
         public async Task<Restaurant> CreateRestaurantAsync(Restaurant restaurant)
