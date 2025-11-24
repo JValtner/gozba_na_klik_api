@@ -1,10 +1,7 @@
 ﻿using AutoMapper;
 using Gozba_na_klik.DTOs.Request;
-using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
-using Gozba_na_klik.Repositories;
-using Microsoft.Extensions.Logging;
 
 namespace Gozba_na_klik.Services
 {
@@ -31,6 +28,7 @@ namespace Gozba_na_klik.Services
                 .Select(g => new RestaurantProfitDailyReportResponseDTO
                 {
                     RestaurantId = request.RestaurantId,
+                    Date = g.Key,
                     TotalDailyOrders = g.Count(),
                     DailyRevenue = g.Sum(o => o.TotalPrice)
                 }).ToList();
@@ -50,9 +48,10 @@ namespace Gozba_na_klik.Services
 
             var dailyReports = items
                 .GroupBy(i => i.Order.OrderDate.Date)
-                .Select(g => new MealSalesReportResponseDTO
+                .Select(g => new MealSalesDailyReportResponseDTO
                 {
                     MealId = request.MealId,
+                    Date =g.Key,
                     TotalDailyUnitsSold = g.Sum(i => i.Quantity),
                     DailyRevenue = g.Sum(i => i.TotalPrice)
                 }).ToList();
@@ -73,7 +72,7 @@ namespace Gozba_na_klik.Services
                 .GroupBy(o => o.OrderDate.Date)
                 .Select(g => new OrdersReportDailyResponseDTO
                 {
-                    OrderId = g.First().Id,
+                    Date =g.Key,
                     TotalOrders = g.Count(),
                     TotalAcceptedOrders = g.Count(o => o.Status == OrderStatus.PRIHVAĆENA),
                     TotalCancelledOrders = g.Count(o => o.Status == OrderStatus.OTKAZANA),
@@ -103,10 +102,24 @@ namespace Gozba_na_klik.Services
             var endDate = DateTime.UtcNow;
 
             var orders = await _reportingRepository.GetOrdersForPeriod(restaurantId, startDate, endDate);
+            var allItems = orders.SelectMany(o => o.Items);
+
+            // Project grouped meals into PopularMealDTO
+            var mealAggregates = allItems
+                .GroupBy(i => i.MealId)
+                .Select(g => new PopularMealDTO
+                {
+                    MealId = g.Key,
+                    MealName = g.First().Meal?.Name ?? "Unknown",
+                    UnitsSold = g.Sum(i => i.Quantity),
+                    Revenue = g.Sum(i => i.TotalPrice)
+                })
+                .ToList();
 
             var report = new MontlyReportDTO
             {
                 RestaurantId = restaurantId,
+                Restaurant = orders.FirstOrDefault()?.Restaurant,
                 Month = DateTime.UtcNow.Month,
                 Year = DateTime.UtcNow.Year,
                 TotalOrders = orders.Count,
@@ -119,36 +132,22 @@ namespace Gozba_na_klik.Services
                     TotalCount = orders.Count
                 },
 
-                Top5PopularMeals = new ListWithCountDTO<Meal>
+                Top5PopularMeals = new ListWithCountDTO<PopularMealDTO>
                 {
-                    Items = orders.SelectMany(o => o.Items)
-                                  .GroupBy(i => i.Meal)
-                                  .OrderByDescending(g => g.Count())
-                                  .Take(5)
-                                  .Select(g => g.Key)
-                                  .ToList(),
-                    TotalCount = orders.SelectMany(o => o.Items).Count()
+                    Items = mealAggregates.OrderByDescending(m => m.UnitsSold).Take(5).ToList(),
+                    TotalCount = mealAggregates.Sum(m => m.UnitsSold)
                 },
 
-                Bottom5PopularMeals = new ListWithCountDTO<Meal>
+                Bottom5PopularMeals = new ListWithCountDTO<PopularMealDTO>
                 {
-                    Items = orders.SelectMany(o => o.Items)
-                                  .GroupBy(i => i.Meal)
-                                  .OrderBy(g => g.Count())
-                                  .Take(5)
-                                  .Select(g => g.Key)
-                                  .ToList(),
-                    TotalCount = orders.SelectMany(o => o.Items).Count()
+                    Items = mealAggregates.OrderBy(m => m.UnitsSold).Take(5).ToList(),
+                    TotalCount = mealAggregates.Sum(m => m.UnitsSold)
                 },
 
-                MostPopularMealUnitsSold = orders.SelectMany(o => o.Items)
-                                                 .GroupBy(i => i.MealId)
-                                                 .OrderByDescending(g => g.Sum(i => i.Quantity))
-                                                 .FirstOrDefault()?.Sum(i => i.Quantity) ?? 0
+                MostPopularMealUnitsSold = mealAggregates
+                    .OrderByDescending(m => m.UnitsSold)
+                    .FirstOrDefault()?.UnitsSold ?? 0
             };
-
-            // Save to NoSQL (MongoDB)
-            // await _mongoCollection.InsertOneAsync(report);
 
             return report;
         }

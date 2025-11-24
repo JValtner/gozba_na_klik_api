@@ -20,15 +20,15 @@ namespace Gozba_na_klik.Settings
         {
             // ---------- User ----------
             CreateMap<RegistrationDto, User>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())          
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Username))
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
-            .ForMember(dest => dest.UserImage, opt => opt.Ignore())  
-            .ForMember(dest => dest.PasswordHash, opt => opt.Ignore()); 
+            .ForMember(dest => dest.UserImage, opt => opt.Ignore())
+            .ForMember(dest => dest.PasswordHash, opt => opt.Ignore());
 
             // --- User -> ProfileDto ---
             CreateMap<User, ProfileDto>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src =>src.Id))
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.UserName))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
                 .ForMember(dest => dest.UserImage, opt => opt.MapFrom(src => src.UserImage));
@@ -172,50 +172,46 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.Restaurant, opt => opt.MapFrom(src => src.Restaurant))
                 .ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src => src.Items));
 
-                    // Podmape (unutar OrderStatusResponseDto)
-                    CreateMap<User, DeliveryPersonDto>();
-                    CreateMap<Restaurant, RestaurantDto>();
-                    CreateMap<Address, CustomerAddressDto>();
-                    CreateMap<OrderItem, OrderItemDto>()
-                        .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Meal.Name));
-                
+            // Podmape (unutar OrderStatusResponseDto)
+            CreateMap<User, DeliveryPersonDto>();
+            CreateMap<Restaurant, RestaurantDto>();
+            CreateMap<Address, CustomerAddressDto>();
+            CreateMap<OrderItem, OrderItemDto>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Meal.Name));
+
 
             // ---------- Order History ----------
             CreateMap<Order, OrderHistoryResponseDto>()
                 .ForMember(dest => dest.RestaurantName, opt => opt.MapFrom(src => src.Restaurant != null ? src.Restaurant.Name : "Nepoznat restoran"))
                 .ForMember(dest => dest.DeliveryAddress, opt => opt.MapFrom(src => src.Address != null ? $"{src.Address.Street}, {src.Address.City}" : "Adresa nije dostupna"))
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
+
             // ---------- Reporting ----------
 
-            // Profit po danu
+            // Profit per day (single order → daily DTO)
             CreateMap<Order, RestaurantProfitDailyReportResponseDTO>()
                 .ForMember(dest => dest.RestaurantId, opt => opt.MapFrom(src => src.RestaurantId))
-                .ForMember(dest => dest.TotalDailyOrders, opt => opt.Ignore()) // računa se u servisu
-                .ForMember(dest => dest.DailyRevenue, opt => opt.MapFrom(src => src.TotalPrice));
+                .ForMember(dest => dest.TotalDailyOrders, opt => opt.Ignore()) // computed in service
+                .ForMember(dest => dest.DailyRevenue, opt => opt.MapFrom(src => src.TotalPrice))
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.OrderDate.Date)); // add Date if DTO has it
 
-            // Profit za period
-            CreateMap<IEnumerable<Order>, RestaurantProfitPeriodReportResponseDTO>()
-                .ForMember(dest => dest.DailyReports, opt => opt.Ignore()) // puni se ručno
-                .ForMember(dest => dest.TotalPeriodOrders, opt => opt.MapFrom(src => src.Count()))
-                .ForMember(dest => dest.TotalRevenue, opt => opt.MapFrom(src => src.Sum(o => o.TotalPrice)))
-                .ForMember(dest => dest.AverageDailyProfit, opt => opt.Ignore());
+            // Profit per period → build manually in service, not via AutoMapper
+            // Remove CreateMap<IEnumerable<Order>, RestaurantProfitPeriodReportResponseDTO>()
 
-            // Prodaja jela po danu
-            CreateMap<OrderItem, MealSalesReportResponseDTO>()
+            // Meal sales per day
+            CreateMap<OrderItem, MealSalesDailyReportResponseDTO>()
                 .ForMember(dest => dest.MealId, opt => opt.MapFrom(src => src.MealId))
+                .ForMember(dest => dest.MealName, opt => opt.MapFrom(src => src.Meal.Name)) // safer for frontend
                 .ForMember(dest => dest.TotalDailyUnitsSold, opt => opt.MapFrom(src => src.Quantity))
-                .ForMember(dest => dest.DailyRevenue, opt => opt.MapFrom(src => src.TotalPrice));
+                .ForMember(dest => dest.DailyRevenue, opt => opt.MapFrom(src => src.TotalPrice))
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Order.OrderDate.Date)); // add Date if DTO has it
 
-            // Prodaja jela za period
-            CreateMap<IEnumerable<OrderItem>, MealSalesPeriodReportResponseDTO>()
-                .ForMember(dest => dest.DailyReports, opt => opt.Ignore())
-                .ForMember(dest => dest.TotalUnitsSold, opt => opt.MapFrom(src => src.Sum(i => i.Quantity)))
-                .ForMember(dest => dest.TotalRevenue, opt => opt.MapFrom(src => src.Sum(i => i.TotalPrice)))
-                .ForMember(dest => dest.AverageDailyUnitsSold, opt => opt.Ignore());
+            // Meal sales per period → build manually in service
+            // Remove CreateMap<IEnumerable<OrderItem>, MealSalesPeriodReportResponseDTO>()
 
-            // Otkazane porudžbine po danu
+            // Orders report per day
             CreateMap<Order, OrdersReportDailyResponseDTO>()
-                .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.OrderDate.Date)) // add Date if DTO has it
                 .ForMember(dest => dest.TotalOrders, opt => opt.Ignore())
                 .ForMember(dest => dest.TotalAcceptedOrders, opt => opt.Ignore())
                 .ForMember(dest => dest.TotalCancelledOrders, opt => opt.Ignore())
@@ -225,22 +221,15 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.TotalReadyOrders, opt => opt.Ignore())
                 .ForMember(dest => dest.TotalDeliveredOrders, opt => opt.Ignore());
 
-            // Otkazane porudžbine za period
-            CreateMap<IEnumerable<Order>, OrdersReportPeriodResponseDTO>()
-                .ForMember(dest => dest.DailyReports, opt => opt.Ignore())
-                .ForMember(dest => dest.TotalOrders, opt => opt.MapFrom(src => src.Count()))
-                .ForMember(dest => dest.TotalAcceptedOrders, opt => opt.MapFrom(src => src.Count(o => o.Status == OrderStatus.PRIHVAĆENA)))
-                .ForMember(dest => dest.TotalCancelledOrders, opt => opt.MapFrom(src => src.Count(o => o.Status == OrderStatus.OTKAZANA)))
-                .ForMember(dest => dest.TotalCompletedOrders, opt => opt.MapFrom(src => src.Count(o => o.Status == OrderStatus.ISPORUČENA)))
-                .ForMember(dest => dest.TotalPendingOrders, opt => opt.MapFrom(src => src.Count(o => o.Status == OrderStatus.NA_CEKANJU)))
-                .ForMember(dest => dest.TotalInDeliveryOrders, opt => opt.MapFrom(src => src.Count(o => o.Status == OrderStatus.U_DOSTAVI)))
-                .ForMember(dest => dest.TotalReadyOrders, opt => opt.MapFrom(src => src.Count(o => o.Status == OrderStatus.SPREMNA)))
-                .ForMember(dest => dest.TotalDeliveredOrders, opt => opt.MapFrom(src => src.Count(o => o.Status == OrderStatus.ISPORUČENA)));
+            // Orders report per period → build manually in service
+            // Remove CreateMap<IEnumerable<Order>, OrdersReportPeriodResponseDTO>()
 
-            // Mesečni izveštaj
+            // Monthly report
             CreateMap<Order, MontlyReportDTO>()
                 .ForMember(dest => dest.RestaurantId, opt => opt.MapFrom(src => src.RestaurantId))
                 .ForMember(dest => dest.Restaurant, opt => opt.MapFrom(src => src.Restaurant))
+                .ForMember(dest => dest.Month, opt => opt.MapFrom(src => src.OrderDate.Month))
+                .ForMember(dest => dest.Year, opt => opt.MapFrom(src => src.OrderDate.Year))
                 .ForMember(dest => dest.TotalOrders, opt => opt.Ignore())
                 .ForMember(dest => dest.TotalRevenue, opt => opt.Ignore())
                 .ForMember(dest => dest.AverageOrderValue, opt => opt.Ignore())

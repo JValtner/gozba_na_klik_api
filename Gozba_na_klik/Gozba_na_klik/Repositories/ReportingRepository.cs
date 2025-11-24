@@ -15,20 +15,24 @@ public class ReportingRepository : IReportingRepository
     {
         return await _context.Orders
             .Include(o => o.Items)
+                .ThenInclude(i => i.Meal) 
             .Where(o => o.RestaurantId == restaurantId &&
                         o.OrderDate >= startDate &&
                         o.OrderDate <= endDate)
             .ToListAsync();
     }
 
+
     public async Task<List<OrderItem>> GetMealSalesForPeriod(int restaurantId, int mealId, DateTime startDate, DateTime endDate)
     {
         return await _context.OrderItems
             .Include(oi => oi.Order)
+            .Include(oi => oi.Meal)   
             .Where(oi => oi.Order.RestaurantId == restaurantId &&
                          oi.MealId == mealId &&
                          oi.Order.OrderDate >= startDate &&
                          oi.Order.OrderDate <= endDate)
             .ToListAsync();
     }
+
 }
