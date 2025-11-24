@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
 using Microsoft.AspNetCore.Identity;
@@ -39,28 +40,24 @@ namespace Gozba_na_klik.Repositories
                 .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
-        // Dobavljanje slobodnih dostavljaca (trenutno bez dostave)
-        public async Task<List<User>> GetAllAvailableCouriersAsync()
+        public async Task<List<int>> GetAvailableCourierIdsAsync(DayOfWeek day, TimeSpan now)
         {
-            var allCouriers = await _userManager.GetUsersInRoleAsync("DeliveryPerson");
+            return await _context.DeliveryPersonSchedules
+                .Where(s => s.IsActive
+                            && s.DayOfWeek == day
+                            && s.StartTime <= now
+                            && s.EndTime >= now)
+                .Select(s => s.DeliveryPersonId)
+                .Distinct()
+                .ToListAsync();
+        }
 
-            var now = DateTime.Now;
-            var currentDay = now.DayOfWeek;
-            var currentTime = now.TimeOfDay;
-
-            // Filter active and scheduled couriers
-            var availableCouriers = allCouriers
-                .Where(c => c.ActiveOrderId == null)
-                .Where(c => _context.DeliveryPersonSchedules.Any(s =>
-                    s.DeliveryPersonId == c.Id &&
-                    s.IsActive &&
-                    s.DayOfWeek == currentDay &&
-                    s.StartTime <= currentTime &&
-                    s.EndTime >= currentTime
-                ))
-                .ToList();
-
-            return availableCouriers;
+        public async Task<List<User>> GetCouriersByIdsAsync(List<int> ids)
+        {
+            return await _context.Users
+                .AsNoTracking()
+                .Where(u => ids.Contains(u.Id))
+                .ToListAsync();
         }
 
         public async Task<bool> ExistsAsync(int id)
