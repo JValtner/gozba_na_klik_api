@@ -96,10 +96,6 @@ namespace Gozba_na_klik.Repositories
         public async Task<List<Order>> GetAllAcceptedOrdersAsync()
         {
             return await _context.Orders
-                .Include(order => order.User)
-                .Include(order => order.Restaurant)
-                .Include(order => order.Address)
-                .Include(order => order.Items)
                 .Where(order => order.Status == "PRIHVAĆENA" && order.DeliveryPersonId == null)
                 .ToListAsync();
         }
@@ -108,14 +104,21 @@ namespace Gozba_na_klik.Repositories
         // Vraća samo aktivne porudžbine (PREUZIMANJE U TOKU ili DOSTAVA U TOKU), ne završene
         public async Task<Order?> GetCourierOrderInPickupAsync(int courierId)
         {
+            var activeStatuses = new[]
+            {
+                "PRIHVAĆENA",
+                "PREUZIMANJE U TOKU",
+                "DOSTAVA U TOKU"
+            };
+
             return await _context.Orders
                 .AsNoTracking()
                 .Include(order => order.Restaurant)
                 .Include(order => order.Items)
+                    .ThenInclude(item => item.Meal)
                 .Include(order => order.User)
                 .Include(order => order.Address)
-                .Where(order => order.DeliveryPersonId == courierId && 
-                    (order.Status == "PREUZIMANJE U TOKU" || order.Status == "DOSTAVA U TOKU"))
+                .Where(order => order.DeliveryPersonId == courierId && activeStatuses.Contains(order.Status))
                 .FirstOrDefaultAsync();
         }
 
@@ -162,7 +165,7 @@ namespace Gozba_na_klik.Repositories
         {
             var activeStatuses = new[]
             {
-                "NA ČEKANJU",
+                "NA_CEKANJU",
                 "PRIHVAĆENA",
                 "PREUZIMANJE U TOKU",
                 "DOSTAVA U TOKU"
