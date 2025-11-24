@@ -5,7 +5,7 @@ namespace Gozba_na_klik.Services
 {
     public interface IInvoiceService
     {
-        Task<InvoiceDto> GenerateInvoiceAsync(Order order);
+        Task<InvoiceDto> GenerateInvoiceAsync(int orderId);
         Task<InvoiceDto> SaveInvoiceAsync(InvoiceDto invoiceDto);
         Task<InvoiceDto> GetInvoiceByOrderIdAsync(int orderId, int userId);
         Task<InvoiceDto> GetInvoiceByIdAsync(string invoiceId, int userId);
