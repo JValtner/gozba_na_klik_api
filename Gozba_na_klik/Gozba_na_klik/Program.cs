@@ -233,6 +233,9 @@ builder.Services.AddHostedService<OrderAutoAssignerBackgroundService>();
 
 builder.Services.AddTransient<IEmailService, SmtpEmailService>();
 
+builder.Services.AddScoped<IReportingRepository, ReportingRepository>();
+builder.Services.AddScoped<IReportingService, ReportingService>();
+
 // ---------------------------
 // Configure MongoDb
 // ---------------------------

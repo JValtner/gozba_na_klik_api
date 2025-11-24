@@ -185,6 +185,69 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.RestaurantName, opt => opt.MapFrom(src => src.Restaurant != null ? src.Restaurant.Name : "Nepoznat restoran"))
                 .ForMember(dest => dest.DeliveryAddress, opt => opt.MapFrom(src => src.Address != null ? $"{src.Address.Street}, {src.Address.City}" : "Adresa nije dostupna"))
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
+            // ---------- Reporting ----------
+
+            // Profit po danu
+            CreateMap<Order, RestaurantProfitDailyReportResponseDTO>()
+                .ForMember(dest => dest.RestaurantId, opt => opt.MapFrom(src => src.RestaurantId))
+                .ForMember(dest => dest.TotalDailyOrders, opt => opt.Ignore()) // računa se u servisu
+                .ForMember(dest => dest.DailyRevenue, opt => opt.MapFrom(src => src.TotalPrice));
+
+            // Profit za period
+            CreateMap<IEnumerable<Order>, RestaurantProfitPeriodReportResponseDTO>()
+                .ForMember(dest => dest.DailyReports, opt => opt.Ignore()) // puni se ručno
+                .ForMember(dest => dest.TotalPeriodOrders, opt => opt.MapFrom(src => src.Count()))
+                .ForMember(dest => dest.TotalRevenue, opt => opt.MapFrom(src => src.Sum(o => o.TotalPrice)))
+                .ForMember(dest => dest.AverageDailyProfit, opt => opt.Ignore());
+
+            // Prodaja jela po danu
+            CreateMap<OrderItem, MealSalesReportResponseDTO>()
+                .ForMember(dest => dest.MealId, opt => opt.MapFrom(src => src.MealId))
+                .ForMember(dest => dest.TotalDailyUnitsSold, opt => opt.MapFrom(src => src.Quantity))
+                .ForMember(dest => dest.DailyRevenue, opt => opt.MapFrom(src => src.TotalPrice));
+
+            // Prodaja jela za period
+            CreateMap<IEnumerable<OrderItem>, MealSalesPeriodReportResponseDTO>()
+                .ForMember(dest => dest.DailyReports, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalUnitsSold, opt => opt.MapFrom(src => src.Sum(i => i.Quantity)))
+                .ForMember(dest => dest.TotalRevenue, opt => opt.MapFrom(src => src.Sum(i => i.TotalPrice)))
+                .ForMember(dest => dest.AverageDailyUnitsSold, opt => opt.Ignore());
+
+            // Otkazane porudžbine po danu
+            CreateMap<Order, OrdersReportDailyResponseDTO>()
+                .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.TotalOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalAcceptedOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalCancelledOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalCompletedOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalPendingOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalInDeliveryOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalReadyOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalDeliveredOrders, opt => opt.Ignore());
+
+            // Otkazane porudžbine za period
+            CreateMap<IEnumerable<Order>, OrdersReportPeriodResponseDTO>()
+                .ForMember(dest => dest.DailyReports, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalOrders, opt => opt.MapFrom(src => src.Count()))
+                .ForMember(dest => dest.TotalAcceptedOrders, opt => opt.MapFrom(src => src.Count(o => o.Status == OrderStatus.PRIHVAĆENA)))
+                .ForMember(dest => dest.TotalCancelledOrders, opt => opt.MapFrom(src => src.Count(o => o.Status == OrderStatus.OTKAZANA)))
+                .ForMember(dest => dest.TotalCompletedOrders, opt => opt.MapFrom(src => src.Count(o => o.Status == OrderStatus.ISPORUČENA)))
+                .ForMember(dest => dest.TotalPendingOrders, opt => opt.MapFrom(src => src.Count(o => o.Status == OrderStatus.NA_CEKANJU)))
+                .ForMember(dest => dest.TotalInDeliveryOrders, opt => opt.MapFrom(src => src.Count(o => o.Status == OrderStatus.U_DOSTAVI)))
+                .ForMember(dest => dest.TotalReadyOrders, opt => opt.MapFrom(src => src.Count(o => o.Status == OrderStatus.SPREMNA)))
+                .ForMember(dest => dest.TotalDeliveredOrders, opt => opt.MapFrom(src => src.Count(o => o.Status == OrderStatus.ISPORUČENA)));
+
+            // Mesečni izveštaj
+            CreateMap<Order, MontlyReportDTO>()
+                .ForMember(dest => dest.RestaurantId, opt => opt.MapFrom(src => src.RestaurantId))
+                .ForMember(dest => dest.Restaurant, opt => opt.MapFrom(src => src.Restaurant))
+                .ForMember(dest => dest.TotalOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalRevenue, opt => opt.Ignore())
+                .ForMember(dest => dest.AverageOrderValue, opt => opt.Ignore())
+                .ForMember(dest => dest.Top5RevenueOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.Top5PopularMeals, opt => opt.Ignore())
+                .ForMember(dest => dest.Bottom5PopularMeals, opt => opt.Ignore())
+                .ForMember(dest => dest.MostPopularMealUnitsSold, opt => opt.Ignore());
         }
     }
 }

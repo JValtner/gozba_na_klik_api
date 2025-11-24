@@ -52,6 +52,7 @@ namespace Gozba_na_klik.Services
             return new ResponseRestaurantDTO
             {
                 Id = restaurant.Id,
+                OwnerId = restaurant.OwnerId,
                 Name = restaurant.Name,
                 PhotoUrl = restaurant.PhotoUrl,
                 Address = restaurant.Address,
