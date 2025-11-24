@@ -188,7 +188,7 @@ namespace Gozba_na_klik.Services
             Restaurant? restaurant = await _context.Restaurants
                 .FirstOrDefaultAsync(r => r.Id == restaurantId);
 
-            if (restaurant == null) 
+            if (restaurant == null)
             {
                 throw new NotFoundException($"Restoran sa ID {restaurantId} nije pronađen.");
             }
@@ -215,7 +215,7 @@ namespace Gozba_na_klik.Services
                         OpenTime = scheduleData.OpenTime,
                         CloseTime = scheduleData.CloseTime
                     };
-                    
+
                     _context.WorkSchedules.Add(newSchedule);
                 }
 
@@ -277,16 +277,36 @@ namespace Gozba_na_klik.Services
         {
             return await _restaurantRepository.GetSortTypesAsync();
         }
-        private static bool IsRestaurantOpen(Restaurant r, DateTime currentDate)
+        private bool IsRestaurantOpen(Restaurant r, DateTime currentDate)
         {
             var currentDay = currentDate.DayOfWeek;
             var currentTime = currentDate.TimeOfDay;
 
-            return !r.ClosedDates.Any(cd => cd.Date.Date == currentDate.Date) &&
-                   r.WorkSchedules.Any(ws =>
-                       ws.DayOfWeek == currentDay &&
-                       ws.OpenTime <= currentTime &&
-                       ws.CloseTime >= currentTime);
+            var isClosedDate = r.ClosedDates.Any(cd => cd.Date.Date == currentDate.Date);
+            if (isClosedDate)
+            {
+                _logger.LogInformation("Restoran {RestaurantId} je zatvoren na datum {Date}", r.Id, currentDate.Date);
+                return false;
+            }
+
+            // Proveri da li postoji radno vreme za trenutni dan
+            var todaySchedule = r.WorkSchedules.FirstOrDefault(ws => ws.DayOfWeek == currentDay);
+            if (todaySchedule == null)
+            {
+                _logger.LogInformation("Restoran {RestaurantId} nema radno vreme za dan {DayOfWeek}", r.Id, currentDay);
+                return false;
+            }
+
+            // Proveri da li je trenutno vreme između vremena otvaranja i zatvaranja
+            var isOpen = currentTime >= todaySchedule.OpenTime && currentTime <= todaySchedule.CloseTime;
+
+            if (!isOpen)
+            {
+                _logger.LogInformation("Restoran {RestaurantId} je zatvoren. Trenutno vreme: {CurrentTime}, Radno vreme: {OpenTime} - {CloseTime}",
+                    r.Id, currentTime, todaySchedule.OpenTime, todaySchedule.CloseTime);
+            }
+
+            return isOpen;
         }
 
     }
