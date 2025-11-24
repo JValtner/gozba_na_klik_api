@@ -3,6 +3,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using Gozba_na_klik.DTOs.Complaints;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -173,7 +174,7 @@ namespace Gozba_na_klik.Repositories
             }
         }
 
-        public async Task<(List<ComplaintResponseDto> complaints, int totalCount)> GetAllComplaintsLast30DaysAsync(int page, int pageSize)
+        public async Task<PaginatedList<ComplaintResponseDto>> GetAllComplaintsLast30DaysAsync(int page, int pageSize)
         {
             try
             {
@@ -202,7 +203,7 @@ namespace Gozba_na_klik.Repositories
 
                 _logger.LogInformation("Retrieved {Count} complaints from last 30 days (page {Page}, pageSize {PageSize}, total {TotalCount})", 
                     result.Count, page, pageSize, totalCount);
-                return (result, totalCount);
+                return new PaginatedList<ComplaintResponseDto>(result, totalCount, page, pageSize);
             }
             catch (Exception ex)
             {
@@ -273,25 +274,5 @@ namespace Gozba_na_klik.Repositories
         }
     }
 
-    public class ComplaintDocument
-    {
-        [BsonId]
-        public ObjectId Id { get; set; }
-
-        [BsonElement("orderId")]
-        public int OrderId { get; set; }
-
-        [BsonElement("userId")]
-        public int UserId { get; set; }
-
-        [BsonElement("restaurantId")]
-        public int RestaurantId { get; set; }
-
-        [BsonElement("message")]
-        public string Message { get; set; } = string.Empty;
-
-        [BsonElement("createdAt")]
-        public DateTime CreatedAt { get; set; }
-    }
 }
 

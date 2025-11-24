@@ -1,6 +1,7 @@
 using Gozba_na_klik.DTOs.Complaints;
 using Gozba_na_klik.Exceptions;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.Utils;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
@@ -105,7 +106,7 @@ namespace Gozba_na_klik.Services
             return complaint;
         }
 
-        public async Task<PaginatedComplaintsResponseDto> GetAllComplaintsLast30DaysAsync(int page, int pageSize)
+        public async Task<PaginatedList<ComplaintResponseDto>> GetAllComplaintsLast30DaysAsync(int page, int pageSize)
         {
             if (page < 1)
                 page = 1;
@@ -114,15 +115,7 @@ namespace Gozba_na_klik.Services
 
             _logger.LogInformation("Getting complaints from last 30 days for admin, page {Page}, pageSize {PageSize}", page, pageSize);
 
-            var (complaints, totalCount) = await _complaintRepository.GetAllComplaintsLast30DaysAsync(page, pageSize);
-
-            return new PaginatedComplaintsResponseDto
-            {
-                Complaints = complaints,
-                TotalCount = totalCount,
-                Page = page,
-                PageSize = pageSize
-            };
+            return await _complaintRepository.GetAllComplaintsLast30DaysAsync(page, pageSize);
         }
 
         public async Task<ComplaintResponseDto> GetComplaintByIdAsync(string complaintId)
