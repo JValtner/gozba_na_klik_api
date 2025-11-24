@@ -33,15 +33,15 @@ namespace Gozba_na_klik.Data
             // --- 2. Admins & Owners (no RestaurantId yet) ---
             var basicUsers = new[]
             {
-                new { UserName = "Josip_admin", Email = "josipvaltner@gmail.com", Role = "Admin", IsActive = true },
-                new { UserName = "Luka_admin", Email = "lukakovacevic@gmail.com", Role = "Admin", IsActive = true },
-                new { UserName = "Boris_admin", Email = "borislaketic@gmail.com", Role = "Admin", IsActive = true },
-                new { UserName = "Tamas_admin", Email = "kopasztamas@gmail.com", Role = "Admin", IsActive = true },
-                new { UserName = "Uros_admin", Email = "urosmilinovic@gmail.com", Role = "Admin", IsActive = true },
+                new { UserName = "Josip_admin", Email = "josipvaltner@gmail.com", Role = "Admin", IsActive = true, EmailConfirmed = true },
+                new { UserName = "Luka_admin", Email = "lukakovacevic@gmail.com", Role = "Admin", IsActive = true, EmailConfirmed = true }, 
+                new { UserName = "Boris_admin", Email = "borislaketic@gmail.com", Role = "Admin", IsActive = true, EmailConfirmed = true },
+                new { UserName = "Tamas_admin", Email = "kopasztamas@gmail.com", Role = "Admin", IsActive = true, EmailConfirmed = true },
+                new { UserName = "Uros_admin", Email = "urosmilinovic@gmail.com", Role = "Admin", IsActive = true, EmailConfirmed = true },
 
-                new { UserName = "Milan_owner", Email = "milan.owner@example.com", Role = "RestaurantOwner", IsActive = true },
-                new { UserName = "Ana_owner", Email = "ana.owner@example.com", Role = "RestaurantOwner", IsActive = true },
-                new { UserName = "Ivan_owner", Email = "ivan.owner@example.com", Role = "RestaurantOwner", IsActive = true }
+                new { UserName = "Milan_owner", Email = "milan.owner@example.com", Role = "RestaurantOwner", IsActive = true, EmailConfirmed = true },
+                new { UserName = "Ana_owner", Email = "ana.owner@example.com", Role = "RestaurantOwner", IsActive = true, EmailConfirmed = true },
+                new { UserName = "Ivan_owner", Email = "ivan.owner@example.com", Role = "RestaurantOwner", IsActive = true, EmailConfirmed = true }
             };
 
             foreach (var u in basicUsers)
@@ -54,7 +54,8 @@ namespace Gozba_na_klik.Data
                         UserName = u.UserName,
                         Email = u.Email,
                         IsActive = u.IsActive,
-                        SecurityStamp = Guid.NewGuid().ToString()
+                        SecurityStamp = Guid.NewGuid().ToString(),
+                        EmailConfirmed = u.EmailConfirmed
                     };
 
                     // Password must be at least 10 characters (as per Program.cs configuration)
@@ -164,12 +165,12 @@ namespace Gozba_na_klik.Data
             // --- 4. Dependent Users (employees, delivery) ---
             var dependentUsers = new[]
             {
-                new { UserName = "Petar_employee", Email = "petar.employee@example.com", Role = "RestaurantEmployee", IsActive = true, OwnerName = "Milan_owner" },
-                new { UserName = "Ana_employee", Email = "ana.employee@example.com", Role = "RestaurantEmployee", IsActive = true, OwnerName = "Ana_owner" },
-                new { UserName = "Nikola_employee", Email = "nikola.employee@example.com", Role = "RestaurantEmployee", IsActive = true, OwnerName = "Ivan_owner" },
-                new { UserName = "Sara_employee", Email = "sara.employee@example.com", Role = "RestaurantEmployee", IsActive = false, OwnerName = "Milan_owner" },
-                new { UserName = "Marko_delivery", Email = "marko.delivery@example.com", Role = "DeliveryPerson", IsActive = true, OwnerName = "Milan_owner" },
-                new { UserName = "Jovan_delivery", Email = "jovan.delivery@example.com", Role = "DeliveryPerson", IsActive = true, OwnerName = "Ana_owner" }
+                new { UserName = "Petar_employee", Email = "petar.employee@example.com", Role = "RestaurantEmployee", IsActive = true, OwnerName = "Milan_owner", EmailConfirmed = true },
+                new { UserName = "Ana_employee", Email = "ana.employee@example.com", Role = "RestaurantEmployee", IsActive = true, OwnerName = "Ana_owner", EmailConfirmed = true },
+                new { UserName = "Nikola_employee", Email = "nikola.employee@example.com", Role = "RestaurantEmployee", IsActive = true, OwnerName = "Ivan_owner", EmailConfirmed = true },
+                new { UserName = "Sara_employee", Email = "sara.employee@example.com", Role = "RestaurantEmployee", IsActive = false, OwnerName = "Milan_owner", EmailConfirmed = true },
+                new { UserName = "Marko_delivery", Email = "marko.delivery@example.com", Role = "DeliveryPerson", IsActive = true, OwnerName = "Milan_owner", EmailConfirmed = true },
+                new { UserName = "Jovan_delivery", Email = "jovan.delivery@example.com", Role = "DeliveryPerson", IsActive = true, OwnerName = "Ana_owner", EmailConfirmed = true }
             };
 
             foreach (var u in dependentUsers)
@@ -189,7 +190,8 @@ namespace Gozba_na_klik.Data
                         Email = u.Email,
                         IsActive = u.IsActive,
                         RestaurantId = restaurant?.Id,
-                        SecurityStamp = Guid.NewGuid().ToString()
+                        SecurityStamp = Guid.NewGuid().ToString(),
+                        EmailConfirmed = u.EmailConfirmed
                     };
 
                     // Password must be at least 10 characters (as per Program.cs configuration)
@@ -258,6 +260,24 @@ namespace Gozba_na_klik.Data
                 context.Meals.AddRange(meals);
                 await context.SaveChangesAsync();
             }
+
+            // --- 5. Allergens ---
+            if (!await context.Alergens.AnyAsync())
+            {
+                var allergens = new[]
+                {
+                    new Alergen { Name = "Kikiriki" },
+                    new Alergen { Name = "Mleko" },
+                    new Alergen { Name = "Jaja" },
+                    new Alergen { Name = "Soja" },
+                    new Alergen { Name = "Riba" },
+                    new Alergen { Name = "Gluten" }
+                };
+
+                context.Alergens.AddRange(allergens);
+                await context.SaveChangesAsync();
+            }
+
 
             Console.WriteLine("Seeding complete.");
         }

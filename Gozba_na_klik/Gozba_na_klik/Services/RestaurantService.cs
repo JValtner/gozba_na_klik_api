@@ -46,17 +46,21 @@ namespace Gozba_na_klik.Services
 
         public async Task<ResponseRestaurantDTO> GetRestaurantDtoByIdAsync(int id)
         {
-            var restaurant = await _restaurantRepository.GetByIdAsync(id);
-            if (restaurant == null)
-            {
-                throw new NotFoundException($"Restoran sa ID {id} nije pronađen.");
-            }
+            var restaurant = await GetRestaurantByIdOrThrowAsync(id);
+            var currentDate = DateTime.UtcNow;
 
-            var currentDate = DateTime.Now;
-            var dto = _mapper.Map<ResponseRestaurantDTO>(restaurant);
-            dto.isOpen = IsRestaurantOpen(restaurant, currentDate);
-            
-            return dto;
+            return new ResponseRestaurantDTO
+            {
+                Id = restaurant.Id,
+                Name = restaurant.Name,
+                PhotoUrl = restaurant.PhotoUrl,
+                Address = restaurant.Address,
+                Description = restaurant.Description,
+                Phone = restaurant.Phone,
+                Menu = restaurant.Menu,
+                ClosedDates = restaurant.ClosedDates,
+                isOpen = IsRestaurantOpen(restaurant, currentDate)
+            };
         }
 
         public async Task<Restaurant> CreateRestaurantAsync(Restaurant restaurant)
@@ -184,7 +188,7 @@ namespace Gozba_na_klik.Services
             Restaurant? restaurant = await _context.Restaurants
                 .FirstOrDefaultAsync(r => r.Id == restaurantId);
 
-            if (restaurant == null) 
+            if (restaurant == null)
             {
                 throw new NotFoundException($"Restoran sa ID {restaurantId} nije pronađen.");
             }
@@ -211,7 +215,7 @@ namespace Gozba_na_klik.Services
                         OpenTime = scheduleData.OpenTime,
                         CloseTime = scheduleData.CloseTime
                     };
-                    
+
                     _context.WorkSchedules.Add(newSchedule);
                 }
 
@@ -295,10 +299,10 @@ namespace Gozba_na_klik.Services
 
             // Proveri da li je trenutno vreme između vremena otvaranja i zatvaranja
             var isOpen = currentTime >= todaySchedule.OpenTime && currentTime <= todaySchedule.CloseTime;
-            
+
             if (!isOpen)
             {
-                _logger.LogInformation("Restoran {RestaurantId} je zatvoren. Trenutno vreme: {CurrentTime}, Radno vreme: {OpenTime} - {CloseTime}", 
+                _logger.LogInformation("Restoran {RestaurantId} je zatvoren. Trenutno vreme: {CurrentTime}, Radno vreme: {OpenTime} - {CloseTime}",
                     r.Id, currentTime, todaySchedule.OpenTime, todaySchedule.CloseTime);
             }
 

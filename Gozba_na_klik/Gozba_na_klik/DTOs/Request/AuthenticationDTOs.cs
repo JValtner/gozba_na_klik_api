@@ -21,6 +21,16 @@
         public string UserImage { get; set; }
         
     }
+    public class ResetPasswordDto
+    {
+        public int UserId { get; set; }
+        public string Token { get; set; }
+        public string NewPassword { get; set; }
+    }
+    public class RequestPasswordResetDto
+    {
+        public string Email { get; set; }
+    }
 
 
 }
