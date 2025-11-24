@@ -7,7 +7,8 @@ namespace Gozba_na_klik.Models
         Task<IEnumerable<User>> GetAllAsync();
         Task<User?> GetByIdAsync(int userId);
         Task<User?> GetByIdWithAlergensAsync(int userId);
-        Task<List<User>> GetAllAvailableCouriersAsync();
+        Task<List<int>> GetAvailableCourierIdsAsync(DayOfWeek day, TimeSpan now);
+        Task<List<User>> GetCouriersByIdsAsync(List<int> ids);
         Task<IEnumerable<User>> GetAllRestaurantOwnersAsync();
         Task<User> AddAsync(User user);
         Task<User> UpdateAsync(User user);

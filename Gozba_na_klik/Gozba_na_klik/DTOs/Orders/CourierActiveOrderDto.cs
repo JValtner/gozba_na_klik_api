@@ -23,12 +23,20 @@ public class CourierOrderRestaurantDto
 {
     public int Id { get; set; }
     public string Name { get; set; } = null!;
+    public string? Address { get; set; }
+    public string? Phone { get; set; }
 }
 
 public class CourierOrderAddressDto
 {
-    public int Id { get; set; }
-    public string Street { get; set; } = null!;
+    public string? City { get; set; }
+    public string? Street { get; set; }
+    public string? Entrance { get; set; }
+    public string? Floor { get; set; }
+    public string? Apartment { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
+    public string? Notes { get; set; }
 }
 
 public class CourierOrderItemDto

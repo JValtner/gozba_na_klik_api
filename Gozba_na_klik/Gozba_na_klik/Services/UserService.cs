@@ -9,6 +9,7 @@ using Gozba_na_klik.Exceptions;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Services.EmailServices;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -343,7 +344,18 @@ namespace Gozba_na_klik.Services
 
         public async Task<List<User>> GetAllAvailableCouriersAsync()
         {
-            return await _userRepository.GetAllAvailableCouriersAsync();
+            var now = DateTime.Now;
+            var day = now.DayOfWeek;
+            var time = now.TimeOfDay;
+
+            var availableIds = await _userRepository.GetAvailableCourierIdsAsync(day, time);
+            var couriers = await _userRepository.GetCouriersByIdsAsync(availableIds);
+
+            var availableCouriers = couriers
+                .Where(c => c.ActiveOrderId == null)
+                .ToList();
+
+            return availableCouriers;
         }
 
         public async Task AssignOrderToCourierAsync(int courierId, int orderId)

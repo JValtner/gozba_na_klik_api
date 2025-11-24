@@ -156,7 +156,8 @@ namespace Gozba_na_klik.Settings
             CreateMap<User, CourierOrderUserDto>();
             CreateMap<Restaurant, CourierOrderRestaurantDto>();
             CreateMap<Address, CourierOrderAddressDto>();
-            CreateMap<OrderItem, CourierOrderItemDto>();
+            CreateMap<OrderItem, CourierOrderItemDto>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Meal.Name));
 
             CreateMap<Order, OrderStatusDto>()
                 .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.Id))
