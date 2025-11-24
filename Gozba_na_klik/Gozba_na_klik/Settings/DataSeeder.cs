@@ -261,6 +261,24 @@ namespace Gozba_na_klik.Data
                 await context.SaveChangesAsync();
             }
 
+            // --- 5. Allergens ---
+            if (!await context.Alergens.AnyAsync())
+            {
+                var allergens = new[]
+                {
+                    new Alergen { Name = "Kikiriki" },
+                    new Alergen { Name = "Mleko" },
+                    new Alergen { Name = "Jaja" },
+                    new Alergen { Name = "Soja" },
+                    new Alergen { Name = "Riba" },
+                    new Alergen { Name = "Gluten" }
+                };
+
+                context.Alergens.AddRange(allergens);
+                await context.SaveChangesAsync();
+            }
+
+
             Console.WriteLine("Seeding complete.");
         }
     }
