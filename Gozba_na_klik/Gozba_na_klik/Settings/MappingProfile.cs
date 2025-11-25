@@ -9,8 +9,7 @@ using Gozba_na_klik.DTOs.Addresses;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
 using Gozba_na_klik.Utils;
-using System.Text.Json;
-using System.Linq;
+using Gozba_na_klik.DTOs.Location;
 
 namespace Gozba_na_klik.Settings
 {
@@ -186,6 +185,10 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.RestaurantName, opt => opt.MapFrom(src => src.Restaurant != null ? src.Restaurant.Name : "Nepoznat restoran"))
                 .ForMember(dest => dest.DeliveryAddress, opt => opt.MapFrom(src => src.Address != null ? $"{src.Address.Street}, {src.Address.City}" : "Adresa nije dostupna"))
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
+
+            // Courier location dto
+            CreateMap<User, UpdateCourierLocationDto>();
+                
         }
     }
 }
