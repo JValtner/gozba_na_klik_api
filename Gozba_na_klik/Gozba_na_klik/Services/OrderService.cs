@@ -3,9 +3,11 @@ using System.Text.Json;
 using AutoMapper;
 using Gozba_na_klik.DTOs.Orders;
 using Gozba_na_klik.Exceptions;
+using Gozba_na_klik.Hubs;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gozba_na_klik.Services
@@ -18,6 +20,7 @@ namespace Gozba_na_klik.Services
         private readonly ILogger<OrderService> _logger;
         private readonly IInvoiceService _invoiceService;
         private readonly UserManager<User> _userManager;
+        private readonly IHubContext<CourierLocationHub> _hub;
 
         public OrderService(
             IOrderRepository orderRepository,
@@ -25,7 +28,8 @@ namespace Gozba_na_klik.Services
             IMapper mapper,
             ILogger<OrderService> logger,
             IInvoiceService invoiceService,
-            UserManager<User> userManager)
+            UserManager<User> userManager,
+            IHubContext<CourierLocationHub> hub)
         {
             _orderRepository = orderRepository;
             _context = context;
@@ -33,6 +37,7 @@ namespace Gozba_na_klik.Services
             _logger = logger;
             _invoiceService = invoiceService;
             _userManager = userManager;
+            _hub = hub;
         }
 
         public async Task<OrderPreviewDto> GetOrderPreviewAsync(int userId, int restaurantId, CreateOrderDto dto)
@@ -569,6 +574,7 @@ namespace Gozba_na_klik.Services
             order.DeliveryTime = DateTime.UtcNow;
             var courierId = order.DeliveryPersonId;
             await _orderRepository.UpdateAsync(order);
+            await _hub.Clients.Group(orderId.ToString()).SendAsync("OrderCompleted");
 
             // Kreiranje Invoice-a
             try
