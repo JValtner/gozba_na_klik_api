@@ -85,7 +85,6 @@ namespace Gozba_na_klik.Services
 
             return new OrdersReportPeriodResponseDTO
             {
-                DailyReports = dailyReports,
                 TotalOrders = orders.Count,
                 TotalAcceptedOrders = orders.Count(o => o.Status == OrderStatus.PRIHVAĆENA),
                 TotalCancelledOrders = orders.Count(o => o.Status == OrderStatus.OTKAZANA),

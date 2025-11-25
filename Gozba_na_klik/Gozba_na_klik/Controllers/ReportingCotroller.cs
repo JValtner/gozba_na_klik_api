@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Gozba_na_klik.DTOs.Request;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Gozba_na_klik.Controllers
 {
@@ -17,7 +18,7 @@ namespace Gozba_na_klik.Controllers
             _logger = logger;
         }
         // GET: api/profit-report
-        //[Authorize(Policy = "AdminPolicy")]
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("profit-report")]
         public async Task<IActionResult> GetRestaurantProfitReport([FromQuery] RestaurantProfitReportRequestDTO requestData )
         {
@@ -27,7 +28,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // GET: api/meal-sales-report
-        //[Authorize(Policy = "AdminPolicy")]
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("meal-sales-report")]
         public async Task<IActionResult> GetMealSalesReport([FromQuery] MealSalesReportRequestDTO requestData)
         {
@@ -37,7 +38,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // GET: api/orders-report
-        //[Authorize(Policy = "AdminPolicy")]
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("orders-report")]
         public async Task<IActionResult> GetOrdersReport([FromQuery] RestaurantOrdersReportRequestDTO requestData)
         {
@@ -47,7 +48,7 @@ namespace Gozba_na_klik.Controllers
         }
 
         // GET: api/full-monthly-report
-        //[Authorize(Policy = "AdminPolicy")]
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("full-monthly-report")]
         public async Task<IActionResult> GetFullMonthlyReport([FromQuery] int restaurantId)
         {

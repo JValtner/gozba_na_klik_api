@@ -48,7 +48,6 @@ namespace Gozba_na_klik.DTOs.Request
 
     public class OrdersReportPeriodResponseDTO
     {
-        public List<OrdersReportDailyResponseDTO> DailyReports { get; set; }
         public int TotalOrders { get; set; }
         public int TotalAcceptedOrders { get; set; }
         public int TotalCancelledOrders { get; set; }
