@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Gozba_na_klik.DTOs.Location;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Models;
@@ -28,6 +29,7 @@ namespace Gozba_na_klik.Services
         Task<ResponseUserAlergenDto?> UpdateUserAlergensAsync(int userId, RequestUpdateAlergenByUserDto dto);
         Task<User?> UpdateUserAsync(int id, UpdateUserDto dto, IFormFile? userimage);
         Task<User?> UpdateUserByAdminAsync(int id, RequestUpdateUserByAdminDto dto);
+        Task<UpdateCourierLocationDto> UpdateCourierLocation(int courierId, double latitude, double longitude);
         Task<bool> UserExistsAsync(int userId);
     }
 }

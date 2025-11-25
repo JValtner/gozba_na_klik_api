@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using System.Text;
 using Gozba_na_klik.Data;
+using Gozba_na_klik.Hubs;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Repositories;
 using Gozba_na_klik.Services;
@@ -239,6 +240,9 @@ builder.Services.AddTransient<IEmailService, SmtpEmailService>();
 builder.Services.AddScoped<IReportingRepository, ReportingRepository>();
 builder.Services.AddScoped<IReportingService, ReportingService>();
 
+// SignalR
+builder.Services.AddSignalR();
+
 // ---------------------------
 // Configure MongoDb
 // ---------------------------
@@ -265,7 +269,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -325,6 +330,9 @@ var app = builder.Build();
 
 // Middleware pipeline
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// SignalR
+app.MapHub<CourierLocationHub>("/locationHub");
 
 // Static files: /assets
 var assetsPath = Path.Combine(builder.Environment.ContentRootPath, "assets");

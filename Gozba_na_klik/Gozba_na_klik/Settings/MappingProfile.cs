@@ -9,8 +9,7 @@ using Gozba_na_klik.DTOs.Addresses;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
 using Gozba_na_klik.Utils;
-using System.Text.Json;
-using System.Linq;
+using Gozba_na_klik.DTOs.Location;
 
 namespace Gozba_na_klik.Settings
 {
@@ -238,6 +237,10 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.Top5PopularMeals, opt => opt.Ignore())
                 .ForMember(dest => dest.Bottom5PopularMeals, opt => opt.Ignore())
                 .ForMember(dest => dest.MostPopularMealUnitsSold, opt => opt.Ignore());
+
+            // Courier location dto
+            CreateMap<User, UpdateCourierLocationDto>();
+                
         }
     }
 }
