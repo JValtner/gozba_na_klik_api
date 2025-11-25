@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Text.Json;
 using AutoMapper;
 using Gozba_na_klik.DTOs.Orders;
 using Gozba_na_klik.Exceptions;
-using Gozba_na_klik.Hubs;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
+using Gozba_na_klik.Utils;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Gozba_na_klik.Services
 {
@@ -20,7 +19,6 @@ namespace Gozba_na_klik.Services
         private readonly ILogger<OrderService> _logger;
         private readonly IInvoiceService _invoiceService;
         private readonly UserManager<User> _userManager;
-        private readonly IHubContext<CourierLocationHub> _hub;
 
         public OrderService(
             IOrderRepository orderRepository,
@@ -28,8 +26,7 @@ namespace Gozba_na_klik.Services
             IMapper mapper,
             ILogger<OrderService> logger,
             IInvoiceService invoiceService,
-            UserManager<User> userManager,
-            IHubContext<CourierLocationHub> hub)
+            UserManager<User> userManager)
         {
             _orderRepository = orderRepository;
             _context = context;
@@ -37,7 +34,6 @@ namespace Gozba_na_klik.Services
             _logger = logger;
             _invoiceService = invoiceService;
             _userManager = userManager;
-            _hub = hub;
         }
 
         public async Task<OrderPreviewDto> GetOrderPreviewAsync(int userId, int restaurantId, CreateOrderDto dto)
@@ -482,13 +478,13 @@ namespace Gozba_na_klik.Services
             return _mapper.Map<CourierActiveOrderDto>(order);
         }
 
-        public async Task<CourierDeliveryHistoryResponseDto> GetCourierDeliveryHistoryAsync(
-           int courierId,
-           int requestingCourierId,
-           DateTime? fromDate,
-           DateTime? toDate,
-           int page,
-           int pageSize)
+        public async Task<PaginatedList<CourierDeliveryHistoryItemDto>> GetCourierDeliveryHistoryAsync(
+            int courierId,
+            int requestingCourierId,
+            DateTime? fromDate,
+            DateTime? toDate,
+            int page,
+            int pageSize)
         {
             if (courierId != requestingCourierId)
             {
@@ -536,14 +532,9 @@ namespace Gozba_na_klik.Services
                 };
             }).ToList();
 
-            return new CourierDeliveryHistoryResponseDto
-            {
-                Deliveries = deliveries,
-                TotalCount = totalCount,
-                Page = page,
-                PageSize = pageSize
-            };
+            return new PaginatedList<CourierDeliveryHistoryItemDto>(deliveries, totalCount, page, pageSize);
         }
+
         // DOSTAVA U TOKU 
         // Dodeli dostavi status "DOSTAVA U TOKU"
         public async Task<OrderStatusDto?> UpdateOrderToInDeliveryAsync(int orderId)
@@ -574,7 +565,6 @@ namespace Gozba_na_klik.Services
             order.DeliveryTime = DateTime.UtcNow;
             var courierId = order.DeliveryPersonId;
             await _orderRepository.UpdateAsync(order);
-            await _hub.Clients.Group(orderId.ToString()).SendAsync("OrderCompleted");
 
             // Kreiranje Invoice-a
             try

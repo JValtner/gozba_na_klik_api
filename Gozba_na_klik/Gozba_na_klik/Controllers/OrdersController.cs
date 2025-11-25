@@ -111,9 +111,10 @@ namespace Gozba_na_klik.Controllers
                 return NoContent();
             return Ok(order);
         }
+
         // GET: api/orders/courier/{courierId}
         [HttpGet("courier/{courierId}")]
-        public async Task<ActionResult<CourierDeliveryHistoryResponseDto>> GetCourierDeliveryHistory(
+        public async Task<ActionResult<PaginatedList<CourierDeliveryHistoryItemDto>>> GetCourierDeliveryHistory(
             int courierId,
             [FromQuery] DateTime? fromDate = null,
             [FromQuery] DateTime? toDate = null,
@@ -131,6 +132,7 @@ namespace Gozba_na_klik.Controllers
 
             return Ok(history);
         }
+
         // PUT: api/orders/{orderId}/status/to-in-delivery
         [HttpPut("{orderId}/status/to-in-delivery")]
         public async Task<ActionResult<OrderStatusDto>> UpdateOrderToInDeliveryAsync(int orderId)
