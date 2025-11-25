@@ -3,6 +3,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper;
+using Gozba_na_klik.DTOs.Location;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Exceptions;
@@ -378,6 +379,20 @@ namespace Gozba_na_klik.Services
             _logger.LogInformation($"Kuriru sa ID-em {courierId} skidam dostavu ID {existingCourier.ActiveOrderId}.");
             existingCourier.ActiveOrderId = null;
             await _userRepository.UpdateAsync(existingCourier);
+        }
+
+        // Update lokacije kurira
+        public async Task<UpdateCourierLocationDto> UpdateCourierLocation(int courierId, double latitude, double longitude)
+        {
+            var courier = await _userManager.FindByIdAsync(courierId.ToString());
+            if (courier == null)
+                throw new NotFoundException(courierId);
+            
+            courier.Latitude = latitude;
+            courier.Longitude = longitude;
+            await _userRepository.UpdateAsync(courier);
+
+            return _mapper.Map<UpdateCourierLocationDto>(courier);
         }
     }
 }

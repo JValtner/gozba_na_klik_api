@@ -23,5 +23,9 @@ namespace Gozba_na_klik.Models
         // Dostava
         public int? ActiveOrderId { get; set; }
         public Order? ActiveOrder { get; set; }
+
+        // Lokacija (kurira)
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
     }
 }
