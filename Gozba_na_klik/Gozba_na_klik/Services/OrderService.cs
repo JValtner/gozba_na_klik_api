@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System;
+using AutoMapper;
 using Gozba_na_klik.DTOs.Orders;
 using Gozba_na_klik.Exceptions;
 using Gozba_na_klik.Models;
@@ -476,6 +477,68 @@ namespace Gozba_na_klik.Services
             return _mapper.Map<CourierActiveOrderDto>(order);
         }
 
+        public async Task<CourierDeliveryHistoryResponseDto> GetCourierDeliveryHistoryAsync(
+           int courierId,
+           int requestingCourierId,
+           DateTime? fromDate,
+           DateTime? toDate,
+           int page,
+           int pageSize)
+        {
+            if (courierId != requestingCourierId)
+            {
+                _logger.LogWarning("Courier {RequestingCourierId} attempted to access deliveries for courier {CourierId}", requestingCourierId, courierId);
+                throw new ForbiddenException("Možete videti samo svoje dostave.");
+            }
+
+            if (page < 1)
+                page = 1;
+
+            if (pageSize < 1 || pageSize > 100)
+                pageSize = 10;
+
+            if (fromDate.HasValue && toDate.HasValue && fromDate > toDate)
+                throw new BadRequestException("fromDate mora biti pre toDate vrednosti.");
+
+            DateTime? normalizedFrom = fromDate?.Date;
+            DateTime? normalizedTo = toDate?.Date.AddDays(1).AddTicks(-1);
+
+            var (orders, totalCount) = await _orderRepository.GetCourierDeliveriesAsync(
+                courierId,
+                normalizedFrom,
+                normalizedTo,
+                page,
+                pageSize);
+
+            var deliveries = orders.Select(order =>
+            {
+                int? duration = null;
+                if (order.PickupTime.HasValue && order.DeliveryTime.HasValue)
+                {
+                    var diff = order.DeliveryTime.Value - order.PickupTime.Value;
+                    if (diff.TotalMinutes >= 0)
+                        duration = (int)Math.Round(diff.TotalMinutes);
+                }
+
+                return new CourierDeliveryHistoryItemDto
+                {
+                    OrderId = order.Id,
+                    RestaurantName = order.Restaurant?.Name ?? "Nepoznat restoran",
+                    PickupTime = order.PickupTime,
+                    DeliveryTime = order.DeliveryTime,
+                    DurationMinutes = duration,
+                    TotalPrice = order.TotalPrice
+                };
+            }).ToList();
+
+            return new CourierDeliveryHistoryResponseDto
+            {
+                Deliveries = deliveries,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
         // DOSTAVA U TOKU 
         // Dodeli dostavi status "DOSTAVA U TOKU"
         public async Task<OrderStatusDto?> UpdateOrderToInDeliveryAsync(int orderId)
@@ -486,6 +549,7 @@ namespace Gozba_na_klik.Services
 
             _logger.LogInformation("Menjam status dostave iz 'PREUZIMANJE U TOKU' u 'DOSTAVA U TOKU'.");
             order.Status = "DOSTAVA U TOKU";
+            order.PickupTime ??= DateTime.UtcNow;
             await _orderRepository.UpdateAsync(order);
 
             return _mapper.Map<OrderStatusDto>(order);
@@ -502,6 +566,7 @@ namespace Gozba_na_klik.Services
 
             _logger.LogInformation("Menjam status dostave u ZAVRŠENO");
             order.Status = "ZAVRŠENO";
+            order.DeliveryTime = DateTime.UtcNow;
             var courierId = order.DeliveryPersonId;
             await _orderRepository.UpdateAsync(order);
 
