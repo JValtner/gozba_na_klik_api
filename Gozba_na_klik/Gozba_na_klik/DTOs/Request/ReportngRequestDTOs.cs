@@ -51,4 +51,16 @@ namespace Gozba_na_klik.DTOs.Request
         [DataType(DataType.DateTime, ErrorMessage = "EndDate must be a valid DateTime.")]
         public DateTime EndDate { get; set; }
     }
+    public class OnDemandMonthlyReportRequest
+    {
+        [Required(ErrorMessage = "RestaurantId is required.")]
+        [Range(1, int.MaxValue, ErrorMessage = "RestaurantId must be a positive integer.")]
+        public int RestaurantId { get; set; }
+        [Required(ErrorMessage = "Year is required.")]
+        [Range(1, 2100, ErrorMessage = "RestaurantId must be between 1-200.")]
+        public int Year { get; set; }
+        [Required(ErrorMessage = "Month is required.")]
+        [Range(1, 12, ErrorMessage = "RestaurantId must be between 1-12.")]
+        public int Month { get; set; }
+    }
 }

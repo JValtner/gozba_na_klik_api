@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Gozba_na_klik.DTOs.Request;
 using Microsoft.AspNetCore.Authorization;
+using Gozba_na_klik.Services.Reporting;
 
 namespace Gozba_na_klik.Controllers
 {
@@ -53,7 +54,7 @@ namespace Gozba_na_klik.Controllers
         public async Task<IActionResult> GetFullMonthlyReport([FromQuery] int restaurantId)
         {
             _logger.LogInformation("Fetching monthly report");
-            var responseData = await _reportingService.GetMonthlyReport(restaurantId);
+            var responseData = await _reportingService.GetMonthlyReportAsync(restaurantId);
             return Ok(responseData);
         }
     }

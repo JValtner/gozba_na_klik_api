@@ -1,5 +1,7 @@
 ﻿using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 namespace Gozba_na_klik.DTOs.Request
 {
     public class RestaurantProfitDailyReportResponseDTO
@@ -67,25 +69,29 @@ namespace Gozba_na_klik.DTOs.Request
         public decimal Revenue { get; set; }
     }
 
-    public class MontlyReportDTO
+    public class MonthlyReportDTO
     {
         public int RestaurantId { get; set; }
         public Restaurant Restaurant { get; set; }
 
         public int Month { get; set; }
         public int Year { get; set; }
+
+        // Existing fields
         public int TotalOrders { get; set; }
         public decimal TotalRevenue { get; set; }
         public decimal AverageOrderValue { get; set; }
-
-        public ListWithCountDTO<Order> Top5RevenueOrders { get; set; }
-
-        // Replace raw OrderItem with a safer DTO
+        public ListWithCountDTO<OrderSummary> Top5RevenueOrders { get; set; }
         public ListWithCountDTO<PopularMealDTO> Top5PopularMeals { get; set; }
         public ListWithCountDTO<PopularMealDTO> Bottom5PopularMeals { get; set; }
-
         public int MostPopularMealUnitsSold { get; set; }
+
+        // New fields for full monthly report
+        public RestaurantProfitPeriodReportResponseDTO ProfitReport { get; set; }
+        public MealSalesPeriodReportResponseDTO MealSalesReport { get; set; }
+        public OrdersReportPeriodResponseDTO OrdersReport { get; set; }
     }
+
 
 
     public class ListWithCountDTO<T>
@@ -93,5 +99,67 @@ namespace Gozba_na_klik.DTOs.Request
         public List<T> Items { get; set; }
         public int TotalCount { get; set; }
     }
+
+    public class OrderSummary
+    {
+        public int OrderId { get; set; }
+        public decimal TotalPrice { get; set; }
+        public DateTime OrderDate { get; set; }
+    }
+
+    //Mongo DB dto
+    public class PdfMonthlyReportDocument
+    {
+        [BsonId] // Marks this as the MongoDB _id
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
+
+        [BsonElement("restaurantId")]
+        public int RestaurantId { get; set; }
+
+        [BsonElement("restaurantName")]
+        public string RestaurantName { get; set; }
+
+        [BsonElement("year")]
+        public int Year { get; set; }
+
+        [BsonElement("month")]
+        public int Month { get; set; }
+
+        [BsonElement("totalOrders")]
+        public int TotalOrders { get; set; }
+
+        [BsonElement("totalRevenue")]
+        public decimal TotalRevenue { get; set; }
+
+        [BsonElement("averageOrderValue")]
+        public decimal AverageOrderValue { get; set; }
+
+        [BsonElement("top5PopularMeals")]
+        public List<PopularMealDTO> Top5PopularMeals { get; set; }
+
+        [BsonElement("bottom5PopularMeals")]
+        public List<PopularMealDTO> Bottom5PopularMeals { get; set; }
+
+        [BsonElement("top5RevenueOrders")]
+        public List<OrderSummary> Top5RevenueOrders { get; set; }
+
+        [BsonElement("profitReport")]
+        public RestaurantProfitPeriodReportResponseDTO ProfitReport { get; set; }
+
+        [BsonElement("mealSalesReport")]
+        public MealSalesPeriodReportResponseDTO MealSalesReport { get; set; }
+
+        [BsonElement("ordersReport")]
+        public OrdersReportPeriodResponseDTO OrdersReport { get; set; }
+
+        [BsonElement("mostPopularMealUnitsSold")]
+        public int MostPopularMealUnitsSold { get; set; }
+
+        [BsonElement("createdUtc")]
+        public DateTime CreatedUtc { get; set; }
+    }
+
+    
 }
 

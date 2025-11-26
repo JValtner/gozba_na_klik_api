@@ -8,11 +8,15 @@ using Gozba_na_klik.Services;
 using Gozba_na_klik.Services.AddressServices;
 using Gozba_na_klik.Services.EmailServices;
 using Gozba_na_klik.Services.OrderAutoAssignerServices;
+using Gozba_na_klik.Services.Pdf;
+using Gozba_na_klik.Services.Reporting;
+using Gozba_na_klik.Services.Snapshots;
 using Gozba_na_klik.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -238,7 +242,13 @@ builder.Services.AddHostedService<OrderAutoAssignerBackgroundService>();
 builder.Services.AddTransient<IEmailService, SmtpEmailService>();
 
 builder.Services.AddScoped<IReportingRepository, ReportingRepository>();
+builder.Services.AddScoped<MonthlyReportBuilder>();
 builder.Services.AddScoped<IReportingService, ReportingService>();
+builder.Services.AddScoped<IPdfRenderer, QuestPdfRenderer>();
+builder.Services.AddScoped<IPdfReportService, PdfReportService>();
+builder.Services.AddScoped<IPdfReportRepository, PdfReportRepository>();
+builder.Services.AddHostedService<PdfSnapshotScheduler>();
+
 
 // SignalR
 builder.Services.AddSignalR();

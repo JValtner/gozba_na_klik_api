@@ -33,6 +33,11 @@
   <ItemGroup>
     <Folder Include="assets\profileImg\" />
     <Folder Include="Logs\" />
+    <Folder Include="Services\Rdf\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Services\IPdfReportService.cs" />
   </ItemGroup>
 
 </Project>

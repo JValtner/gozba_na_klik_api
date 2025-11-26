@@ -225,7 +225,7 @@ namespace Gozba_na_klik.Settings
             // Remove CreateMap<IEnumerable<Order>, OrdersReportPeriodResponseDTO>()
 
             // Monthly report
-            CreateMap<Order, MontlyReportDTO>()
+            CreateMap<Order, MonthlyReportDTO>()
                 .ForMember(dest => dest.RestaurantId, opt => opt.MapFrom(src => src.RestaurantId))
                 .ForMember(dest => dest.Restaurant, opt => opt.MapFrom(src => src.Restaurant))
                 .ForMember(dest => dest.Month, opt => opt.MapFrom(src => src.OrderDate.Month))
