@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Services.Pdf;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Gozba_na_klik.Services.Snapshots
 {

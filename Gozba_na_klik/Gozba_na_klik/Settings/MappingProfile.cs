@@ -191,27 +191,23 @@ namespace Gozba_na_klik.Settings
             // Profit per day (single order → daily DTO)
             CreateMap<Order, RestaurantProfitDailyReportResponseDTO>()
                 .ForMember(dest => dest.RestaurantId, opt => opt.MapFrom(src => src.RestaurantId))
-                .ForMember(dest => dest.TotalDailyOrders, opt => opt.Ignore()) // computed in service
+                .ForMember(dest => dest.TotalDailyOrders, opt => opt.Ignore()) 
                 .ForMember(dest => dest.DailyRevenue, opt => opt.MapFrom(src => src.TotalPrice))
-                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.OrderDate.Date)); // add Date if DTO has it
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.OrderDate.Date)); 
 
-            // Profit per period → build manually in service, not via AutoMapper
-            // Remove CreateMap<IEnumerable<Order>, RestaurantProfitPeriodReportResponseDTO>()
-
+            // Profit per period → build manually in service
             // Meal sales per day
             CreateMap<OrderItem, MealSalesDailyReportResponseDTO>()
                 .ForMember(dest => dest.MealId, opt => opt.MapFrom(src => src.MealId))
-                .ForMember(dest => dest.MealName, opt => opt.MapFrom(src => src.Meal.Name)) // safer for frontend
+                .ForMember(dest => dest.MealName, opt => opt.MapFrom(src => src.Meal.Name)) 
                 .ForMember(dest => dest.TotalDailyUnitsSold, opt => opt.MapFrom(src => src.Quantity))
                 .ForMember(dest => dest.DailyRevenue, opt => opt.MapFrom(src => src.TotalPrice))
-                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Order.OrderDate.Date)); // add Date if DTO has it
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Order.OrderDate.Date)); 
 
             // Meal sales per period → build manually in service
-            // Remove CreateMap<IEnumerable<OrderItem>, MealSalesPeriodReportResponseDTO>()
-
             // Orders report per day
             CreateMap<Order, OrdersReportDailyResponseDTO>()
-                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.OrderDate.Date)) // add Date if DTO has it
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.OrderDate.Date)) 
                 .ForMember(dest => dest.TotalOrders, opt => opt.Ignore())
                 .ForMember(dest => dest.TotalAcceptedOrders, opt => opt.Ignore())
                 .ForMember(dest => dest.TotalCancelledOrders, opt => opt.Ignore())
@@ -222,8 +218,6 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.TotalDeliveredOrders, opt => opt.Ignore());
 
             // Orders report per period → build manually in service
-            // Remove CreateMap<IEnumerable<Order>, OrdersReportPeriodResponseDTO>()
-
             // Monthly report
             CreateMap<Order, MonthlyReportDTO>()
                 .ForMember(dest => dest.RestaurantId, opt => opt.MapFrom(src => src.RestaurantId))

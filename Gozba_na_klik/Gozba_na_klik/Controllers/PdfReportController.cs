@@ -1,5 +1,6 @@
 ﻿using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.Services.Pdf;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gozba_na_klik.Controllers
@@ -15,9 +16,7 @@ namespace Gozba_na_klik.Controllers
             _service = service;
         }
 
-        // --------------------------------------------------------------------
-        // A) LIST STORED SNAPSHOTS
-        // --------------------------------------------------------------------
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
         public async Task<IActionResult> ListSnapshots(
             [FromQuery] int restaurantId,
@@ -26,24 +25,10 @@ namespace Gozba_na_klik.Controllers
         {
             var list = await _service.ListSnapshotsAsync(restaurantId, year, month);
 
-            return Ok(list.Select(x => new
-            {
-                id = x.Id,
-                restaurantId = x.RestaurantId,
-                restaurantName = x.RestaurantName,
-                year = x.Year,
-                month = x.Month,
-                createdUtc = x.CreatedUtc,
-                totalOrders = x.TotalOrders,
-                totalRevenue = x.TotalRevenue
-            }));
+            return Ok(list);
         }
 
-        // --------------------------------------------------------------------
-        // B) MANUAL TRIGGER: GENERATE PREVIOUS MONTH SNAPSHOT & STORE IN MONGO
-        // --------------------------------------------------------------------
-        // Example:
-        // POST api/PdfReport/autogenerate?restaurantId=5
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost("autogenerate")]
         public async Task<IActionResult> AutoGenerate([FromQuery] int restaurantId)
         {
@@ -53,9 +38,7 @@ namespace Gozba_na_klik.Controllers
             return Ok(new { id });
         }
 
-        // --------------------------------------------------------------------
-        // C) DOWNLOAD SNAPSHOT PDF (FROM MONGO)
-        // --------------------------------------------------------------------
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("{id}/pdf")]
         public async Task<IActionResult> DownloadSnapshotPdf([FromRoute] string id)
         {
@@ -63,15 +46,7 @@ namespace Gozba_na_klik.Controllers
             return File(bytes, "application/pdf", $"mesecni-izvestaj-{id}.pdf");
         }
 
-        // --------------------------------------------------------------------
-        // D) ON-DEMAND MONTH PDF (NOT STORED)
-        // --------------------------------------------------------------------
-        // Cleaner version: frontend sends only restaurantId + year + month
-        // {
-        //    "restaurantId": 5,
-        //    "year": 2025,
-        //    "month": 11
-        // }
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost("on-demand/pdf")]
         public async Task<IActionResult> DownloadOnDemandPdf(
             [FromBody] OnDemandMonthlyReportRequest request)

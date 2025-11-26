@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Gozba_na_klik.DTOs.Request;
+﻿using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.Models;
-using Gozba_na_klik.Models.Orders;
 using Gozba_na_klik.Services.Reporting;
-using Microsoft.AspNetCore.Components.RenderTree;
-using Microsoft.Extensions.Logging;
 
 namespace Gozba_na_klik.Services.Pdf
 {
@@ -103,9 +96,28 @@ namespace Gozba_na_klik.Services.Pdf
             return _pdf.Render(monthlyReport); // full report
         }
 
-        public Task<List<PdfMonthlyReportDocument>> ListSnapshotsAsync(int restaurantId, int? year = null, int? month = null)
+        public async Task<List<PdfMonthlyReportDocument>> ListSnapshotsAsync(int restaurantId, int? year = null, int? month = null)
         {
-            return _repo.ListAsync(restaurantId, year, month);
+            var list = await _repo.ListAsync(restaurantId, year, month);
+            return list.Select(x => new PdfMonthlyReportDocument
+            {
+                Id = x.Id,
+                RestaurantId = x.RestaurantId,
+                RestaurantName = x.RestaurantName,
+                Year = x.Year,
+                Month = x.Month,
+                CreatedUtc = x.CreatedUtc,
+                TotalOrders = x.TotalOrders,
+                TotalRevenue = x.TotalRevenue,
+                AverageOrderValue = x.AverageOrderValue,
+                Top5PopularMeals = x.Top5PopularMeals,
+                Bottom5PopularMeals = x.Bottom5PopularMeals,
+                Top5RevenueOrders = x.Top5RevenueOrders,
+                MostPopularMealUnitsSold = x.MostPopularMealUnitsSold,
+                ProfitReport = x.ProfitReport,
+                MealSalesReport = x.MealSalesReport,
+                OrdersReport = x.OrdersReport
+            }).ToList();
         }
 
         private PdfMonthlyReportDocument MapMonthlyToSnapshot(MonthlyReportDTO m, string restaurantName, int year, int month)
@@ -123,12 +135,9 @@ namespace Gozba_na_klik.Services.Pdf
                 Bottom5PopularMeals = m.Bottom5PopularMeals?.Items ?? new List<PopularMealDTO>(),
                 Top5RevenueOrders = m.Top5RevenueOrders?.Items ?? new List<OrderSummary>(),
                 MostPopularMealUnitsSold = m.MostPopularMealUnitsSold,
-
-                // NEW FIELDS
                 ProfitReport = m.ProfitReport,
                 MealSalesReport = m.MealSalesReport,
                 OrdersReport = m.OrdersReport,
-
                 CreatedUtc = DateTime.UtcNow
             };
         }

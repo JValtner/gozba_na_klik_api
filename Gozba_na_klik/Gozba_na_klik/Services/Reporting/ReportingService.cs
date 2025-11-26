@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Gozba_na_klik.DTOs.Request;
-using Gozba_na_klik.DTOs.Response;
-using Gozba_na_klik.Models;
+﻿using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.Models.Orders;
 using Gozba_na_klik.Services.Snapshots;
-using Microsoft.Extensions.Logging;
 
 namespace Gozba_na_klik.Services.Reporting
 {
