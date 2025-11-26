@@ -17,10 +17,12 @@ namespace Gozba_na_klik.Controllers
     public class RestaurantsController : ControllerBase
     {
         private readonly IRestaurantService _restaurantService;
+        private readonly IReviewService _reviewService;
 
-        public RestaurantsController(IRestaurantService restaurantService)
+        public RestaurantsController(IRestaurantService restaurantService, IReviewService reviewService)
         {
             _restaurantService = restaurantService;
+            _reviewService = reviewService;
         }
 
         [Authorize(Policy = "AdminPolicy")]
@@ -160,6 +162,17 @@ namespace Gozba_na_klik.Controllers
         {
             var sortTypes = await _restaurantService.GetSortTypesAsync();
             return Ok(sortTypes);
+        }
+        // GET: api/restaurants/{id}/reviews
+        [Authorize(Policy = "PublicPolicy")]
+        [HttpGet("{id}/reviews")]
+        public async Task<IActionResult> GetRestaurantReviews(
+            int id,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var reviews = await _reviewService.GetRestaurantReviewsAsync(id, page, pageSize);
+            return Ok(reviews);
         }
     }
 }
