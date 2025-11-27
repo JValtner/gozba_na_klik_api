@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Services;
+using Gozba_na_klik.Services.EmailServices;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
@@ -12,6 +14,9 @@ namespace gozba_na_klik_Tests.Services
         private readonly Mock<IRestaurantRepository> _repoMock = new();
         private readonly Mock<IMapper> _mapperMock = new();
         private readonly Mock<ILogger<RestaurantService>> _loggerMock = new();
+        private readonly Mock<ISuspensionRepository> _suspensionRepoMock = new();
+        private readonly Mock<IEmailService> _emailServiceMock = new();
+        private readonly Mock<IConfiguration> _configurationMock = new();
         private readonly RestaurantService _service;
 
         public RestaurantServiceTests()
@@ -20,7 +25,10 @@ namespace gozba_na_klik_Tests.Services
                 _repoMock.Object,
                 null!,
                 _mapperMock.Object,
-                _loggerMock.Object
+                _loggerMock.Object,
+                _suspensionRepoMock.Object,
+                _emailServiceMock.Object,
+                _configurationMock.Object
             );
         }
 

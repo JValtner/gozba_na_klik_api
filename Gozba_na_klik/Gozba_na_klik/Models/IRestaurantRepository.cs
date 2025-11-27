@@ -13,5 +13,6 @@ public interface IRestaurantRepository
     Task<IEnumerable<Restaurant>> GetByOwnerAsync(int ownerId);
     Task<PaginatedList<Restaurant>> GetAllFilteredSortedPagedAsync(RestaurantFilter filter, int sortType, int page, int pageSize);
     Task<List<SortTypeOption>> GetSortTypesAsync();
+    Task<List<(Restaurant Restaurant, int CancelledCount)>> GetIrresponsibleRestaurantsAsync();
 
 }

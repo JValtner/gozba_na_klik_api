@@ -30,5 +30,11 @@ namespace Gozba_na_klik.Services
         Task UpdateWorkSchedulesAsync(int restaurantId, List<WorkSchedule> schedules);
         Task AddClosedDateAsync(int restaurantId, ClosedDate date);
         Task RemoveClosedDateAsync(int restaurantId, int dateId);
+        Task<List<IrresponsibleRestaurantDto>> GetIrresponsibleRestaurantsAsync();
+        Task<SuspensionResponseDto> SuspendRestaurantAsync(int restaurantId, string reason, int adminId);
+        Task<SuspensionResponseDto?> GetRestaurantSuspensionAsync(int restaurantId);
+        Task<SuspensionResponseDto> AppealSuspensionAsync(int restaurantId, string appealText, int ownerId);
+        Task<List<SuspensionResponseDto>> GetAppealedSuspensionsAsync();
+        Task ProcessAppealDecisionAsync(int restaurantId, bool accept, int adminId);
     }
 }

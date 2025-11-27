@@ -203,6 +203,9 @@ builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IUsersRepository, UsersDbRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+builder.Services.AddScoped<ISuspensionRepository, SuspensionRepository>();
+builder.Services.AddTransient<IEmailService, SmtpEmailService>();
+
 builder.Services.AddScoped<IRestaurantRepository, RestaurantDbRepository>();
 builder.Services.AddScoped<IRestaurantService, RestaurantService>();
 
@@ -234,8 +237,6 @@ builder.Services.AddScoped<IFileService, FileService>();
 
 builder.Services.AddScoped<IOrderAutoAssignerService, OrderAutoAssignerService>();
 builder.Services.AddHostedService<OrderAutoAssignerBackgroundService>();
-
-builder.Services.AddTransient<IEmailService, SmtpEmailService>();
 
 // SignalR
 builder.Services.AddSignalR();
