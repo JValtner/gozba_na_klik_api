@@ -5,6 +5,7 @@ namespace Gozba_na_klik.DTOs.Response
     public class ResponseRestaurantDTO
     {
         public int Id { get; set; }
+        public int OwnerId { get; set; }
         public string Name { get; set; }
         public string? PhotoUrl { get; set; }
         public string? Address { get; set; }
@@ -14,7 +15,7 @@ namespace Gozba_na_klik.DTOs.Response
 
         // Standardno radno vreme po danima
         public bool isOpen { get; set; } =false;
-        public WorkSchedule? WorkSchedule { get; set; }
+        public WorkSchedule? WorkSchedules { get; set; }
 
         // Neradni datumi
         public List<ClosedDate> ClosedDates { get; set; } = new();

@@ -2,6 +2,7 @@
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using Gozba_na_klik.DTOs.Invoice;
+using Gozba_na_klik.DTOs.Request;
 
 namespace Gozba_na_klik.Services
 {

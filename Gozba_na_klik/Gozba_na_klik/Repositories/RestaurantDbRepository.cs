@@ -28,7 +28,7 @@ public class RestaurantDbRepository : IRestaurantRepository
     public async Task<Restaurant?> GetByIdAsync(int id)
     {
         return await _context.Restaurants
-                //.Include(r => r.Owner)
+                .Include(r => r.Owner)
                 .Include(r => r.Menu)
                     .ThenInclude(m => m.Addons)
                 .Include(r => r.Menu)

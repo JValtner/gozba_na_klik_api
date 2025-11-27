@@ -19,15 +19,15 @@ namespace Gozba_na_klik.Settings
         {
             // ---------- User ----------
             CreateMap<RegistrationDto, User>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())          
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Username))
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
-            .ForMember(dest => dest.UserImage, opt => opt.Ignore())  
-            .ForMember(dest => dest.PasswordHash, opt => opt.Ignore()); 
+            .ForMember(dest => dest.UserImage, opt => opt.Ignore())
+            .ForMember(dest => dest.PasswordHash, opt => opt.Ignore());
 
             // --- User -> ProfileDto ---
             CreateMap<User, ProfileDto>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src =>src.Id))
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.UserName))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
                 .ForMember(dest => dest.UserImage, opt => opt.MapFrom(src => src.UserImage));
@@ -172,19 +172,65 @@ namespace Gozba_na_klik.Settings
                 .ForMember(dest => dest.Restaurant, opt => opt.MapFrom(src => src.Restaurant))
                 .ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src => src.Items));
 
-                    // Podmape (unutar OrderStatusResponseDto)
-                    CreateMap<User, DeliveryPersonDto>();
-                    CreateMap<Restaurant, RestaurantDto>();
-                    CreateMap<Address, CustomerAddressDto>();
-                    CreateMap<OrderItem, OrderItemDto>()
-                        .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Meal.Name));
-                
+            // Podmape (unutar OrderStatusResponseDto)
+            CreateMap<User, DeliveryPersonDto>();
+            CreateMap<Restaurant, RestaurantDto>();
+            CreateMap<Address, CustomerAddressDto>();
+            CreateMap<OrderItem, OrderItemDto>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Meal.Name));
+
 
             // ---------- Order History ----------
             CreateMap<Order, OrderHistoryResponseDto>()
                 .ForMember(dest => dest.RestaurantName, opt => opt.MapFrom(src => src.Restaurant != null ? src.Restaurant.Name : "Nepoznat restoran"))
                 .ForMember(dest => dest.DeliveryAddress, opt => opt.MapFrom(src => src.Address != null ? $"{src.Address.Street}, {src.Address.City}" : "Adresa nije dostupna"))
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
+
+            // ---------- Reporting ----------
+
+            // Profit per day (single order → daily DTO)
+            CreateMap<Order, RestaurantProfitDailyReportResponseDTO>()
+                .ForMember(dest => dest.RestaurantId, opt => opt.MapFrom(src => src.RestaurantId))
+                .ForMember(dest => dest.TotalDailyOrders, opt => opt.Ignore()) 
+                .ForMember(dest => dest.DailyRevenue, opt => opt.MapFrom(src => src.TotalPrice))
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.OrderDate.Date)); 
+
+            // Profit per period → build manually in service
+            // Meal sales per day
+            CreateMap<OrderItem, MealSalesDailyReportResponseDTO>()
+                .ForMember(dest => dest.MealId, opt => opt.MapFrom(src => src.MealId))
+                .ForMember(dest => dest.MealName, opt => opt.MapFrom(src => src.Meal.Name)) 
+                .ForMember(dest => dest.TotalDailyUnitsSold, opt => opt.MapFrom(src => src.Quantity))
+                .ForMember(dest => dest.DailyRevenue, opt => opt.MapFrom(src => src.TotalPrice))
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Order.OrderDate.Date)); 
+
+            // Meal sales per period → build manually in service
+            // Orders report per day
+            CreateMap<Order, OrdersReportDailyResponseDTO>()
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.OrderDate.Date)) 
+                .ForMember(dest => dest.TotalOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalAcceptedOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalCancelledOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalCompletedOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalPendingOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalInDeliveryOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalReadyOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalDeliveredOrders, opt => opt.Ignore());
+
+            // Orders report per period → build manually in service
+            // Monthly report
+            CreateMap<Order, MonthlyReportDTO>()
+                .ForMember(dest => dest.RestaurantId, opt => opt.MapFrom(src => src.RestaurantId))
+                .ForMember(dest => dest.Restaurant, opt => opt.MapFrom(src => src.Restaurant))
+                .ForMember(dest => dest.Month, opt => opt.MapFrom(src => src.OrderDate.Month))
+                .ForMember(dest => dest.Year, opt => opt.MapFrom(src => src.OrderDate.Year))
+                .ForMember(dest => dest.TotalOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalRevenue, opt => opt.Ignore())
+                .ForMember(dest => dest.AverageOrderValue, opt => opt.Ignore())
+                .ForMember(dest => dest.Top5RevenueOrders, opt => opt.Ignore())
+                .ForMember(dest => dest.Top5PopularMeals, opt => opt.Ignore())
+                .ForMember(dest => dest.Bottom5PopularMeals, opt => opt.Ignore())
+                .ForMember(dest => dest.MostPopularMealUnitsSold, opt => opt.Ignore());
 
             // Courier location dto
             CreateMap<User, UpdateCourierLocationDto>();
