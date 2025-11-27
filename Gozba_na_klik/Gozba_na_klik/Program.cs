@@ -6,6 +6,7 @@ using Gozba_na_klik.Models;
 using Gozba_na_klik.Repositories;
 using Gozba_na_klik.Services;
 using Gozba_na_klik.Services.AddressServices;
+using Gozba_na_klik.Services.CurrencyService;
 using Gozba_na_klik.Services.EmailServices;
 using Gozba_na_klik.Services.OrderAutoAssignerServices;
 using Gozba_na_klik.Services.Pdf;
@@ -244,6 +245,10 @@ builder.Services.AddScoped<IPdfRenderer, QuestPdfRenderer>();
 builder.Services.AddScoped<IPdfReportService, PdfReportService>();
 builder.Services.AddScoped<IPdfReportRepository, PdfReportRepository>();
 builder.Services.AddHostedService<PdfSnapshotScheduler>();
+//CurrencyConvert
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<ICurrencyService, CurrencyService>();
+builder.Services.AddSingleton<ICurrencyRepository, CurrencyRepository>();
 
 // SignalR
 builder.Services.AddSignalR();
