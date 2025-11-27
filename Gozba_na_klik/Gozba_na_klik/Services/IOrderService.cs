@@ -1,7 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Gozba_na_klik.DTOs.Orders;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
+using Gozba_na_klik.Utils;
 
 namespace Gozba_na_klik.Services
 {
@@ -25,5 +27,12 @@ namespace Gozba_na_klik.Services
         Task<CourierActiveOrderDto?> GetCourierOrderInPickupAsync(int courierId);
         Task<OrderStatusDto?> UpdateOrderToInDeliveryAsync(int orderId);
         Task<OrderStatusDto?> UpdateOrderToDeliveredAsync(int orderId);
+        Task<PaginatedList<CourierDeliveryHistoryItemDto>> GetCourierDeliveryHistoryAsync(
+            int courierId,
+            int requestingCourierId,
+            DateTime? fromDate,
+            DateTime? toDate,
+            int page,
+            int pageSize);
     }
 }

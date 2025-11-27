@@ -1,3 +1,4 @@
+using System;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
 using Microsoft.EntityFrameworkCore;
@@ -180,6 +181,38 @@ namespace Gozba_na_klik.Repositories
                 .Where(order => order.UserId == userId && activeStatuses.Contains(order.Status))
                 .OrderByDescending(order => order.OrderDate)
                 .FirstOrDefaultAsync();
+        }
+        public async Task<(List<Order> Orders, int TotalCount)> GetCourierDeliveriesAsync(
+          int courierId,
+          DateTime? fromDate,
+          DateTime? toDate,
+          int page,
+          int pageSize)
+        {
+            var query = _context.Orders
+                .AsNoTracking()
+                .Include(order => order.Restaurant)
+                .Where(order => order.DeliveryPersonId == courierId && order.Status == "ZAVRŠENO");
+
+            if (fromDate.HasValue)
+            {
+                query = query.Where(order => order.DeliveryTime >= fromDate.Value);
+            }
+
+            if (toDate.HasValue)
+            {
+                query = query.Where(order => order.DeliveryTime <= toDate.Value);
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var deliveries = await query
+                .OrderByDescending(order => order.DeliveryTime ?? order.OrderDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (deliveries, totalCount);
         }
 
     }

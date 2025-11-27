@@ -6,8 +6,12 @@ using Gozba_na_klik.Models;
 using Gozba_na_klik.Repositories;
 using Gozba_na_klik.Services;
 using Gozba_na_klik.Services.AddressServices;
+using Gozba_na_klik.Services.CurrencyService;
 using Gozba_na_klik.Services.EmailServices;
 using Gozba_na_klik.Services.OrderAutoAssignerServices;
+using Gozba_na_klik.Services.Pdf;
+using Gozba_na_klik.Services.Reporting;
+using Gozba_na_klik.Services.Snapshots;
 using Gozba_na_klik.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
@@ -79,18 +83,14 @@ builder.Services.AddAuthentication(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateLifetime = true, // Validacija da li je token istekao
-
-        ValidateIssuer = true,   // Validacija URL-a aplikacije koja izdaje token
-        ValidIssuer = builder.Configuration["Jwt:Issuer"], // URL aplikacije koja izdaje token (čita se iz appsettings.json)
-
-        ValidateAudience = true, // Validacija URL-a aplikacije koja koristi token
-        ValidAudience = builder.Configuration["Jwt:Audience"], // URL aplikacije koja koristi token (čita se iz appsettings.json)
-
-        ValidateIssuerSigningKey = true, // Validacija ključa za potpisivanje tokena (koji se koristi i pri proveri potpisa)
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])), //Ključ za proveru tokena (čita se iz appsettings.json)
-
-        RoleClaimType = ClaimTypes.Role // Potrebno za kontrolu pristupa, što ćemo videti kasnije
+        ValidateLifetime = true,
+        ValidateIssuer = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+        RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
     };
     
     // Dozvoli zahtevima bez tokena ili sa nevažećim tokenom da prođu dalje za PublicPolicy endpoint-e
@@ -236,6 +236,19 @@ builder.Services.AddScoped<IOrderAutoAssignerService, OrderAutoAssignerService>(
 builder.Services.AddHostedService<OrderAutoAssignerBackgroundService>();
 
 builder.Services.AddTransient<IEmailService, SmtpEmailService>();
+
+builder.Services.AddScoped<IReportingRepository, ReportingRepository>();
+builder.Services.AddScoped<MonthlyReportBuilder>();
+builder.Services.AddScoped<IReportingService, ReportingService>();
+builder.Services.AddScoped<IPdfRenderer, QuestPdfRenderer>();
+builder.Services.AddScoped<IPdfReportService, PdfReportService>();
+builder.Services.AddScoped<IPdfReportRepository, PdfReportRepository>();
+builder.Services.AddHostedService<PdfSnapshotScheduler>();
+//CurrencyConvert
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<ICurrencyService, CurrencyService>();
+builder.Services.AddSingleton<ICurrencyRepository, CurrencyRepository>();
+
 
 // SignalR
 builder.Services.AddSignalR();
