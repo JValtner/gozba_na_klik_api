@@ -1,4 +1,5 @@
-﻿using Gozba_na_klik.DTOs.Orders;
+﻿using System;
+using Gozba_na_klik.DTOs.Orders;
 using Gozba_na_klik.Services;
 using Gozba_na_klik.Utils;
 using Microsoft.AspNetCore.Authorization;
@@ -109,6 +110,27 @@ namespace Gozba_na_klik.Controllers
             if (order == null)
                 return NoContent();
             return Ok(order);
+        }
+
+        // GET: api/orders/courier/{courierId}
+        [HttpGet("courier/{courierId}")]
+        public async Task<ActionResult<PaginatedList<CourierDeliveryHistoryItemDto>>> GetCourierDeliveryHistory(
+            int courierId,
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var requestingCourierId = User.GetUserId();
+            var history = await _orderService.GetCourierDeliveryHistoryAsync(
+                courierId,
+                requestingCourierId,
+                fromDate,
+                toDate,
+                page,
+                pageSize);
+
+            return Ok(history);
         }
 
         // PUT: api/orders/{orderId}/status/to-in-delivery

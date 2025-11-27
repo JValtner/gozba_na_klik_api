@@ -28,6 +28,8 @@
         public int? EstimatedPreparationMinutes { get; set; }
         public DateTime? CancelledAt { get; set; }
         public string? CancellationReason { get; set; }
+        public DateTime? PickupTime { get; set; }
+        public DateTime? DeliveryTime { get; set; }
         public List<OrderItem> Items { get; set; } = new();
 
         public string Status { get; set; } = "NA ČEKANJU";
