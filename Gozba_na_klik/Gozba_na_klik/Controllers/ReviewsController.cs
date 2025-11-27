@@ -36,11 +36,8 @@ namespace Gozba_na_klik.Controllers
             var userId = User.GetUserId();
             _logger.LogInformation("User {UserId} creating review for order {OrderId}", userId, dto.OrderId);
 
-            var success = await _service.CreateReviewAsync(dto, userId);
-            if (!success)
-                return BadRequest(new { message = "Greška pri kreiranju recenzije." });
-
-            return Ok(new { message = "Recenzija uspešno kreirana." });
+            await _service.CreateReviewAsync(dto, userId);
+            return Ok(new { message = "Recenzija uspe?no kreirana." });
         }
     }
 }
