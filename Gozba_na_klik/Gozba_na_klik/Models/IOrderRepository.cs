@@ -1,4 +1,5 @@
-﻿using Gozba_na_klik.Models.Orders;
+﻿using System;
+using Gozba_na_klik.Models.Orders;
 
 namespace Gozba_na_klik.Models
 {
@@ -15,5 +16,11 @@ namespace Gozba_na_klik.Models
             int userId, string? statusFilter, int page, int pageSize
         );
         Task<Order?> GetActiveOrderStatusAsync(int userId);
+        Task<(List<Order> Orders, int TotalCount)> GetCourierDeliveriesAsync(
+            int courierId,
+            DateTime? fromDate,
+            DateTime? toDate,
+            int page,
+            int pageSize);
     }
 }
