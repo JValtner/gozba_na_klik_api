@@ -8,6 +8,7 @@
         public string RestaurantName { get; set; }
         public int RestaurantId { get; set; }
         public string DeliveryAddress { get; set; }
+        public string? CustomerName { get; set; }
         public string? CustomerNote { get; set; }
         public bool HasAllergenWarning { get; set; }
         public List<OrderItemResponseDto> Items { get; set; } = new();

@@ -163,6 +163,56 @@ namespace Gozba_na_klik.Controllers
             var sortTypes = await _restaurantService.GetSortTypesAsync();
             return Ok(sortTypes);
         }
+
+        [Authorize(Policy = "AdminPolicy")]
+        [HttpGet("irresponsible")]
+        public async Task<IActionResult> GetIrresponsibleRestaurantsAsync()
+        {
+            var result = await _restaurantService.GetIrresponsibleRestaurantsAsync();
+            return Ok(result);
+        }
+
+        [Authorize(Policy = "AdminPolicy")]
+        [HttpPost("{id}/suspend")]
+        public async Task<IActionResult> SuspendRestaurantAsync(int id, [FromBody] SuspendRestaurantDto dto)
+        {
+            var adminId = User.GetUserId();
+            var result = await _restaurantService.SuspendRestaurantAsync(id, dto.Reason, adminId);
+            return Ok(result);
+        }
+
+        [Authorize(Policy = "OwnerOrAdminPolicy")]
+        [HttpGet("{id}/suspension")]
+        public async Task<IActionResult> GetRestaurantSuspensionAsync(int id)
+        {
+            var suspension = await _restaurantService.GetRestaurantSuspensionAsync(id);
+            return Ok(suspension);
+        }
+
+        [Authorize(Policy = "OwnerOrAdminPolicy")]
+        [HttpPost("{id}/suspension/appeal")]
+        public async Task<IActionResult> AppealSuspensionAsync(int id, [FromBody] AppealSuspensionDto dto)
+        {
+            var ownerId = User.GetUserId();
+            var result = await _restaurantService.AppealSuspensionAsync(id, dto.AppealText, ownerId);
+            return Ok(result);
+        }
+
+        [Authorize(Policy = "AdminPolicy")]
+        [HttpGet("suspension-appeals")]
+        public async Task<IActionResult> GetAppealedSuspensionsAsync()
+        {
+            var appeals = await _restaurantService.GetAppealedSuspensionsAsync();
+            return Ok(appeals);
+        }
+
+        [Authorize(Policy = "AdminPolicy")]
+        [HttpPatch("{id}/suspension/decision")]
+        public async Task<IActionResult> ProcessAppealDecisionAsync(int id, [FromBody] AppealDecisionDto dto)
+        {
+            var adminId = User.GetUserId();
+            await _restaurantService.ProcessAppealDecisionAsync(id, dto.Accept, adminId);
+            return Ok(new { message = dto.Accept ? "Žalba je prihvaćena i suspenzija je uklonjena." : "Žalba je odbijena." });
         // GET: api/restaurants/{id}/reviews
         [Authorize(Policy = "PublicPolicy")]
         [HttpGet("{id}/reviews")]

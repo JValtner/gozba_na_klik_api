@@ -6,6 +6,8 @@ using Gozba_na_klik.Exceptions;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Gozba_na_klik.Services.EmailServices;
 
 namespace Gozba_na_klik.Services
 {
@@ -15,13 +17,26 @@ namespace Gozba_na_klik.Services
         private readonly GozbaNaKlikDbContext _context;
         private readonly IMapper _mapper;
         private readonly ILogger<RestaurantService> _logger;
+        private readonly ISuspensionRepository _suspensionRepository;
+        private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
 
-        public RestaurantService(IRestaurantRepository restaurantRepository, GozbaNaKlikDbContext context, IMapper mapper, ILogger<RestaurantService> logger)
+        public RestaurantService(
+            IRestaurantRepository restaurantRepository, 
+            GozbaNaKlikDbContext context, 
+            IMapper mapper, 
+            ILogger<RestaurantService> logger,
+            ISuspensionRepository suspensionRepository,
+            IEmailService emailService,
+            IConfiguration configuration)
         {
             _restaurantRepository = restaurantRepository;
             _context = context;
             _mapper = mapper;
             _logger = logger;
+            _suspensionRepository = suspensionRepository;
+            _emailService = emailService;
+            _configuration = configuration;
         }
 
         public async Task<IEnumerable<Restaurant>> GetAllRestaurantsAsync()
@@ -308,6 +323,243 @@ namespace Gozba_na_klik.Services
             }
 
             return isOpen;
+        }
+
+        public async Task<List<IrresponsibleRestaurantDto>> GetIrresponsibleRestaurantsAsync()
+        {
+            _logger.LogInformation("Getting irresponsible restaurants");
+            var irresponsibleRestaurants = await _restaurantRepository.GetIrresponsibleRestaurantsAsync();
+            
+            var result = new List<IrresponsibleRestaurantDto>();
+            
+            foreach (var item in irresponsibleRestaurants)
+            {
+                var suspension = await _suspensionRepository.GetSuspensionByRestaurantIdAsync(item.Restaurant.Id);
+                var isSuspended = suspension != null && 
+                    (suspension.Status == "SUSPENDED" || 
+                     suspension.Status == "APPEALED" || 
+                     suspension.Status == "REJECTED");
+                
+                result.Add(new IrresponsibleRestaurantDto
+                {
+                    Id = item.Restaurant.Id,
+                    Name = item.Restaurant.Name,
+                    Address = item.Restaurant.Address,
+                    Phone = item.Restaurant.Phone,
+                    OwnerUsername = item.Restaurant.Owner?.UserName,
+                    CancelledOrdersCount = item.CancelledCount,
+                    IsSuspended = isSuspended,
+                    SuspensionStatus = suspension?.Status
+                });
+            }
+
+            _logger.LogInformation("Successfully retrieved {Count} irresponsible restaurants", result.Count);
+            return result;
+        }
+
+        public async Task<SuspensionResponseDto> SuspendRestaurantAsync(int restaurantId, string reason, int adminId)
+        {
+            var restaurant = await GetRestaurantByIdOrThrowAsync(restaurantId);
+
+            if (restaurant.Owner == null)
+            {
+                await _context.Entry(restaurant)
+                    .Reference(r => r.Owner)
+                    .LoadAsync();
+            }
+
+            var existingSuspension = await _suspensionRepository.GetSuspensionByRestaurantIdAsync(restaurantId);
+            if (existingSuspension != null)
+            {
+                throw new BadRequestException("Restoran je već suspendovan.");
+            }
+
+            var suspension = await _suspensionRepository.InsertSuspensionAsync(restaurantId, reason, adminId);
+            
+            _logger.LogInformation("Restaurant {RestaurantId} suspended by admin {AdminId}", restaurantId, adminId);
+
+            try
+            {
+                if (restaurant.Owner != null && !string.IsNullOrEmpty(restaurant.Owner.Email))
+                {
+                    var frontendUrl = _configuration["FrontendUrl"] ?? "http://localhost:5173";
+                    var suspensionLink = $"{frontendUrl}/restaurants/{restaurantId}/suspension";
+                    
+                    var emailBody = $@"
+                        <html>
+                        <body>
+                            <h2>Obaveštenje o suspenziji restorana</h2>
+                            <p>Poštovani/a,</p>
+                            <p>Vaš restoran <strong>{restaurant.Name}</strong> je suspendovan.</p>
+                            <p><strong>Razlog suspenzije:</strong></p>
+                            <p style='background-color: #f3f4f6; padding: 1rem; border-radius: 0.5rem;'>{reason}</p>
+                            <p>Za više informacija o suspenziji, kliknite na sledeći link:</p>
+                            <p><a href='{suspensionLink}' style='background-color: #dc2626; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 0.375rem; display: inline-block;'>Pregled suspenzije</a></p>
+                            <p>Srdačan pozdrav,<br>Gozba na klik</p>
+                        </body>
+                        </html>";
+
+                    await _emailService.SendEmailAsync(
+                        restaurant.Owner.Email,
+                        $"Suspenzija restorana: {restaurant.Name}",
+                        emailBody
+                    );
+
+                    _logger.LogInformation("Suspension email sent to owner {OwnerEmail} for restaurant {RestaurantId}", 
+                        restaurant.Owner.Email, restaurantId);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send suspension email to owner for restaurant {RestaurantId}", restaurantId);
+            }
+
+            return suspension;
+        }
+
+        public async Task<SuspensionResponseDto?> GetRestaurantSuspensionAsync(int restaurantId)
+        {
+            var suspension = await _suspensionRepository.GetSuspensionByRestaurantIdAsync(restaurantId);
+            return suspension;
+        }
+
+        public async Task<SuspensionResponseDto> AppealSuspensionAsync(int restaurantId, string appealText, int ownerId)
+        {
+            var restaurant = await GetRestaurantByIdOrThrowAsync(restaurantId);
+
+            if (restaurant.OwnerId != ownerId)
+            {
+                throw new ForbiddenException("Nemate pravo da podnesete žalbu za ovaj restoran.");
+            }
+
+            var existingSuspension = await _suspensionRepository.GetSuspensionByRestaurantIdAsync(restaurantId);
+            if (existingSuspension == null)
+            {
+                throw new NotFoundException("Suspenzija nije pronađena.");
+            }
+
+            if (existingSuspension.Status == "APPEALED")
+            {
+                throw new BadRequestException("Žalba je već podneta za ovu suspenziju.");
+            }
+
+            var updatedSuspension = await _suspensionRepository.UpdateSuspensionWithAppealAsync(
+                restaurantId, 
+                appealText, 
+                ownerId
+            );
+
+            if (updatedSuspension == null)
+            {
+                throw new NotFoundException("Greška pri ažuriranju suspenzije sa žalbom. Suspenzija možda nije u statusu SUSPENDED.");
+            }
+
+            _logger.LogInformation("Appeal submitted for restaurant {RestaurantId} by owner {OwnerId}", restaurantId, ownerId);
+
+            return updatedSuspension;
+        }
+
+        public async Task<List<SuspensionResponseDto>> GetAppealedSuspensionsAsync()
+        {
+            var appeals = await _suspensionRepository.GetAppealedSuspensionsAsync();
+            
+            if (appeals.Count == 0)
+                return appeals;
+            
+            var restaurantIds = appeals.Select(a => a.RestaurantId).Distinct().ToList();
+            var restaurants = await _context.Restaurants
+                .Where(r => restaurantIds.Contains(r.Id))
+                .Select(r => new { r.Id, r.Name })
+                .AsNoTracking()
+                .ToListAsync();
+            
+            var restaurantDict = restaurants.ToDictionary(r => r.Id, r => r.Name);
+            
+            foreach (var appeal in appeals)
+            {
+                if (restaurantDict.TryGetValue(appeal.RestaurantId, out var name))
+                {
+                    appeal.RestaurantName = name;
+                }
+            }
+            
+            return appeals;
+        }
+
+        public async Task ProcessAppealDecisionAsync(int restaurantId, bool accept, int adminId)
+        {
+            var restaurant = await GetRestaurantByIdOrThrowAsync(restaurantId);
+
+            var appeal = await _suspensionRepository.GetAppealedSuspensionByRestaurantIdAsync(restaurantId);
+            
+            if (appeal == null)
+            {
+                _logger.LogWarning("No appealed suspension found for restaurant {RestaurantId} when processing appeal decision", restaurantId);
+                throw new NotFoundException("Žalba za ovaj restoran nije pronađena.");
+            }
+
+            _logger.LogInformation("Processing appeal decision for restaurant {RestaurantId}. Status: {Status}, AppealText: {HasAppealText}", 
+                restaurantId, appeal.Status, appeal.AppealText != null ? "Yes" : "No");
+
+            var suspension = appeal;
+
+            var updatedSuspension = await _suspensionRepository.UpdateSuspensionDecisionAsync(restaurantId, accept, adminId);
+            if (updatedSuspension == null)
+            {
+                throw new InvalidOperationException("Greška pri ažuriranju odluke o suspenziji.");
+            }
+            
+            _logger.LogInformation("Appeal {Decision} for restaurant {RestaurantId} by admin {AdminId}", 
+                accept ? "accepted" : "rejected", restaurantId, adminId);
+
+            try
+            {
+                var owner = await _context.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.Id == restaurant.OwnerId);
+
+                if (owner != null)
+                {
+                    var frontendUrl = _configuration["FrontendUrl"] ?? "http://localhost:5173";
+                    var decisionText = accept ? "prihvaćena" : "odbijena";
+                    var decisionMessage = accept 
+                        ? "Vaša žalba je prihvaćena i suspenzija je uklonjena. Restoran je ponovo aktivan."
+                        : "Vaša žalba je odbijena. Suspenzija ostaje na snazi.";
+
+                    var emailBody = $@"
+                        <html>
+                        <body>
+                            <h2>Obaveštenje o odluci na žalbu</h2>
+                            <p>Poštovani/a {owner.UserName},</p>
+                            <p>Vaša žalba na suspenziju restorana <strong>{restaurant.Name}</strong> je {decisionText}.</p>
+                            <p><strong>Razlog suspenzije:</strong></p>
+                            <p style='background-color: #f3f4f6; padding: 1rem; border-radius: 0.5rem;'>{suspension.SuspensionReason}</p>
+                            {(suspension.AppealText != null ? $@"
+                            <p><strong>Vaša žalba:</strong></p>
+                            <p style='background-color: #f0f9ff; padding: 1rem; border-radius: 0.5rem;'>{suspension.AppealText}</p>
+                            " : "")}
+                            <p><strong>Odluka:</strong></p>
+                            <p style='background-color: {(accept ? "#d1fae5" : "#fee2e2")}; padding: 1rem; border-radius: 0.5rem; font-weight: bold;'>
+                                {decisionMessage}
+                            </p>
+                            <p>Srdačan pozdrav,<br>Gozba na klik</p>
+                        </body>
+                        </html>";
+
+                    await _emailService.SendEmailAsync(
+                        owner.Email,
+                        $"Odgovor na žalbu - Restoran: {restaurant.Name}",
+                        emailBody
+                    );
+
+                    _logger.LogInformation("Appeal decision email sent to owner {OwnerEmail} for restaurant {RestaurantId}", 
+                        owner.Email, restaurantId);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send appeal decision email to owner for restaurant {RestaurantId}", restaurantId);
+            }
         }
 
     }

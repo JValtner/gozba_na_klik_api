@@ -1,17 +1,21 @@
 ﻿using Gozba_na_klik.Enums;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.Models.Orders;
 using Microsoft.EntityFrameworkCore;
 using Gozba_na_klik.Utils;
+using Microsoft.Extensions.Logging;
 
 namespace Gozba_na_klik.Repositories;
 
 public class RestaurantDbRepository : IRestaurantRepository
 {
     private GozbaNaKlikDbContext _context;
+    private readonly ILogger<RestaurantDbRepository> _logger;
 
-    public RestaurantDbRepository(GozbaNaKlikDbContext context)
+    public RestaurantDbRepository(GozbaNaKlikDbContext context, ILogger<RestaurantDbRepository> logger)
     {
         _context = context;
+        _logger = logger;
     }
     public async Task<IEnumerable<Restaurant>> GetAllAsync()
     {
@@ -139,5 +143,48 @@ public class RestaurantDbRepository : IRestaurantRepository
             options.Add(new SortTypeOption(sortType));
         }
         return options;
+    }
+
+    public async Task<List<(Restaurant Restaurant, int CancelledCount)>> GetIrresponsibleRestaurantsAsync()
+    {
+        var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+        _logger.LogInformation("Fetching irresponsible restaurants (5+ cancelled orders in last 7 days)");
+
+        var irresponsibleRestaurants = await _context.Orders
+            .Where(o => o.Status == OrderStatus.OTKAZANA 
+                     && o.CancelledAt.HasValue 
+                     && o.CancelledAt.Value >= sevenDaysAgo)
+            .GroupBy(o => o.RestaurantId)
+            .Where(g => g.Count() >= 5)
+            .Select(g => new
+            {
+                RestaurantId = g.Key,
+                CancelledCount = g.Count()
+            })
+            .ToListAsync();
+
+        _logger.LogInformation("Found {Count} restaurants with 5+ cancelled orders", irresponsibleRestaurants.Count);
+
+        if (!irresponsibleRestaurants.Any())
+        {
+            return new List<(Restaurant, int)>();
+        }
+
+        var restaurantIds = irresponsibleRestaurants.Select(r => r.RestaurantId).ToList();
+        
+        var restaurants = await _context.Restaurants
+            .Include(r => r.Owner)
+            .Where(r => restaurantIds.Contains(r.Id))
+            .ToListAsync();
+
+        var result = restaurants
+            .Join(irresponsibleRestaurants,
+                r => r.Id,
+                ir => ir.RestaurantId,
+                (r, ir) => (Restaurant: r, CancelledCount: ir.CancelledCount))
+            .ToList();
+
+        _logger.LogInformation("Successfully retrieved {Count} irresponsible restaurants", result.Count);
+        return result;
     }
 }

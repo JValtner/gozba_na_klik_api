@@ -22,6 +22,7 @@ namespace Gozba_na_klik.Services
         private readonly IInvoiceService _invoiceService;
         private readonly UserManager<User> _userManager;
         private readonly IHubContext<CourierLocationHub> _hub;
+        private readonly ISuspensionRepository _suspensionRepository;
 
         public OrderService(
             IOrderRepository orderRepository,
@@ -30,7 +31,8 @@ namespace Gozba_na_klik.Services
             ILogger<OrderService> logger,
             IInvoiceService invoiceService,
             UserManager<User> userManager,
-            IHubContext<CourierLocationHub> hub)
+            IHubContext<CourierLocationHub> hub,
+            ISuspensionRepository suspensionRepository)
         {
             _orderRepository = orderRepository;
             _context = context;
@@ -39,6 +41,7 @@ namespace Gozba_na_klik.Services
             _invoiceService = invoiceService;
             _userManager = userManager;
             _hub = hub;
+            _suspensionRepository = suspensionRepository;
         }
 
         public async Task<OrderPreviewDto> GetOrderPreviewAsync(int userId, int restaurantId, CreateOrderDto dto)
@@ -62,6 +65,12 @@ namespace Gozba_na_klik.Services
 
             if (restaurant == null)
                 throw new NotFoundException("Restoran nije pronađen.");
+
+            var suspension = await _suspensionRepository.GetSuspensionByRestaurantIdAsync(restaurantId);
+            if (suspension != null && (suspension.Status == "SUSPENDED" || suspension.Status == "APPEALED"))
+            {
+                throw new BadRequestException("Restoran suspendovan.");
+            }
 
             var now = DateTime.Now;
             var today = now.DayOfWeek;
@@ -191,6 +200,12 @@ namespace Gozba_na_klik.Services
             if (!restaurantExists)
                 throw new NotFoundException("Restoran nije pronađen.");
 
+            var suspension = await _suspensionRepository.GetSuspensionByRestaurantIdAsync(restaurantId);
+            if (suspension != null && (suspension.Status == "SUSPENDED" || suspension.Status == "APPEALED"))
+            {
+                throw new BadRequestException("Restoran suspendovan.");
+            }
+
             var addressExists = await _context.Addresses
                 .AsNoTracking()
                 .AnyAsync(a => a.Id == dto.AddressId && a.UserId == userId && a.IsActive);
@@ -265,7 +280,10 @@ namespace Gozba_na_klik.Services
             if (order == null)
                 throw new NotFoundException($"Porudžbina sa ID {orderId} nije pronađena.");
 
-            if (order.UserId != userId)
+            var isOrderOwner = order.UserId == userId;
+            var isRestaurantOwner = order.Restaurant != null && order.Restaurant.OwnerId == userId;
+
+            if (!isOrderOwner && !isRestaurantOwner)
                 throw new ForbiddenException("Nemate pristup ovoj porudžbini.");
 
             var dto = new OrderDetailsDto
@@ -278,6 +296,7 @@ namespace Gozba_na_klik.Services
                 DeliveryAddress = order.Address != null
                     ? $"{order.Address.Street}, {order.Address.City}, {order.Address.PostalCode}"
                     : "N/A",
+                CustomerName = order.User?.UserName ?? "N/A",
                 CustomerNote = order.CustomerNote,
                 HasAllergenWarning = order.HasAllergenWarning,
                 Items = order.Items.Select(item => new OrderItemResponseDto
