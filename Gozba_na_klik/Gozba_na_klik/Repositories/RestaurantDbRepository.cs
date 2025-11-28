@@ -20,7 +20,7 @@ public class RestaurantDbRepository : IRestaurantRepository
     public async Task<IEnumerable<Restaurant>> GetAllAsync()
     {
         return await _context.Restaurants
-                //.Include(r => r.Owner)
+                .Include(r => r.Owner)
                 //.Include(r => r.Menu)
                 //    .ThenInclude(m => m.Addons)
                 //.Include(r => r.Menu)
