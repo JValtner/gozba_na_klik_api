@@ -1,101 +1,182 @@
 using Gozba_na_klik.DTOs.Review;
+using Gozba_na_klik.Exceptions;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.Models.Orders;
+using Gozba_na_klik.Utils;
+using Microsoft.EntityFrameworkCore;
 
-public class ReviewService : IReviewService
+namespace Gozba_na_klik.Services
 {
-    private readonly IReviewsRepository _repository;
-    private readonly GozbaNaKlikDbContext _context;
-
-    public ReviewService(IReviewsRepository repository, GozbaNaKlikDbContext context)
+    public class ReviewService : IReviewService
     {
-        _repository = repository;
-        _context = context;
-    }
+        private readonly IReviewsRepository _repository;
+        private readonly GozbaNaKlikDbContext _context;
+        private readonly IFileService _fileService;
+        private readonly ILogger<ReviewService> _logger;
 
-    public async Task<bool> CreateReviewAsync(CreateReviewDto dto)
-    {
-        var order = await _context.Orders.FindAsync(dto.OrderId);
-        if (order == null || order.Status != "ZAVRŠENO")
-            return false;
-
-        if (await _repository.ReviewExistsForOrderAsync(dto.OrderId))
-            return false;
-
-        var review = new Review
+        public ReviewService(
+            IReviewsRepository repository,
+            GozbaNaKlikDbContext context,
+            IFileService fileService,
+            ILogger<ReviewService> logger)
         {
-            OrderId = dto.OrderId,
-            RestaurantId = order.RestaurantId,
-            RestaurantRating = dto.RestaurantRating,
-            RestaurantComment = dto.RestaurantComment,
-            RestaurantPhotoUrl = dto.RestaurantPhoto != null ? await SavePhotoAsync(dto.RestaurantPhoto) : null,
-            CourierRating = dto.CourierRating,
-            CourierComment = dto.CourierComment,
-            CreatedAt = DateTime.UtcNow
-        };
+            _repository = repository;
+            _context = context;
+            _fileService = fileService;
+            _logger = logger;
+        }
 
-        await _repository.AddReviewAsync(review);
-        return true;
-    }
-
-    public async Task<List<RestaurantReviewDto>> GetRestaurantReviewsAsync(int restaurantId, int page, int pageSize)
-    {
-        var reviews = await _repository.GetRestaurantReviewsAsync(restaurantId, page, pageSize);
-        return reviews.Select(r => new RestaurantReviewDto
+        public async Task<bool> CreateReviewAsync(CreateReviewDto dto, int userId)
         {
-            RestaurantRating = r.RestaurantRating,
-            RestaurantComment = r.RestaurantComment,
-            RestaurantPhotoUrl = r.RestaurantPhotoUrl,
-            CreatedAt = r.CreatedAt
-        }).ToList();
-    }
+            var order = await _context.Orders
+                .Include(o => o.Restaurant)
+                .FirstOrDefaultAsync(o => o.Id == dto.OrderId);
 
-    public async Task<double> GetRestaurantAverageRatingAsync(int restaurantId)
-    {
-        return await _repository.GetRestaurantAverageRatingAsync(restaurantId);
-    }
+            if (order == null)
+                throw new NotFoundException($"Porudžbina sa ID-em {dto.OrderId} nije pronađena.");
 
-    // CRUD additions
-    public async Task<RestaurantReviewDto?> GetReviewByIdAsync(int id)
-    {
-        var review = await _repository.GetReviewByIdAsync(id);
-        if (review == null) return null;
-        return new RestaurantReviewDto
+            if (order.UserId != userId)
+                throw new ForbiddenException("Možete oceniti samo svoje porudžbine.");
+
+            if (order.Status != "ZAVRŠENO")
+                throw new BadRequestException("Recenzija je dostupna samo za završene porudžbine.");
+
+            if (await _repository.ReviewExistsForOrderAsync(dto.OrderId))
+                throw new BadRequestException("Ova porudžbina već ima recenziju.");
+
+            if (dto.RestaurantRating < 1 || dto.RestaurantRating > 5)
+                throw new BadRequestException("Ocena restorana mora biti između 1 i 5.");
+
+            if (dto.CourierRating < 1 || dto.CourierRating > 5)
+                throw new BadRequestException("Ocena kurira mora biti između 1 i 5.");
+
+            string? photoUrl = null;
+            if (dto.RestaurantPhoto != null)
+            {
+                try
+                {
+                    photoUrl = await _fileService.SaveMealImageAsync(dto.RestaurantPhoto, "reviewImg");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Greška pri čuvanju fotografije recenzije");
+                    throw new BadRequestException("Greška pri čuvanju fotografije: " + ex.Message);
+                }
+            }
+
+            if (!order.DeliveryPersonId.HasValue)
+                throw new BadRequestException("Porudžbina nema dodeljenog kurira.");
+
+            var review = new Review
+            {
+                OrderId = dto.OrderId,
+                RestaurantId = order.RestaurantId,
+                CourierId = order.DeliveryPersonId.Value,
+                RestaurantRating = dto.RestaurantRating,
+                RestaurantComment = dto.RestaurantComment,
+                RestaurantPhotoUrl = photoUrl,
+                CourierRating = dto.CourierRating,
+                CourierComment = dto.CourierComment,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _repository.AddReviewAsync(review);
+            _logger.LogInformation("Recenzija kreirana za porudžbinu {OrderId}", dto.OrderId);
+            return true;
+        }
+
+        public async Task<PaginatedList<RestaurantReviewDto>> GetRestaurantReviewsAsync(int restaurantId, int page, int pageSize)
         {
-            RestaurantRating = review.RestaurantRating,
-            RestaurantComment = review.RestaurantComment,
-            RestaurantPhotoUrl = review.RestaurantPhotoUrl,
-            CreatedAt = review.CreatedAt
-        };
-    }
+            if (page < 1)
+                page = 1;
+            if (pageSize < 1 || pageSize > 100)
+                pageSize = 10;
 
-    public async Task<bool> UpdateReviewAsync(int id, CreateReviewDto dto)
-    {
-        var review = await _repository.GetReviewByIdAsync(id);
-        if (review == null) return false;
+            var (reviews, totalCount) = await _repository.GetRestaurantReviewsAsync(restaurantId, page, pageSize);
 
-        review.RestaurantRating = dto.RestaurantRating;
-        review.RestaurantComment = dto.RestaurantComment;
-        review.RestaurantPhotoUrl = dto.RestaurantPhoto != null ? await SavePhotoAsync(dto.RestaurantPhoto) : review.RestaurantPhotoUrl;
-        review.CourierRating = dto.CourierRating;
-        review.CourierComment = dto.CourierComment;
-        // Optionally update CreatedAt or other fields
+            var reviewDtos = reviews.Select(r => new RestaurantReviewDto
+            {
+                Id = r.Id,
+                RestaurantRating = r.RestaurantRating,
+                RestaurantComment = r.RestaurantComment,
+                RestaurantPhotoUrl = r.RestaurantPhotoUrl,
+                CourierRating = r.CourierRating,
+                CourierComment = r.CourierComment,
+                CreatedAt = r.CreatedAt
+            }).ToList();
+            return new PaginatedList<RestaurantReviewDto>(reviewDtos, totalCount, page, pageSize);
+        }
 
-        await _repository.UpdateReviewAsync(review);
-        return true;
-    }
+        public async Task<double> GetRestaurantAverageRatingAsync(int restaurantId)
+        {
+            return await _repository.GetRestaurantAverageRatingAsync(restaurantId);
+        }
 
-    public async Task<bool> DeleteReviewAsync(int id)
-    {
-        var review = await _repository.GetReviewByIdAsync(id);
-        if (review == null) return false;
-        await _repository.DeleteReviewAsync(id);
-        return true;
-    }
+        // CRUD additions
+        public async Task<RestaurantReviewDto?> GetReviewByIdAsync(int id)
+        {
+            var review = await _repository.GetReviewByIdAsync(id);
+            if (review == null) return null;
+            return new RestaurantReviewDto
+            {
+                Id = review.Id,
+                RestaurantRating = review.RestaurantRating,
+                RestaurantComment = review.RestaurantComment,
+                RestaurantPhotoUrl = review.RestaurantPhotoUrl,
+                CourierRating = review.CourierRating,
+                CourierComment = review.CourierComment,
+                CreatedAt = review.CreatedAt
+            };
+        }
 
-    // Example photo saving method
-    private async Task<string?> SavePhotoAsync(IFormFile photo)
-    {
-        // Implement photo saving logic and return URL
-        return null;
+        public async Task<bool> UpdateReviewAsync(int id, CreateReviewDto dto, int userId)
+        {
+            var review = await _repository.GetReviewByIdAsync(id);
+            if (review == null)
+                throw new NotFoundException($"Recenzija sa ID-em {id} nije pronađena.");
+
+            var order = await _context.Orders.FindAsync(review.OrderId);
+            if (order == null || order.UserId != userId)
+                throw new ForbiddenException("Možete ažurirati samo svoje recenzije.");
+
+            if (dto.RestaurantRating < 1 || dto.RestaurantRating > 5)
+                throw new BadRequestException("Ocena restorana mora biti između 1 i 5.");
+
+            if (dto.CourierRating < 1 || dto.CourierRating > 5)
+                throw new BadRequestException("Ocena kurira mora biti između 1 i 5.");
+
+            if (dto.RestaurantPhoto != null)
+            {
+                if (!string.IsNullOrEmpty(review.RestaurantPhotoUrl))
+                {
+                    _fileService.DeleteFile(review.RestaurantPhotoUrl);
+                }
+                try
+                {
+                    review.RestaurantPhotoUrl = await _fileService.SaveMealImageAsync(dto.RestaurantPhoto, "reviewImg");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Greška pri čuvanju fotografije recenzije");
+                    throw new BadRequestException("Greška pri čuvanju fotografije: " + ex.Message);
+                }
+            }
+
+            review.RestaurantRating = dto.RestaurantRating;
+            review.RestaurantComment = dto.RestaurantComment;
+            review.CourierRating = dto.CourierRating;
+            review.CourierComment = dto.CourierComment;
+
+            await _repository.UpdateReviewAsync(review);
+            return true;
+        }
+
+        public async Task<bool> DeleteReviewAsync(int id)
+        {
+            var review = await _repository.GetReviewByIdAsync(id);
+            if (review == null) return false;
+            await _repository.DeleteReviewAsync(id);
+            return true;
+        }
     }
 }

@@ -4,7 +4,7 @@ public interface IReviewsRepository
 {
     Task AddReviewAsync(Review review);
     Task<bool> ReviewExistsForOrderAsync(int orderId);
-    Task<List<Review>> GetRestaurantReviewsAsync(int restaurantId, int page, int pageSize);
+    Task<(List<Review> Reviews, int TotalCount)> GetRestaurantReviewsAsync(int restaurantId, int page, int pageSize);
     Task<double> GetRestaurantAverageRatingAsync(int restaurantId);
 
     // CRUD additions
