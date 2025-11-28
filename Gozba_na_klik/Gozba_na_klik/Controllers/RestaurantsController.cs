@@ -87,10 +87,10 @@ namespace Gozba_na_klik.Controllers
         [FromQuery] int sortType = (int)RestaurantSortType.A_Z,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
-            {
-                var result = await _restaurantService.GetAllFilteredSortedPagedAsync(filter, sortType, page, pageSize);
-                return Ok(result);
-            }
+        {
+            var result = await _restaurantService.GetAllFilteredSortedPagedAsync(filter, sortType, page, pageSize);
+            return Ok(result);
+        }
 
         [Authorize(Policy = "OwnerOrAdminPolicy")]
         [HttpPut("{id:int}")]
@@ -213,6 +213,8 @@ namespace Gozba_na_klik.Controllers
             var adminId = User.GetUserId();
             await _restaurantService.ProcessAppealDecisionAsync(id, dto.Accept, adminId);
             return Ok(new { message = dto.Accept ? "Žalba je prihvaćena i suspenzija je uklonjena." : "Žalba je odbijena." });
+        }
+
         // GET: api/restaurants/{id}/reviews
         [Authorize(Policy = "PublicPolicy")]
         [HttpGet("{id}/reviews")]
