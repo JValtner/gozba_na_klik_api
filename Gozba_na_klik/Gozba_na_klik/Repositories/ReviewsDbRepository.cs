@@ -21,21 +21,34 @@ public class ReviewsDbRepository : IReviewsRepository
         return await _context.Reviews.AnyAsync(r => r.OrderId == orderId);
     }
 
-    public async Task<List<Review>> GetRestaurantReviewsAsync(int restaurantId, int page, int pageSize)
+    public async Task<(List<Review> Reviews, int TotalCount)> GetRestaurantReviewsAsync(int restaurantId, int page, int pageSize)
     {
-        return await _context.Reviews
-            .Where(r => r.RestaurantId == restaurantId)
+        var query = _context.Reviews
+           .AsNoTracking()
+           .Where(r => r.RestaurantId == restaurantId);
+
+        var totalCount = await query.CountAsync();
+
+        var reviews = await query
             .OrderByDescending(r => r.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
+
+        return (reviews, totalCount);
     }
 
     public async Task<double> GetRestaurantAverageRatingAsync(int restaurantId)
     {
-        return await _context.Reviews
+        var reviews = await _context.Reviews
             .Where(r => r.RestaurantId == restaurantId)
-            .AverageAsync(r => (double)r.RestaurantRating);
+            .Select(r => (double)r.RestaurantRating)
+            .ToListAsync();
+
+        if (reviews.Count == 0)
+            return 0.0;
+
+        return reviews.Average();
     }
 
     // CRUD additions

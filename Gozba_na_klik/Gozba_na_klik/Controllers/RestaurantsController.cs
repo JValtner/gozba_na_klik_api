@@ -17,10 +17,12 @@ namespace Gozba_na_klik.Controllers
     public class RestaurantsController : ControllerBase
     {
         private readonly IRestaurantService _restaurantService;
+        private readonly IReviewService _reviewService;
 
-        public RestaurantsController(IRestaurantService restaurantService)
+        public RestaurantsController(IRestaurantService restaurantService, IReviewService reviewService)
         {
             _restaurantService = restaurantService;
+            _reviewService = reviewService;
         }
 
         [Authorize(Policy = "AdminPolicy")]
@@ -211,6 +213,16 @@ namespace Gozba_na_klik.Controllers
             var adminId = User.GetUserId();
             await _restaurantService.ProcessAppealDecisionAsync(id, dto.Accept, adminId);
             return Ok(new { message = dto.Accept ? "Žalba je prihvaćena i suspenzija je uklonjena." : "Žalba je odbijena." });
+        // GET: api/restaurants/{id}/reviews
+        [Authorize(Policy = "PublicPolicy")]
+        [HttpGet("{id}/reviews")]
+        public async Task<IActionResult> GetRestaurantReviews(
+            int id,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var reviews = await _reviewService.GetRestaurantReviewsAsync(id, page, pageSize);
+            return Ok(reviews);
         }
     }
 }
