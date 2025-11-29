@@ -14,6 +14,7 @@ namespace Gozba_na_klik.Services
         Task <ProfileDto>RegisterAsync(RegistrationDto data);
         Task RequestPasswordResetAsync(string email);
         Task<IdentityResult> ResetPasswordAsync(ResetPasswordDto data);
+        Task<bool> ConfirmEmailAsync(int userId, string token);
         Task ActivateEmployeeAsync(int employeeId);
         Task AssignOrderToCourierAsync(int courierId, int orderId);
         Task<bool> DeleteUserAsync(int id);
