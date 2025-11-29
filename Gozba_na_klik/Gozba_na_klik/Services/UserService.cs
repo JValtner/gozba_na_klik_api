@@ -190,6 +190,25 @@ namespace Gozba_na_klik.Services
             _logger.LogInformation("[RESET] Password reset succeeded");
             return result;
         }
+        public async Task<bool> ConfirmEmailAsync(int userId, string token)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+                throw new NotFoundException("User not found");
+
+            // Decode URL-safe token
+            var decodedToken = Uri.UnescapeDataString(token).Replace(" ", "+");
+
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                _logger.LogError("Email confirmation failed: {Errors}", errors);
+                throw new BadRequestException(errors);
+            }
+            return result.Succeeded;
+        }
 
         private async Task<string> GenerateJwt(User user)
         {
