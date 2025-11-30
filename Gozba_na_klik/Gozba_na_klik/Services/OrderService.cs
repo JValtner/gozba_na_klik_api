@@ -631,6 +631,10 @@ namespace Gozba_na_klik.Services
 
             return _mapper.Map<OrderStatusResponseDto>(activeOrder);
         }
+        public async Task<List<int>> GetTop5PopularMealIdsAsync()
+        {
+            return await _orderRepository.GetTop5PopularMealIdsAsync();
+        }
 
     }
 }

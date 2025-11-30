@@ -11,4 +11,5 @@ public interface IReviewsRepository
     Task<Review?> GetReviewByIdAsync(int id);
     Task UpdateReviewAsync(Review review);
     Task DeleteReviewAsync(int id);
+    Task<List<int>> GetTop5BestRatedRestaurantIdsAsync();
 }

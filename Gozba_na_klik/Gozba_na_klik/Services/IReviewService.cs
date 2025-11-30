@@ -14,5 +14,6 @@ namespace Gozba_na_klik.Services
         Task<RestaurantReviewDto?> GetReviewByIdAsync(int id);
         Task<bool> UpdateReviewAsync(int id, CreateReviewDto dto, int userId);
         Task<bool> DeleteReviewAsync(int id);
+        Task<List<int>> GetTop5BestRestaurantsAsync();
     }
 }

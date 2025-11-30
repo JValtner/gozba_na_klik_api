@@ -9,7 +9,7 @@ namespace Gozba_na_klik.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Policy = "RegisteredPolicy")]
+    [Authorize(Policy = "PublicPolicy")]
     public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;
@@ -148,12 +148,19 @@ namespace Gozba_na_klik.Controllers
         }
 
         // GET: api/orders/user/my-active-order
-        [Authorize(Policy = "UserPolicy")]
+        
         [HttpGet("user/my-active-order")]
         public async Task<ActionResult<OrderStatusResponseDto>> GetOrderStatusAsync()
         {
             var userId = User.GetUserId();
             return Ok(await _orderService.GetActiveOrderStatusAsync(userId));
+        }
+
+        
+        [HttpGet("most-popular")]
+        public async Task<ActionResult<List<int>>> GetMostPopularMeals()
+        {
+            return Ok(await _orderService.GetTop5PopularMealIdsAsync());
         }
     }
 }

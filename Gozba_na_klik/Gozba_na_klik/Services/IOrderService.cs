@@ -34,5 +34,6 @@ namespace Gozba_na_klik.Services
             DateTime? toDate,
             int page,
             int pageSize);
+        Task<List<int>> GetTop5PopularMealIdsAsync();
     }
 }
