@@ -1,15 +1,17 @@
 ﻿using AutoMapper;
 using Gozba_na_klik.DTOs;
+using Gozba_na_klik.DTOs.Addresses;
+using Gozba_na_klik.DTOs.Admin;
 using Gozba_na_klik.DTOs.DeliveryPersonSchedule;
 using Gozba_na_klik.DTOs.Employee;
+using Gozba_na_klik.DTOs.Location;
 using Gozba_na_klik.DTOs.Orders;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
-using Gozba_na_klik.DTOs.Addresses;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Models.Orders;
 using Gozba_na_klik.Utils;
-using Gozba_na_klik.DTOs.Location;
+using Microsoft.AspNetCore.Identity;
 
 namespace Gozba_na_klik.Settings
 {
@@ -50,12 +52,20 @@ namespace Gozba_na_klik.Settings
                     }
                 });
 
+            CreateMap<IdentityUser<int>, AdminUsersDto>();
+
+            CreateMap<IdentityUser<int>, AdminRestaurantOwnersDto>();
+
+            CreateMap<Restaurant, AdminRestaurantEditDto>();
+
             // ---------- Restaurant ----------
             CreateMap<RequestCreateRestaurantByAdminDto, Restaurant>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
 
             CreateMap<RequestUpdateRestaurantByAdminDto, Restaurant>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
+
+            CreateMap<Restaurant, AdminRestaurantDto>();
 
             // ---------- Address ----------
             CreateMap<AddressCreateDto, Address>()

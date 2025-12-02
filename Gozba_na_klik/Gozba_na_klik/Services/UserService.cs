@@ -3,6 +3,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper;
+using Gozba_na_klik.DTOs.Admin;
 using Gozba_na_klik.DTOs.Location;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
@@ -10,8 +11,6 @@ using Gozba_na_klik.Exceptions;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Services.EmailServices;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Gozba_na_klik.Services
@@ -49,19 +48,19 @@ namespace Gozba_na_klik.Services
             _emailService = emailService;
         }
 
-        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        public async Task<IEnumerable<AdminUsersDto>> GetAllUsersAsync()
         {
-            var users = await _userRepository.GetAllAsync();
+            var users = _userManager.Users.ToList();
 
-            foreach (var user in users)
+            var userDtos = _mapper.Map<List<AdminUsersDto>>(users);
+
+            for (int i = 0; i < users.Count; i++)
             {
-                if (string.IsNullOrEmpty(user.UserImage))
-                {
-                    user.UserImage = DefaultProfileImagePath;
-                }
+                var roles = await _userManager.GetRolesAsync(users[i]);
+                userDtos[i].Role = roles.FirstOrDefault() ?? "NoRole";
             }
 
-            return users;
+            return userDtos;
         }
 
         public async Task<ProfileDto> RegisterAsync(RegistrationDto data)
@@ -239,9 +238,10 @@ namespace Gozba_na_klik.Services
         }
 
 
-        public async Task<IEnumerable<User>> GetAllRestaurantOnwersAsync()
+        public async Task<List<AdminRestaurantOwnersDto>> GetAllRestaurantOnwersAsync()
         {
-            return await _userRepository.GetAllRestaurantOwnersAsync();
+            var owners = await _userRepository.GetAllRestaurantOwnersAsync();
+            return _mapper.Map<List<AdminRestaurantOwnersDto>>(owners);
         }
 
         public async Task<User?> GetUserByIdAsync(int id)
@@ -400,7 +400,6 @@ namespace Gozba_na_klik.Services
             await _userRepository.UpdateAsync(existingCourier);
         }
 
-        // Update lokacije kurira
         public async Task<UpdateCourierLocationDto> UpdateCourierLocation(int courierId, double latitude, double longitude)
         {
             var courier = await _userManager.FindByIdAsync(courierId.ToString());

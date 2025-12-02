@@ -1,4 +1,5 @@
 ﻿using Gozba_na_klik.DTOs;
+using Gozba_na_klik.DTOs.Admin;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Models;
@@ -8,7 +9,7 @@ namespace Gozba_na_klik.Services
 {
     public interface IRestaurantService
     {
-        Task<IEnumerable<Restaurant>> GetAllRestaurantsAsync();
+        Task<List<AdminRestaurantDto>> GetAllRestaurantsAsync();
         Task<Restaurant?> GetRestaurantByIdAsync(int id);
         Task<Restaurant> GetRestaurantByIdOrThrowAsync(int id);
         Task<ResponseRestaurantDTO> GetRestaurantDtoByIdAsync(int id);
@@ -19,6 +20,7 @@ namespace Gozba_na_klik.Services
         Task<Restaurant> CreateRestaurantAsync(Restaurant restaurant);
 
         // ADMIN
+        Task<AdminRestaurantEditDto> GetRestaurantByIdByAdminAsync(int id);
         Task<Restaurant> CreateRestaurantByAdminAsync(RequestCreateRestaurantByAdminDto dto);
         Task<Restaurant> UpdateRestaurantByAdminAsync(int id,RequestUpdateRestaurantByAdminDto dto);
 

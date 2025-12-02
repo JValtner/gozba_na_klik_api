@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Gozba_na_klik.DTOs.Admin;
 using Gozba_na_klik.DTOs.Location;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
@@ -19,8 +20,8 @@ namespace Gozba_na_klik.Services
         Task AssignOrderToCourierAsync(int courierId, int orderId);
         Task<bool> DeleteUserAsync(int id);
         Task<List<User>> GetAllAvailableCouriersAsync();
-        Task<IEnumerable<User>> GetAllRestaurantOnwersAsync();
-        Task<IEnumerable<User>> GetAllUsersAsync();
+        Task<List<AdminRestaurantOwnersDto>> GetAllRestaurantOnwersAsync();
+        Task<IEnumerable<AdminUsersDto>> GetAllUsersAsync();
         Task<IEnumerable<User>> GetEmployeesByRestaurantAsync(int restaurantId);
         Task<User?> GetUserByIdAsync(int id);
         Task<string?> GetUserRoleAsync(int userId);
