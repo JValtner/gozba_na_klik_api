@@ -64,6 +64,12 @@ namespace Gozba_na_klik.Services
             var restaurant = await GetRestaurantByIdOrThrowAsync(id);
             var currentDate = DateTime.UtcNow;
 
+            var suspension = await _suspensionRepository.GetSuspensionByRestaurantIdAsync(id);
+            var isSuspended = suspension != null && 
+                (suspension.Status == "SUSPENDED" || 
+                 suspension.Status == "APPEALED" || 
+                 suspension.Status == "REJECTED");
+
             return new ResponseRestaurantDTO
             {
                 Id = restaurant.Id,
@@ -75,7 +81,11 @@ namespace Gozba_na_klik.Services
                 Phone = restaurant.Phone,
                 Menu = restaurant.Menu,
                 ClosedDates = restaurant.ClosedDates,
-                isOpen = IsRestaurantOpen(restaurant, currentDate)
+                WorkSchedules = restaurant.WorkSchedules ?? new List<WorkSchedule>(),
+                isOpen = IsRestaurantOpen(restaurant, currentDate),
+                IsSuspended = isSuspended,
+                SuspensionStatus = suspension?.Status,
+                SuspensionReason = suspension?.SuspensionReason
             };
         }
 
@@ -272,19 +282,34 @@ namespace Gozba_na_klik.Services
             var currentDay = currentDate.DayOfWeek;
             var currentTime = currentDate.TimeOfDay;
 
-            var dtoItems = pagedRestaurants.Items.Select(r => new ResponseRestaurantDTO
+            var dtoItems = new List<ResponseRestaurantDTO>();
+            
+            foreach (var r in pagedRestaurants.Items)
             {
-                Id = r.Id,
-                Name = r.Name,
-                PhotoUrl = r.PhotoUrl,
-                Address = r.Address,
-                Description = r.Description,
-                Phone = r.Phone,
-                Menu = r.Menu,
-                ClosedDates = r.ClosedDates,
-                isOpen = IsRestaurantOpen(r, currentDate)
-
-            }).ToList();
+                var suspension = await _suspensionRepository.GetSuspensionByRestaurantIdAsync(r.Id);
+                var isSuspended = suspension != null && 
+                    (suspension.Status == "SUSPENDED" || 
+                     suspension.Status == "APPEALED" || 
+                     suspension.Status == "REJECTED");
+                
+                dtoItems.Add(new ResponseRestaurantDTO
+                {
+                    Id = r.Id,
+                    OwnerId = r.OwnerId,
+                    Name = r.Name,
+                    PhotoUrl = r.PhotoUrl,
+                    Address = r.Address,
+                    Description = r.Description,
+                    Phone = r.Phone,
+                    Menu = r.Menu,
+                    ClosedDates = r.ClosedDates,
+                    WorkSchedules = r.WorkSchedules ?? new List<WorkSchedule>(),
+                    isOpen = IsRestaurantOpen(r, currentDate),
+                    IsSuspended = isSuspended,
+                    SuspensionStatus = suspension?.Status,
+                    SuspensionReason = suspension?.SuspensionReason
+                });
+            }
 
             return new PaginatedList<ResponseRestaurantDTO>(
                 dtoItems, pagedRestaurants.Count, pagedRestaurants.PageIndex, pageSize);

@@ -12,6 +12,7 @@ namespace Gozba_na_klik.Services
         private readonly IComplaintRepository _complaintRepository;
         private readonly IOrderRepository _orderRepository;
         private readonly IRestaurantService _restaurantService;
+        private readonly IUserService _userService;
         private readonly GozbaNaKlikDbContext _context;
         private readonly ILogger<ComplaintService> _logger;
 
@@ -19,12 +20,14 @@ namespace Gozba_na_klik.Services
             IComplaintRepository complaintRepository,
             IOrderRepository orderRepository,
             IRestaurantService restaurantService,
+            IUserService userService,
             GozbaNaKlikDbContext context,
             ILogger<ComplaintService> logger)
         {
             _complaintRepository = complaintRepository;
             _orderRepository = orderRepository;
             _restaurantService = restaurantService;
+            _userService = userService;
             _context = context;
             _logger = logger;
         }
@@ -56,6 +59,8 @@ namespace Gozba_na_klik.Services
             var restaurantId = order.RestaurantId;
 
             var complaint = await _complaintRepository.InsertComplaintAsync(dto, userId, restaurantId);
+
+            await EnrichComplaintWithNamesAsync(complaint);
 
             _logger.LogInformation("Complaint created for order {OrderId} by user {UserId}", dto.OrderId, userId);
 
@@ -103,6 +108,9 @@ namespace Gozba_na_klik.Services
                 _logger.LogInformation("No complaint found for order {OrderId} by user {UserId}", orderId, userId);
                 throw new NotFoundException("Žalba za ovu porudžbinu nije pronađena.");
             }
+            
+            await EnrichComplaintWithNamesAsync(complaint);
+            
             return complaint;
         }
 
@@ -115,7 +123,14 @@ namespace Gozba_na_klik.Services
 
             _logger.LogInformation("Getting complaints from last 30 days for admin, page {Page}, pageSize {PageSize}", page, pageSize);
 
-            return await _complaintRepository.GetAllComplaintsLast30DaysAsync(page, pageSize);
+            var result = await _complaintRepository.GetAllComplaintsLast30DaysAsync(page, pageSize);
+            
+            foreach (var complaint in result.Items)
+            {
+                await EnrichComplaintWithNamesAsync(complaint);
+            }
+            
+            return result;
         }
 
         public async Task<ComplaintResponseDto> GetComplaintByIdAsync(string complaintId)
@@ -126,7 +141,28 @@ namespace Gozba_na_klik.Services
                 _logger.LogInformation("Complaint with ID {ComplaintId} not found", complaintId);
                 throw new NotFoundException("Žalba sa datim ID-jem nije pronađena.");
             }
+            
+            await EnrichComplaintWithNamesAsync(complaint);
+            
             return complaint;
+        }
+
+        private async Task EnrichComplaintWithNamesAsync(ComplaintResponseDto complaint)
+        {
+            try
+            {
+                var restaurant = await _restaurantService.GetRestaurantByIdAsync(complaint.RestaurantId);
+                complaint.RestaurantName = restaurant?.Name ?? "Nepoznat restoran";
+
+                var user = await _userService.GetUserByIdAsync(complaint.UserId);
+                complaint.CustomerName = user?.UserName ?? "Nepoznat korisnik";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error enriching complaint {ComplaintId} with names", complaint.Id);
+                complaint.RestaurantName = complaint.RestaurantName ?? "Nepoznat restoran";
+                complaint.CustomerName = complaint.CustomerName ?? "Nepoznat korisnik";
+            }
         }
     }
 }

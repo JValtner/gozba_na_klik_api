@@ -14,14 +14,16 @@ namespace Gozba_na_klik.Services
         private readonly IMealsRepository _mealsRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<MealService> _logger;
+        private readonly ISuspensionRepository _suspensionRepository;
 
         private const string DefaultMealImagePath = "/assets/mealImg/default_meal.png";
 
-        public MealService(IMealsRepository mealsRepository, IMapper mapper, ILogger<MealService> logger)
+        public MealService(IMealsRepository mealsRepository, IMapper mapper, ILogger<MealService> logger, ISuspensionRepository suspensionRepository)
         {
             _mealsRepository = mealsRepository;
             _mapper = mapper;
             _logger = logger;
+            _suspensionRepository = suspensionRepository;
         }
 
         Task<IEnumerable<ResponseMealDto>> IMealService.GetAllMealsAsync()
@@ -77,7 +79,35 @@ namespace Gozba_na_klik.Services
             var pagedMeals = await _mealsRepository.GetAllFilteredSortedPagedAsync(filter, sortType, page, pageSize);
 
             var dtoItems = _mapper.Map<List<ResponseMealDto>>(pagedMeals.Items);
-            return new PaginatedList<ResponseMealDto>(dtoItems, pagedMeals.Count, pagedMeals.PageIndex, pageSize);
+            
+            var restaurantIds = dtoItems
+                .Where(m => m.Restaurant != null)
+                .Select(m => m.Restaurant.Id)
+                .Distinct()
+                .ToList();
+            
+            var suspendedRestaurantIds = new HashSet<int>();
+            foreach (var restaurantId in restaurantIds)
+            {
+                var suspension = await _suspensionRepository.GetSuspensionByRestaurantIdAsync(restaurantId);
+                var isSuspended = suspension != null && 
+                    (suspension.Status == "SUSPENDED" || 
+                     suspension.Status == "APPEALED" || 
+                     suspension.Status == "REJECTED");
+                
+                if (isSuspended)
+                {
+                    suspendedRestaurantIds.Add(restaurantId);
+                }
+            }
+            
+            var filteredItems = dtoItems
+                .Where(m => m.Restaurant == null || !suspendedRestaurantIds.Contains(m.Restaurant.Id))
+                .ToList();
+
+            var filteredCount = Math.Max(0, pagedMeals.Count - (dtoItems.Count - filteredItems.Count));
+            
+            return new PaginatedList<ResponseMealDto>(filteredItems, filteredCount, pagedMeals.PageIndex, pageSize);
         }
         public async Task<List<SortTypeOption>> GetSortTypesAsync()  //dobavlja vrste sortiranja
         {
