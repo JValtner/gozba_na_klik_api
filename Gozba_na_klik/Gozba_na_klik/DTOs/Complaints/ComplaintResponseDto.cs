@@ -8,6 +8,8 @@ namespace Gozba_na_klik.DTOs.Complaints
         public int RestaurantId { get; set; }
         public string Message { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        public string? RestaurantName { get; set; }
+        public string? CustomerName { get; set; }
     }
 }
 

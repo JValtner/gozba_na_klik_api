@@ -15,10 +15,15 @@ namespace Gozba_na_klik.DTOs.Response
 
         // Standardno radno vreme po danima
         public bool isOpen { get; set; } =false;
-        public WorkSchedule? WorkSchedules { get; set; }
+        public List<WorkSchedule> WorkSchedules { get; set; } = new();
 
         // Neradni datumi
         public List<ClosedDate> ClosedDates { get; set; } = new();
+
+        // Suspension status
+        public bool IsSuspended { get; set; } = false;
+        public string? SuspensionStatus { get; set; }
+        public string? SuspensionReason { get; set; }
 
     }
 }
