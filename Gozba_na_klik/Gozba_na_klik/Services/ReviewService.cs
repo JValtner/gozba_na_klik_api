@@ -178,5 +178,10 @@ namespace Gozba_na_klik.Services
             await _repository.DeleteReviewAsync(id);
             return true;
         }
+
+        public async Task<List<int>> GetTop5BestRestaurantsAsync()
+        {
+            return await _repository.GetTop5BestRatedRestaurantIdsAsync ();
+        }
     }
 }

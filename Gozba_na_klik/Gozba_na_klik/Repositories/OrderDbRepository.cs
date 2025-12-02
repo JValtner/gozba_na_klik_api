@@ -214,6 +214,21 @@ namespace Gozba_na_klik.Repositories
 
             return (deliveries, totalCount);
         }
+        public async Task<List<int>> GetTop5PopularMealIdsAsync()
+        {
+            return await _context.OrderItems
+                .GroupBy(oi => oi.MealId)
+                .Select(g => new
+                {
+                    MealId = g.Key,
+                    TotalSold = g.Sum(x => x.Quantity)
+                })
+                .OrderByDescending(x => x.TotalSold)
+                .Take(5)
+                .Select(x => x.MealId)
+                .ToListAsync();
+        }
+
 
     }
 }

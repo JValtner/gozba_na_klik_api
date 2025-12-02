@@ -32,7 +32,6 @@ namespace Gozba_na_klik.Services.EmailServices
             message.To.Add(new MailboxAddress(to, to));
             message.Subject = subject;
 
-            // DO NOT BASE64 ENCODE HTML — it breaks URLs and tokens
             var htmlPart = new TextPart("html")
             {
                 Text = body
@@ -65,22 +64,6 @@ namespace Gozba_na_klik.Services.EmailServices
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
         }
-        public async Task<bool> ConfirmEmailAsync(int userId, string token)
-        {
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null)
-                throw new NotFoundException("User not found");
-
-            // Decode URL-safe token
-            var decodedToken = Uri.UnescapeDataString(token).Replace(" ", "+");
-
-            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
-
-            if (!result.Succeeded)
-                throw new BadRequestException("Invalid token");
-
-            return true;
-        }
-
+        
     }
 }

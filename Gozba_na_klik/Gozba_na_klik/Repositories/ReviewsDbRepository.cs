@@ -72,4 +72,22 @@ public class ReviewsDbRepository : IReviewsRepository
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task<List<int>> GetTop5BestRatedRestaurantIdsAsync()
+    {
+        return await _context.Reviews
+            .GroupBy(r => r.RestaurantId)
+            .Select(g => new
+            {
+                RestaurantId = g.Key,
+                AvgRating = g.Average(x => x.RestaurantRating),
+                CountReviews = g.Count()
+            })
+            .OrderByDescending(x => x.AvgRating)
+            .ThenByDescending(x => x.CountReviews)
+            .Take(5)
+            .Select(x => x.RestaurantId)
+            .ToListAsync();
+    }
+
 }

@@ -1,3 +1,4 @@
+using Gozba_na_klik.DTOs.Orders;
 using Gozba_na_klik.DTOs.Review;
 using Gozba_na_klik.Models;
 using Gozba_na_klik.Services;
@@ -9,7 +10,7 @@ namespace Gozba_na_klik.Controllers
 {
     [ApiController]
     [Route("api/reviews")]
-    [Authorize(Policy = "UserPolicy")]
+    [Authorize(Policy = "PublicPolicy")]
     public class ReviewsController : ControllerBase
     {
         private readonly IReviewService _service;
@@ -30,6 +31,7 @@ namespace Gozba_na_klik.Controllers
         //    return Ok();
         //}
         // POST: api/reviews
+
         [HttpPost]
         public async Task<IActionResult> CreateReview([FromForm] CreateReviewDto dto)
         {
@@ -38,6 +40,13 @@ namespace Gozba_na_klik.Controllers
 
             await _service.CreateReviewAsync(dto, userId);
             return Ok(new { message = "Recenzija uspe?no kreirana." });
+        }
+
+        
+        [HttpGet("best-rated-restaurants")]
+        public async Task<ActionResult<List<int>>> GetBestRatedRestaurants()
+        {
+            return Ok(await _service.GetTop5BestRestaurantsAsync());
         }
     }
 }

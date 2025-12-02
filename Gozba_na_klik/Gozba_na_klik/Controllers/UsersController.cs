@@ -26,19 +26,22 @@ namespace Gozba_na_klik.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IEmailService _emailService;
         private readonly IHubContext<CourierLocationHub> _hub;
+        private readonly IConfiguration _configuration;
 
         public UsersController(
             IUserService userService,
             IFileService fileService,
             UserManager<User> userManager,
             IEmailService emailService,
-            IHubContext<CourierLocationHub> hub)
+            IHubContext<CourierLocationHub> hub,
+            IConfiguration configuration)
         {
             _userService = userService;
             _fileService = fileService;
             _userManager = userManager;
             _emailService = emailService;
             _hub = hub;
+            _configuration = configuration;
         }
 
         // GET: api/users
@@ -163,9 +166,15 @@ namespace Gozba_na_klik.Controllers
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmailAsync([FromQuery] int userId, [FromQuery] string token)
         {
-            await _emailService.ConfirmEmailAsync(userId, token);
-            return Ok("Email confirmed successfully");
+            var success = await _userService.ConfirmEmailAsync(userId, token);
+            var FrontendUrl = _configuration["FrontendUrl"];
+
+            if (success)
+                return Redirect($"{FrontendUrl}/login?emailConfirmed=true");
+
+            return Redirect($"{FrontendUrl}/login?emailConfirmError=true");
         }
+
 
         [AllowAnonymous]
         [HttpPost("request-password-reset")]
@@ -183,26 +192,7 @@ namespace Gozba_na_klik.Controllers
             return Ok("Password successfully changed");
         }
 
-        // Temporary diagnostic controller action
-        [AllowAnonymous]
-        [HttpPost("diagnose-reset-token")]
-        public async Task<IActionResult> DiagnoseResetToken([FromBody] int userId)
-        {
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null) return NotFound("User not found");
-
-            // Generate token and immediately verify — no email, no transport.
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var verify = await _userManager.ResetPasswordAsync(user, token, "Temp_Test@12345");
-
-            return Ok(new
-            {
-                userId,
-                success = verify.Succeeded,
-                errors = verify.Succeeded ? null : verify.Errors.Select(e => e.Description).ToArray(),
-                tokenSample = token.Substring(0, Math.Min(token.Length, 32)) // just to see shape
-            });
-        }
+        
 
         [Authorize(Policy = "DeliveryPerson")]
         [HttpPost("update-location")]
