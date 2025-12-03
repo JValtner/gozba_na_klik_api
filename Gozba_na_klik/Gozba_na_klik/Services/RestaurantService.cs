@@ -1,13 +1,12 @@
-﻿using System.Linq;
-using AutoMapper;
+﻿using AutoMapper;
+using Gozba_na_klik.DTOs.Admin;
 using Gozba_na_klik.DTOs.Request;
 using Gozba_na_klik.DTOs.Response;
 using Gozba_na_klik.Exceptions;
 using Gozba_na_klik.Models;
+using Gozba_na_klik.Services.EmailServices;
 using Gozba_na_klik.Utils;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Gozba_na_klik.Services.EmailServices;
 
 namespace Gozba_na_klik.Services
 {
@@ -39,14 +38,21 @@ namespace Gozba_na_klik.Services
             _configuration = configuration;
         }
 
-        public async Task<IEnumerable<Restaurant>> GetAllRestaurantsAsync()
+        public async Task<List<AdminRestaurantDto>> GetAllRestaurantsAsync()
         {
-            return await _restaurantRepository.GetAllAsync();
+            var restaurants = await _restaurantRepository.GetAllAsync();
+            return _mapper.Map<List<AdminRestaurantDto>>(restaurants);
         }
 
         public async Task<Restaurant?> GetRestaurantByIdAsync(int id)
         {
             return await _restaurantRepository.GetByIdAsync(id);
+        }
+
+        public async Task<AdminRestaurantEditDto> GetRestaurantByIdByAdminAsync(int id)
+        {
+            var restaurant = await _restaurantRepository.GetByIdAsync(id);
+            return _mapper.Map<AdminRestaurantEditDto>(restaurant);
         }
 
         public async Task<Restaurant> GetRestaurantByIdOrThrowAsync(int id)

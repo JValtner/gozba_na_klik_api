@@ -42,6 +42,14 @@ namespace Gozba_na_klik.Controllers
         }
 
         [Authorize(Policy = "AdminPolicy")]
+        [HttpGet("{id:int}/admin")]
+        public async Task<IActionResult> GetOneByAdminAsync(int id)
+        {
+            var restaurant = await _restaurantService.GetRestaurantByIdByAdminAsync(id);
+            return Ok(restaurant);
+        }
+
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost]
         public async Task<IActionResult> PostByAdminAsync([FromBody] RequestCreateRestaurantByAdminDto dto)
         {
