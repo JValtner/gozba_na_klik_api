@@ -1,0 +1,240 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0" version="29.2.1">
+  <diagram name="Page-1" id="H3Rs1dWYzzX1_TayLvr5">
+    <mxGraphModel dx="985" dy="543" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <object placeholders="1" c4Name="Kupac" c4Type="Korisnik" c4Description="Kupac usluga/Porucuje hranu preko aplikacije" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font color=&quot;#cccccc&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;" id="qA6u9BNv_6LZ32N9nRfr-1">
+          <mxCell parent="1" style="html=1;fontSize=11;dashed=0;whiteSpace=wrap;fillColor=#083F75;strokeColor=#06315C;fontColor=#ffffff;shape=mxgraph.c4.person2;align=center;metaEdit=1;points=[[0.5,0,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0]];resizable=0;" vertex="1">
+            <mxGeometry height="180" width="200" x="80" y="90" as="geometry" />
+          </mxCell>
+        </object>
+        <object placeholders="1" c4Name="Vlasnik Restorana" c4Type="korisnik" c4Description="Upravlja sa svojim restoranom" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font color=&quot;#cccccc&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;" id="qA6u9BNv_6LZ32N9nRfr-2">
+          <mxCell parent="1" style="html=1;fontSize=11;dashed=0;whiteSpace=wrap;fillColor=#083F75;strokeColor=#06315C;fontColor=#ffffff;shape=mxgraph.c4.person2;align=center;metaEdit=1;points=[[0.5,0,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0]];resizable=0;" vertex="1">
+            <mxGeometry height="180" width="200" x="750" y="90" as="geometry" />
+          </mxCell>
+        </object>
+        <object placeholders="1" c4Name="Administrator" c4Type="Korisnik" c4Description="Administrira sistemom" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font color=&quot;#cccccc&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;" id="qA6u9BNv_6LZ32N9nRfr-3">
+          <mxCell parent="1" style="html=1;fontSize=11;dashed=0;whiteSpace=wrap;fillColor=#083F75;strokeColor=#06315C;fontColor=#ffffff;shape=mxgraph.c4.person2;align=center;metaEdit=1;points=[[0.5,0,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0]];resizable=0;" vertex="1">
+            <mxGeometry height="180" width="200" x="10" y="330" as="geometry" />
+          </mxCell>
+        </object>
+        <object placeholders="1" c4Name="Dostavljac " c4Type="Korisnik" c4Description="Dostavlja aktivne porudzbine" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font color=&quot;#cccccc&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;" id="qA6u9BNv_6LZ32N9nRfr-4">
+          <mxCell parent="1" style="html=1;fontSize=11;dashed=0;whiteSpace=wrap;fillColor=#083F75;strokeColor=#06315C;fontColor=#ffffff;shape=mxgraph.c4.person2;align=center;metaEdit=1;points=[[0.5,0,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0]];resizable=0;" vertex="1">
+            <mxGeometry height="180" width="200" x="80" y="800" as="geometry" />
+          </mxCell>
+        </object>
+        <object placeholders="1" c4Name="Zaposleni restorana" c4Type="Korisnik" c4Description="Zaposleni restorana sprema porudzbine" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font color=&quot;#cccccc&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;" id="qA6u9BNv_6LZ32N9nRfr-5">
+          <mxCell parent="1" style="html=1;fontSize=11;dashed=0;whiteSpace=wrap;fillColor=#083F75;strokeColor=#06315C;fontColor=#ffffff;shape=mxgraph.c4.person2;align=center;metaEdit=1;points=[[0.5,0,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0]];resizable=0;" vertex="1">
+            <mxGeometry height="180" width="200" x="390" y="800" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-7" edge="1" parent="1" source="qA6u9BNv_6LZ32N9nRfr-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;entryPerimeter=0;" target="qA6u9BNv_6LZ32N9nRfr-38">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="250" y="420" />
+              <mxPoint x="250" y="407" />
+            </Array>
+            <mxPoint x="490" y="495.8325" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-8" connectable="0" parent="qA6u9BNv_6LZ32N9nRfr-7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Salje zahtev" vertex="1">
+          <mxGeometry relative="1" x="0.0214" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-9" edge="1" parent="1" source="qA6u9BNv_6LZ32N9nRfr-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;entryPerimeter=0;" target="qA6u9BNv_6LZ32N9nRfr-3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="490" y="571.6650000000002" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-10" connectable="0" parent="qA6u9BNv_6LZ32N9nRfr-9" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Dobija Odgovor" vertex="1">
+          <mxGeometry relative="1" x="0.1303" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-11" edge="1" parent="1" source="qA6u9BNv_6LZ32N9nRfr-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;entryPerimeter=0;" target="qA6u9BNv_6LZ32N9nRfr-38">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="180" y="523" />
+            </Array>
+            <mxPoint x="490" y="647.4975" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-12" connectable="0" parent="qA6u9BNv_6LZ32N9nRfr-11" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Salje zahtev" vertex="1">
+          <mxGeometry relative="1" x="0.093" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-13" edge="1" parent="1" source="qA6u9BNv_6LZ32N9nRfr-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="qA6u9BNv_6LZ32N9nRfr-4">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="453" y="640" />
+              <mxPoint x="280" y="640" />
+            </Array>
+            <mxPoint x="560" y="723.3299999999999" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-14" connectable="0" parent="qA6u9BNv_6LZ32N9nRfr-13" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Dobija Odgovor" vertex="1">
+          <mxGeometry relative="1" x="-0.2183" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-15" edge="1" parent="1" source="qA6u9BNv_6LZ32N9nRfr-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" target="qA6u9BNv_6LZ32N9nRfr-38">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="490" y="670" />
+              <mxPoint x="506" y="670" />
+            </Array>
+            <mxPoint x="700" y="723.3299999999999" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-16" connectable="0" parent="qA6u9BNv_6LZ32N9nRfr-15" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Salje zahtev" vertex="1">
+          <mxGeometry relative="1" x="-0.0304" y="4" as="geometry">
+            <mxPoint x="20" y="-26" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-17" edge="1" parent="1" source="qA6u9BNv_6LZ32N9nRfr-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="qA6u9BNv_6LZ32N9nRfr-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="453" y="690" />
+              <mxPoint x="330" y="690" />
+              <mxPoint x="330" y="890" />
+            </Array>
+            <mxPoint x="630" y="723.3299999999999" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-18" connectable="0" parent="qA6u9BNv_6LZ32N9nRfr-17" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Dobija Odgovor" vertex="1">
+          <mxGeometry relative="1" x="0.2387" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-19" edge="1" parent="1" source="qA6u9BNv_6LZ32N9nRfr-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.084;entryY=0.01;entryDx=0;entryDy=0;entryPerimeter=0;" target="qA6u9BNv_6LZ32N9nRfr-38">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="560" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-20" connectable="0" parent="qA6u9BNv_6LZ32N9nRfr-19" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Salje zahtev" vertex="1">
+          <mxGeometry relative="1" x="-0.2754" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-21" edge="1" parent="1" source="qA6u9BNv_6LZ32N9nRfr-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;entryPerimeter=0;" target="qA6u9BNv_6LZ32N9nRfr-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="420" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-22" connectable="0" parent="qA6u9BNv_6LZ32N9nRfr-21" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Dobija Odgovor" vertex="1">
+          <mxGeometry relative="1" x="0.4434" y="2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-23" edge="1" parent="1" source="qA6u9BNv_6LZ32N9nRfr-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" target="qA6u9BNv_6LZ32N9nRfr-38">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-24" connectable="0" parent="qA6u9BNv_6LZ32N9nRfr-23" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Salje zahtev" vertex="1">
+          <mxGeometry relative="1" x="0.3251" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-25" edge="1" parent="1" source="qA6u9BNv_6LZ32N9nRfr-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" target="qA6u9BNv_6LZ32N9nRfr-2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="770" y="495.8325" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-26" connectable="0" parent="qA6u9BNv_6LZ32N9nRfr-25" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Dobija Odgovor" vertex="1">
+          <mxGeometry relative="1" x="0.5172" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <object placeholders="1" c4Name="Interni sitem za skladistenje podataka" c4Type="Postgre SQL Baza podataka/MongoDB" c4Description="Interni sistem za skladistenje podataka" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font color=&quot;#cccccc&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;" id="qA6u9BNv_6LZ32N9nRfr-27">
+          <mxCell parent="1" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#1061B0;fontColor=#ffffff;align=center;arcSize=10;strokeColor=#0D5091;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1">
+            <mxGeometry height="120" width="240" x="1000" y="260" as="geometry" />
+          </mxCell>
+        </object>
+        <object placeholders="1" c4Name="Eksterni servisi" c4Type="Softverski sistem" c4Description="Eksterni aplikativni servisi" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font color=&quot;#cccccc&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;" id="qA6u9BNv_6LZ32N9nRfr-28">
+          <mxCell parent="1" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#8C8496;fontColor=#ffffff;align=center;arcSize=10;strokeColor=#736782;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1">
+            <mxGeometry height="120" width="240" x="1000" y="520" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-29" edge="1" parent="1" source="qA6u9BNv_6LZ32N9nRfr-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" target="qA6u9BNv_6LZ32N9nRfr-28">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="770" y="571.6650000000002" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-30" connectable="0" parent="qA6u9BNv_6LZ32N9nRfr-29" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Salje zahtev" vertex="1">
+          <mxGeometry relative="1" x="0.7015" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-31" edge="1" parent="1" source="qA6u9BNv_6LZ32N9nRfr-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="qA6u9BNv_6LZ32N9nRfr-38">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1060" y="465" />
+            </Array>
+            <mxPoint x="1057.7000000000003" y="535" as="sourcePoint" />
+            <mxPoint x="670.01" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-32" connectable="0" parent="qA6u9BNv_6LZ32N9nRfr-31" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Vraca odgovor" vertex="1">
+          <mxGeometry relative="1" x="0.0376" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-33" edge="1" parent="1" source="qA6u9BNv_6LZ32N9nRfr-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.25;entryDx=0;entryDy=0;entryPerimeter=0;" target="qA6u9BNv_6LZ32N9nRfr-38">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="770" y="495.8325" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-34" connectable="0" parent="qA6u9BNv_6LZ32N9nRfr-33" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Salje zahtev za podatke/podatke za arhiviranje" vertex="1">
+          <mxGeometry relative="1" x="-0.4702" y="-1" as="geometry">
+            <mxPoint x="191" y="101" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-35" connectable="0" parent="qA6u9BNv_6LZ32N9nRfr-33" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Salje odgovor" vertex="1">
+          <mxGeometry relative="1" x="-0.5749" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-36" edge="1" parent="1" source="qA6u9BNv_6LZ32N9nRfr-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;exitX=1;exitY=0.25;exitDx=0;exitDy=0;exitPerimeter=0;" target="qA6u9BNv_6LZ32N9nRfr-27">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="770" y="571.6666666666667" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <object placeholders="1" c4Name="Gozba na Klik" c4Type="SystemScopeBoundary" c4Application="Software System" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;&lt;div style=&quot;text-align: left&quot;&gt;%c4Name%&lt;/div&gt;&lt;/b&gt;&lt;/font&gt;&lt;div style=&quot;text-align: left&quot;&gt;[%c4Application%]&lt;/div&gt;" id="qA6u9BNv_6LZ32N9nRfr-37">
+          <mxCell parent="1" style="rounded=1;fontSize=11;whiteSpace=wrap;html=1;dashed=1;arcSize=20;fillColor=none;strokeColor=#666666;fontColor=#333333;labelBackgroundColor=none;align=left;verticalAlign=bottom;labelBorderColor=none;spacingTop=0;spacing=10;dashPattern=8 4;metaEdit=1;rotatable=0;perimeter=rectanglePerimeter;noLabel=0;labelPadding=0;allowArrows=0;connectable=0;expand=0;recursiveResize=0;editable=1;pointerEvents=0;absoluteArcSize=1;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1">
+            <mxGeometry height="410" width="530" x="370" y="330" as="geometry" />
+          </mxCell>
+        </object>
+        <object placeholders="1" c4Name="Gozba na Klik SPA" c4Type="Container REACT, JavaScript" c4Description="Sistem omogucuje Korisnicima da na intuitivan nacin ostvare interakciju sa sistemom, kupci koriste sistem da naprave porudzbine, vlasnici restorana da upravljaju restoranom, administratori da kontrolisu ceo sistem, Dostavljaci da dobiju informacije o aktivnim dostavama, zaposleni restorana o aktivnim porudzbinama" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font color=&quot;#cccccc&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;" Kupci="Sistem omogucuje kupcima da poruce hranu" Administratori="Sistem oMogucuje Administratorima kontrolu sistema" Vlasnici_restorana="Sistem omogucuje vlasnicima restorana da upravljaju svojim restoranima" Dostavljaci="Sistem omogucuje Dostavljacima da prihvate i isporuce aktivne porudzbine" Zaposleni_restorana="Sistem omogucuje Zaposlenima restorana da vide aktivne porudzbine za svoj restoran kako bi iste pripremili" id="qA6u9BNv_6LZ32N9nRfr-38">
+          <mxCell parent="1" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#1061B0;fontColor=#ffffff;align=center;arcSize=10;strokeColor=#0D5091;metaEdit=1;resizable=1;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];movable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;aspect=fixed;" vertex="1">
+            <mxGeometry height="230" width="212.31" x="400" y="350" as="geometry" />
+          </mxCell>
+        </object>
+        <object placeholders="1" c4Name="Web API" c4Type="Containe: C# .NET" c4Description="Sistem koji u pozadini vrsi poslove Dobavljanja podataka iz skladista, obradu i vracanje odgovora za sve upite SPA" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font color=&quot;#cccccc&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;" id="qA6u9BNv_6LZ32N9nRfr-39">
+          <mxCell parent="1" style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#1061B0;fontColor=#ffffff;align=center;arcSize=10;strokeColor=#0D5091;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1">
+            <mxGeometry height="120" width="240" x="630" y="590" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-40" edge="1" parent="1" source="qA6u9BNv_6LZ32N9nRfr-39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.75;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" target="qA6u9BNv_6LZ32N9nRfr-38">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-43" connectable="0" parent="qA6u9BNv_6LZ32N9nRfr-40" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Vraca odgovor" vertex="1">
+          <mxGeometry relative="1" x="0.1636" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-41" edge="1" parent="1" source="qA6u9BNv_6LZ32N9nRfr-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;exitX=1;exitY=0.75;exitDx=0;exitDy=0;exitPerimeter=0;" target="qA6u9BNv_6LZ32N9nRfr-39">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qA6u9BNv_6LZ32N9nRfr-42" connectable="0" parent="qA6u9BNv_6LZ32N9nRfr-41" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Salje zahtev" vertex="1">
+          <mxGeometry relative="1" x="0.6101" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
